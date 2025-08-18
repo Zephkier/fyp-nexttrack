@@ -116,7 +116,7 @@ export default function Home() {
                     <p className="italic text-gray-400">(GIF guides coming soon)</p>
                 </div>
 
-                {/* Component: Examples */}
+                {/* Component: Examples NOTE This is temporary, and is to be deleted at final product */}
                 <div className="my-32">
                     <h3 className="text-2xl mb-2">Examples</h3>
                     <ul className="list-inside list-disc space-y-4">
