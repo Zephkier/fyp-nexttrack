@@ -3,41 +3,42 @@
 const exampleTracks = [
     {
         artistAndName: '"Playboi Carti" - Bando',
-        note: "test unknown artist",
+        notes: ["test unknown artist"],
         spotifyLink: "https://open.spotify.com/track/6z7dQwXh9UJJl4wsWxexuI?si=308467749bd94d0d",
     },
     {
         artistAndName: "The Beatles - Something",
-        note: "test singular artist",
+        notes: ["test singular artist"],
         spotifyLink: "https://open.spotify.com/track/0pNeVovbiZHkulpGeOx1Gj?si=b9def5c53fe943a7",
     },
     {
-        artistAndName: "Selena, benny, Marias - Ojos Tristes",
-        note: "test multiple artists",
+        artistAndName: "Selena Gomez, benny blanco, The Marías - Ojos Tristes",
+        notes: ["test multiple artists", 'test "í" character'],
         spotifyLink: "https://open.spotify.com/track/1DFmBjoeQN9DpOVTEewyx0?si=210d4a8f264e4430",
     },
     {
         artistAndName: "Florence + The Machine - Dog Days Are Over",
-        note: 'test "+" character (for Last.fm API)',
+        notes: ['test "+" character'],
         spotifyLink: "https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe",
     },
     {
         artistAndName: "AC/DC - Thunderstruck",
-        note: 'test "/" character (for Last.fm API)',
+        notes: ['test "/" character'],
         spotifyLink: "https://open.spotify.com/track/57bgtoPSgt236HzfBOd8kj?si=1f3b7d2fbc074a5e",
     },
     {
         artistAndName: "Dimitri Vegas & Like Mike - Thank You (Not So Bad)",
-        note: 'test "&" character (for Last.fm API)',
+        notes: ['test "&" character'],
         spotifyLink: "https://open.spotify.com/track/09CnYHiZ5jGT1wr1TXJ9Zt?si=68c00376f8e7456a",
     },
 ];
 
 export default function HomeClient() {
     // NOTE This is part of "Examples" section, is temporary, and is to be deleted at final product
-    async function copyToClipboard(text: string, event: React.MouseEvent<HTMLButtonElement>) {
-        await navigator.clipboard.writeText(text);
+    async function copyToClipboard(text: string, event: React.MouseEvent<HTMLButtonElement | null>) {
         const button = event.currentTarget;
+        if (!button) return;
+        await navigator.clipboard.writeText(text);
         button.innerText = "Copied!";
         setTimeout(() => {
             button.innerText = "Copy";
@@ -107,7 +108,8 @@ export default function HomeClient() {
                     <p className="italic text-gray-400">(GIF guides coming soon)</p>
                 </div>
 
-                {/* Component: Examples NOTE This is temporary, and is to be deleted at final product */}
+                {/* NOTE This is temporary, and is to be deleted at final product */}
+                {/* Component: Examples */}
                 <div className="my-32">
                     <h3 className="text-2xl mb-2">Examples</h3>
                     <ul className="list-inside list-disc space-y-4">
@@ -115,8 +117,10 @@ export default function HomeClient() {
                             <li key={index}>
                                 {track.artistAndName}
                                 <div className="text-gray-400 ml-4">
-                                    <li>{track.note}</li>
-                                    <li>
+                                    {track.notes.map((note, index) => (
+                                        <p key={index}>{note}</p>
+                                    ))}
+                                    <p>
                                         <button
                                             // Format
                                             type="button"
@@ -130,7 +134,7 @@ export default function HomeClient() {
                                                 {track.spotifyLink}
                                             </a>
                                         </code>
-                                    </li>
+                                    </p>
                                 </div>
                             </li>
                         ))}
