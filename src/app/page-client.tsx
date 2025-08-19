@@ -1,6 +1,6 @@
 "use client";
 
-const exampleTracks = [
+const temp_exampleTracks = [
     {
         artistAndName: '"Playboi Carti" - Bando',
         notes: ["test unknown artist"],
@@ -48,8 +48,13 @@ export default function HomeClient() {
     return (
         <div className="container mx-auto max-w-4xl">
             <main>
+                {/*
+                TODO
+                - Convert every component/part/section into its own component.
+                */}
+
                 {/* Component: Hero */}
-                <div className="my-32 flex flex-col items-center justify-center text-center">
+                <div className="my-24 flex flex-col items-center justify-center text-center">
                     <h1 className="text-8xl font-bold">
                         <a href="/" className="cursor-pointer">
                             NextTrack
@@ -98,7 +103,7 @@ export default function HomeClient() {
 
                 {/* Component: Guide to get Spotify track link */}
                 <div className="my-32">
-                    <h3 className="text-2xl mb-2">Here's how you can get a link</h3>
+                    <h3 className="text-2xl mb-2 font-bold">Here's how you can get a link</h3>
                     <ol className="list-inside list-decimal mb-2">
                         <li>Hover over your desired song on Spotify</li>
                         <li>Right click</li>
@@ -111,9 +116,9 @@ export default function HomeClient() {
                 {/* NOTE This is temporary, and is to be deleted at final product */}
                 {/* Component: Examples */}
                 <div className="my-32">
-                    <h3 className="text-2xl mb-2">Examples</h3>
+                    <h3 className="text-2xl mb-2 font-bold">Examples</h3>
                     <ul className="list-inside list-disc space-y-4">
-                        {exampleTracks.map((track, index) => (
+                        {temp_exampleTracks.map((track, index) => (
                             <li key={index}>
                                 {track.artistAndName}
                                 <div className="text-gray-400 ml-4">

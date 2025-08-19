@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { siteConfig } from "@/app/config/site";
-
 import "./globals.css";
 
 // // NOTE This is a client-side component
