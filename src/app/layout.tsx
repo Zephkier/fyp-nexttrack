@@ -3,7 +3,21 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { siteConfig } from "@/app/config/site";
 
 import "./globals.css";
-import Link from "next/link";
+
+// // NOTE This is a client-side component
+// // Could easily set "title" this way, but it is not scalable (i.e. when there are more pages)
+// export const metadata: Metadata = {
+//     title: "Home | NextTrack",
+// };
+
+// NOTE This is a server-side component
+// Better to set "title" this way for scalability
+export const metadata: Metadata = {
+    title: {
+        default: siteConfig.name,
+        template: `%s | ${siteConfig.name}`,
+    },
+};
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -15,20 +29,10 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-    title: {
-        default: siteConfig.name,
-        template: `%s | ${siteConfig.name}`,
-    },
-};
-
-export default function RootLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="en">
+            {/* <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}> */}
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 {/* Format */}
                 {children}
