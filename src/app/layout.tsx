@@ -31,10 +31,17 @@ const geistMono = Geist_Mono({
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="en">
-            {/* <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}> */}
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                {/* Format */}
+                {/* Navbar header */}
+                {/* TODO Maybe move hero section here? */}
+
+                {/* Actual content */}
                 {children}
+
+                {/* Footer (has nothing and is mainly for whitespace) */}
+                <footer className="mt-20 h-32 flex items-center justify-center bg-black text-white">
+                    <p className="italic text-gray-400">(footer placeholder)</p>
+                </footer>
             </body>
         </html>
     );

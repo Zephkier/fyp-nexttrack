@@ -8,6 +8,11 @@ export const metadata: Metadata = {
 };
 
 export default function Recommendations() {
-    // Must split server-side component (^) from client-side component @ "./page-client.tsx::RecommendationsClient()"
-    return <RecommendationsClient />;
+    return (
+        // "<div>" is here so that "<footer>" section from "layout.tsx" can be applied
+        <div className="container mx-auto">
+            {/* Must split server-side component (^) from client-side component @ "./page-client.tsx::RecommendationsClient()" */}
+            <RecommendationsClient />
+        </div>
+    );
 }

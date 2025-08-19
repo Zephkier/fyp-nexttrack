@@ -9,6 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-    // Must split server-side component (^) from client-side component @ "./page-client.tsx::HomeClient()"
-    return <HomeClient />;
+    return (
+        // "<div>" is here so that "<footer>" section from "layout.tsx" can be applied
+        <div className="container mx-auto max-w-4xl">
+            {/* Must split server-side component (^) from client-side component @ "./page-client.tsx::HomeClient()" */}
+            <HomeClient />
+        </div>
+    );
 }
