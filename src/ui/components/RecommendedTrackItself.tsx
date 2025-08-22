@@ -21,10 +21,7 @@ type recommendedTrackProp = {
     };
 };
 
-export default function RecommendedTrackItself(
-    // Format
-    { recommendedTrack }: { recommendedTrack: recommendedTrackProp }
-) {
+export default function RecommendedTrackItself({ recommendedTrack }: { recommendedTrack: recommendedTrackProp }) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (

@@ -11,10 +11,7 @@ type submittedTrackProp = {
     moods: string[];
 };
 
-export default function CustomiseRecommendations(
-    // Format
-    { submittedTrack }: { submittedTrack: submittedTrackProp }
-) {
+export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackProp }) {
     const [similarity, setSimilarity] = useState(100);
     const [popularity, setPopularity] = useState(submittedTrack.popularity);
     const [dateRange, setDateRange] = useState(2000);

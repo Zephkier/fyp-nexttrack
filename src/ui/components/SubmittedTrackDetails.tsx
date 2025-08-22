@@ -8,10 +8,7 @@ type submittedTrackProp = {
     moods: string[];
 };
 
-export default function SubmittedTrackDetails(
-    // Format
-    { submittedTrack }: { submittedTrack: submittedTrackProp }
-) {
+export default function SubmittedTrackDetails({ submittedTrack }: { submittedTrack: submittedTrackProp }) {
     return (
         <div className="mb-20">
             <h3 className="text-2xl font-bold mb-2" style={{ color: "var(--primary)" }}>

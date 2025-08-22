@@ -2,10 +2,7 @@ import RecommendedTrackItself from "./RecommendedTrackItself";
 
 type RecommendedTrackProps = Parameters<typeof RecommendedTrackItself>[0]["recommendedTrack"];
 
-export default function RecommendedTracks(
-    // Format
-    { recommendedTracks }: { recommendedTracks: RecommendedTrackProps[] }
-) {
+export default function RecommendedTracks({ recommendedTracks }: { recommendedTracks: RecommendedTrackProps[] }) {
     return (
         <section>
             <h3

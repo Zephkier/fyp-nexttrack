@@ -5,8 +5,7 @@ import SubmittedTrackDetails from "@/ui/components/SubmittedTrackDetails";
 import CustomiseRecommendations from "@/ui/components/CustomiseRecommendations";
 import RecommendedTracks from "@/ui/components/RecommendedTracks";
 
-// NOTE This is a server-side component
-// (sub-pages do not need additional " | ${siteConfig.name}")
+// Sub-pages do not need additional " | ${siteConfig.name}"
 export const metadata: Metadata = {
     title: `Recommendations`,
 };

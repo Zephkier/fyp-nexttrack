@@ -7,13 +7,6 @@ import "./globals.css";
 import Header from "@/ui/components/Header";
 import Footer from "@/ui/components/Footer";
 
-// // NOTE This is a client-side component
-// // Could easily set "title" this way, but it is not scalable (i.e. when there are more pages)
-// export const metadata: Metadata = {
-//     title: "Home | NextTrack",
-// };
-
-// NOTE This is a server-side component
 // Better to set "title" this way for scalability
 export const metadata: Metadata = {
     title: {

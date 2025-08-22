@@ -1,4 +1,4 @@
-export default function SpotifyGuide() {
+export default function Guide() {
     return (
         <div className="mb-40">
             <h3
