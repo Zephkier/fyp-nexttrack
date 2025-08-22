@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function Home() {
     return (
         <main className="container mx-auto max-w-4xl">
-            <Hero />
+            <Hero customMarginBottom="mb-40" />
             <TrackForm />
             <Guide />
             <Examples />
