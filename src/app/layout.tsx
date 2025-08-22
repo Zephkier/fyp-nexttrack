@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/config/site";
+
 import { Geist, Geist_Mono } from "next/font/google";
-import { siteConfig } from "@/app/config/site";
 import "./globals.css";
+
+import Header from "@/ui/components/Header";
+import Footer from "@/ui/components/Footer";
 
 // // NOTE This is a client-side component
 // // Could easily set "title" this way, but it is not scalable (i.e. when there are more pages)
@@ -32,16 +36,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     return (
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                {/* Navbar header */}
-                {/* TODO Maybe move hero section here? */}
+                {/* Header (has nothing and is mainly for whitespace) */}
+                <Header />
 
-                {/* Actual content */}
+                {/* Actual content (is enclosed with "<main>") */}
                 {children}
 
                 {/* Footer (has nothing and is mainly for whitespace) */}
-                <footer className="mt-20 h-32 flex items-center justify-center bg-black text-white">
-                    <p className="italic text-gray-400">(footer placeholder)</p>
-                </footer>
+                <Footer />
             </body>
         </html>
     );
