@@ -1,23 +1,35 @@
 "use client";
+import { useState } from "react";
 
 export default function TrackForm() {
+    const [inputValue, setInputValue] = useState("");
+    const handleClear = () => {
+        setInputValue("");
+    };
+
     return (
-        <form method="POST" action="/recommendations" className="mb-40">
+        <form
+            method="POST"
+            action="/api/recommendations" // This is located at "./src/app/api/recommendations/route.ts"
+            className="mb-40"
+        >
             <label
-                // Format
-                htmlFor="spotify_trackLink"
+                htmlFor="spotifyTrackLink" // Connected to <input>'s "id" attribute below
                 className="mb-2 block text-xl"
             >
                 Submit your <strong>Spotify</strong> track link:
             </label>
             <input
-                // Format
-                id="spotify_trackLink"
-                name="spotify_trackLink"
+                id="spotifyTrackLink" // Connected to <label>'s "htmlFor" attribute above
+                name="spotifyTrackLink" // Connected to "./src/app/api/recommendations/route.ts::POST()::link"
                 type="text"
                 placeholder="https://open.spotify.com/track/..."
                 autoComplete="off"
                 required
+                value={inputValue}
+                onChange={(event) => {
+                    setInputValue(event.target.value);
+                }}
                 className="w-full px-3 py-2 mb-4 bg-white text-black placeholder-gray-400 focus:outline-none"
             />
             <button
@@ -28,12 +40,9 @@ export default function TrackForm() {
                 Submit
             </button>
             <button
+                // Format
                 type="button"
-                // NOTE This is a client-side component
-                onClick={() => {
-                    const input = document.getElementById("spotify_trackLink") as HTMLInputElement;
-                    if (input) input.value = "";
-                }}
+                onClick={handleClear}
                 className="px-4 py-2 text-white bg-red-800 hover:bg-red-600 cursor-pointer"
             >
                 Clear

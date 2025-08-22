@@ -25,7 +25,7 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
         <section>
             <h3
                 // Format
-                className="text-2xl font-bold mb-2"
+                className="mb-2 text-2xl font-bold"
                 style={{ color: "var(--primary)" }}
             >
                 Customise Recommendations
@@ -37,10 +37,10 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 className="mb-4 p-4"
                 style={{ background: "var(--secondary)" }}
             >
-                <h4 className="text-xl font-bold">Genres / Tags</h4>
+                <h4 className="text-xl font-bold">Genres</h4>
                 <p className="mb-4">
                     <b>Current:</b> {submittedTrack.genres.join(", ")} <br />
-                    <b>Recommended track&apos;s similarity:</b> {similarity}%
+                    <b>Recommended track's similarity:</b> {similarity}%
                 </p>
                 <input
                     // Format
@@ -63,7 +63,7 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 <h4 className="text-xl font-bold">Popularity</h4>
                 <p className="mb-4">
                     <b>Current:</b> {submittedTrack.popularity}% <br />
-                    <b>Recommended track&apos;s popularity:</b> {popularity}%
+                    <b>Recommended track's popularity:</b> {popularity}%
                 </p>
                 <input
                     // Format
@@ -86,7 +86,7 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 <h4 className="text-xl font-bold">Release Date Range</h4>
                 <p className="mb-4">
                     <b>Current:</b> {submittedTrack.releaseDate} <br />
-                    <b>Recommended track&apos;s release date:</b> {dateRange}
+                    <b>Recommended track's release date:</b> {dateRange}
                 </p>
                 <input
                     // Format
