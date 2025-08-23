@@ -49,15 +49,21 @@ export default function RecommendedTrackItself({ recommendedTrack }: { recommend
             {/* Details when expanded */}
             <div>
                 {/* Video */}
-                <iframe
-                    // Format
-                    width="100%"
-                    height="360"
-                    src={`https://www.youtube.com/embed/${recommendedTrack.link.video}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="mb-4"
-                />
+                {recommendedTrack.link.video == null ? (
+                    // When there IS NO YouTube video
+                    <p className="mb-4 text-center text-gray-400 italic">No YouTube video available...</p>
+                ) : (
+                    // When there IS A YouTube video
+                    <iframe
+                        // Format
+                        width="100%"
+                        height="360"
+                        src={`https://www.youtube.com/embed/${recommendedTrack.link.video}`}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="mb-4"
+                    />
+                )}
 
                 {/* Links */}
                 <div className="mb-4 flex items-center space-x-2">
