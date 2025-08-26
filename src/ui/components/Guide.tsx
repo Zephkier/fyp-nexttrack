@@ -6,7 +6,7 @@ export default function Guide() {
                 className="text-2xl font-bold mb-2"
                 style={{ color: "var(--primary)" }}
             >
-                Here's how you can get a link
+                Here&apos;s how you can get a link
             </h3>
             <ol className="mb-2 list-inside list-decimal">
                 <li>Hover over your desired song on Spotify</li>
