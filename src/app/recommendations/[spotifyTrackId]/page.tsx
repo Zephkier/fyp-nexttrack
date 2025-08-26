@@ -68,7 +68,7 @@ export default async function RecommendationsWithId(
     // 3. Convert the retrieved data into something suitable for the website
     const submittedTrack = {
         name: trackDetailsFromSpotify.name,
-        artists: trackDetailsFromSpotify.artists.map((a) => a.name),
+        artists: trackDetailsFromSpotify.artists.map((artist) => artist.name),
         releaseDate: trackDetailsFromSpotify.album.release_date,
         popularity: trackDetailsFromSpotify.popularity,
         genres: genresFromLastFm.map((genreObject) => genreObject.name),
