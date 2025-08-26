@@ -11,8 +11,8 @@ export default function Guide() {
             <ol className="mb-2 list-inside list-decimal">
                 <li>Hover over your desired song on Spotify</li>
                 <li>Right click</li>
-                <li>Select "Share"</li>
-                <li>Select "Copy link to Song"</li>
+                <li>Select &quot;Share&quot;</li>
+                <li>Select &quot;Copy link to Song&quot;</li>
             </ol>
             <p className="italic text-gray-400">(GIF guides coming soon)</p>
         </div>

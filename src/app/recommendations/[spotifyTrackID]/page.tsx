@@ -8,7 +8,8 @@ import RecommendedTracks from "@/ui/components/RecommendedTracks";
 import { getSpotifyTrackDetails } from "@/libs/spotify";
 import { getLastFmGenres, getLastFmSimilarTracks, getLastFmYoutubeId } from "@/libs/lastfm";
 
-type SpotifyTrack = Awaited<ReturnType<typeof getSpotifyTrackDetails>>;
+type trackDetailsFromSpotifyType = Awaited<ReturnType<typeof getSpotifyTrackDetails>>;
+type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
 
 export const metadata: Metadata = {
     title: "Recommendations",
@@ -35,7 +36,7 @@ export default async function RecommendationsWithId(
     //     - to album   @ https://developer.spotify.com/documentation/web-api/reference/get-an-album
     //     - to get album's genres, but album's genres is deprecated...
     //     - thus, next best thing is to get genres from Last.fm
-    let trackDetailsFromSpotify: SpotifyTrack;
+    let trackDetailsFromSpotify: trackDetailsFromSpotifyType;
     try {
         // Hover over function to see exactly what is being returned
         trackDetailsFromSpotify = await getSpotifyTrackDetails(spotifyTrackId);
@@ -91,7 +92,7 @@ export default async function RecommendationsWithId(
         similarTracksFromLastFm
             // Limit to first 5 tracks (TODO Allow user to change this value?)
             .slice(0, 5)
-            .map(async (similarTrack: any) => {
+            .map(async (similarTrack: similarTrackType) => {
                 // The URL leads to the similar track's respective Last.fm page
                 const youtubeId = await getLastFmYoutubeId(similarTrack.url);
                 // Basically append/push it to the `similarTracksFromLastFm` object
@@ -100,7 +101,7 @@ export default async function RecommendationsWithId(
     );
 
     // 6. Convert the retrieved data into something suitable for the website
-    const recommendedTracks = similarTracksFromLastFmWithYoutubeIds.map((recommendedTrack: any) => ({
+    const recommendedTracks = similarTracksFromLastFmWithYoutubeIds.map((recommendedTrack) => ({
         name: recommendedTrack.name,
         artists: [recommendedTrack.artist.name],
         link: {

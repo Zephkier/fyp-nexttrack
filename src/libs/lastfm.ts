@@ -196,7 +196,7 @@ export async function getLastFmYoutubeId(lastFmUrl: string) {
         const $ = cheerio.load(html);
 
         // Select the HTML element via its "id" attribute, and then the desired attribute (i.e. data-youtube-id)
-        let youtubeId = $("#track-page-video-playlink").attr("data-youtube-id");
+        const youtubeId = $("#track-page-video-playlink").attr("data-youtube-id");
 
         return youtubeId;
     } catch {
