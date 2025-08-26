@@ -13,16 +13,14 @@ export async function POST(request: Request) {
         // Thus, we use the following line instead:
         const link = String(formDataObject.get("spotifyTrackLink") || "");
 
-        const id = link //         Currently: "https://open.spotify.com/track/1DFmBjoeQN9DpOVTEewyx0?si=210d4a8f264e4430"
-            .split("track/")[1] // Currently:                                "1DFmBjoeQN9DpOVTEewyx0?si=210d4a8f264e4430"
-            .split("?si=")[0]; //  Currently:                                "1DFmBjoeQN9DpOVTEewyx0"
+        const id = link //         Currently: "https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe"
+            .split("track/")[1] // Currently:                                "456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe"
+            .split("?si=")[0]; //  Currently:                                "456WNXWhDwYOSf5SpTuqxd"
 
         // Connected to "./src/app/recommendations/[spotifyTrackId]/page.tsx"
         return NextResponse.redirect(new URL(`/recommendations/${id}`, request.url));
     } catch {
-        // TODO Send to home or error page
-
-        // Connected to "./src/app/page.tsx"
+        // Connected to "./src/app/page.tsx" TODO Create a popup window of some sort to notify user
         return NextResponse.redirect(new URL(`/?error=invalid-link`, request.url));
     }
 }

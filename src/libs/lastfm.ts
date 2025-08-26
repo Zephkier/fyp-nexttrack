@@ -1,91 +1,132 @@
 import * as cheerio from "cheerio";
 
 /**
+ * Convert (artist and track) names into Last.fm's format.
+ *
+ * For some reason, Last.fm...
+ * - Double-encodes special characters.
+ *   - Source: https://stackoverflow.com/questions/13968282/unknown-characters-252b-in-url.
+ * - Does not encode spaces.
+ *
+ * Returns a string in Last.fm's format. Example:
+ *
+ * - "Florence + The Machine" --> "Florence+%252B+the+Machine"
+ * - "Pink + White"           --> "Pink+%252B+White"
+ */
+export function convertToLastFmFormat(name: string): string {
+    /**
+     * Encode all special characters. Example:
+     * - `" "` becomes `"%20"`
+     * - `"+"` becomes `"%2B"`
+     */
+    const encodedOnce = encodeURIComponent(name);
+    /**
+     * But Last.fm encodes it **AGAIN** for some reason... Example:
+     * - `"%20"` becomes `"%2520"`
+     * - `"%2B"` becomes `"%252B"`
+     */
+    const encodedTwice = encodeURIComponent(encodedOnce);
+    /**And Last.fm uses `"+"` instead of `"%2520"` to indicate spaces. */
+    const lastFmFormat = encodedTwice.replace(/%2520/g, "+");
+    /**_Same JSDoc as this function._ */
+    return lastFmFormat;
+}
+
+/**
  * Returns an array of objects with `name` and `url` keys. Example:
  *
- * ```json
+ * ```js
     [
-        { name: 'Espanol',      url: 'https://www.last.fm/tag/Espanol'      },
-        { name: 'indie pop',    url: 'https://www.last.fm/tag/indie+pop'    },
-        { name: 'sunshine pop', url: 'https://www.last.fm/tag/sunshine+pop' },
-        { name: 'bedroom pop',  url: 'https://www.last.fm/tag/bedroom+pop'  },
-        { name: 'The Marias',   url: 'https://www.last.fm/tag/The+Marias'   }
+        { name: 'indie',            url: 'https://www.last.fm/tag/indie'            },
+        { name: 'female vocalists', url: 'https://www.last.fm/tag/female+vocalists' },
+        { name: 'alternative',      url: 'https://www.last.fm/tag/alternative'      },
+        { name: 'indie pop',        url: 'https://www.last.fm/tag/indie+pop'        },
+        { name: 'british',          url: 'https://www.last.fm/tag/british'          }
     ]
  * ```
  */
 export async function getLastFmGenres(artistName: string, trackName: string) {
     // From https://www.last.fm/api/show/track.getInfo
     const baseUrl = "http://ws.audioscrobbler.com";
-
     // Could have used "track.getTopTags", but this offers more info if ever needed
     const method = "track.getInfo";
     const apiKey = process.env.LASTFM_API_KEY;
+    const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
+    const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
+    const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&format=json`;
 
-    // TEST Original
-    // const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${encodeURI(artistName)}&track=${encodeURI(trackName)}&format=json`;
-
-    // TEST I want to test without "encodeURI()"
-    // const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistName}&track=${trackName}&format=json`;
-
-    // TEST I want to test with "autocorrect=1"
-    const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistName}&track=${trackName}&autocorrect=1&format=json`;
+    // // TEST
+    // // Ensure "Florence + The Machine" --> "Florence%252B+the+Machine
+    // // Ensure "Pink + White"           --> "Pink%252B+White"
+    // console.log(`[!] @ ./src/libs/lastfm.ts::getLastFmGenres()`);
+    // console.log(`original:  ${artistName}`);
+    // console.log(`formatted: ${artistNameInLastFmFormat}`);
+    // console.log(`fullUrl:   ${fullUrl}`);
+    // console.log(`[!]`);
 
     const response = await fetch(fullUrl);
     if (!response.ok) return [];
-
     /**
      * Returns an object with many keys. Example:
-     * ```json
+     * ```js
         {
             track: {
-                name: 'Ojos Tristes (with The Marías)',
-                url: 'https://www.last.fm/music/Selena+Gomez/_/Ojos+Tristes+(with+The+Mar%C3%ADas)',
+                name: 'Dog Days Are Over',
+                mbid: '52587f93-2a1d-45fb-a8ba-97aafa2c1f28',
+                url: 'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over',
                 duration: '0',
                 streamable: { '#text': '0', fulltrack: '0' },
-                listeners: '315774',
-                playcount: '2663349',
-                artist: { name: 'Selena Gomez', url: 'https://www.last.fm/music/Selena+Gomez' },
-                    toptags: { tag: [Array] },
-                    wiki: {
-                        published: '26 May 2025, 22:04',
-                        summary: 'From... tristes”.\n' + '\n' + '“Ojos... Read more on Last.fm</a>.',
-                        content: 'From... tristes”.\n' + '\n' + '“Ojos... painful.\n' + 'The... terms may apply.'
-                    }
+                listeners: '2537',
+                playcount: '8492',
+                artist: {
+                    name: 'Florence   The Machine',
+                    mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
+                    url: 'https://www.last.fm/music/Florence+++The+Machine'
+                },
+                
+                // Toptags normal
+                toptags: { tag: [Array] },
+                // Toptags abnormal (possibly due to Last.fm double-encoding special characters)
+                toptags: { tag: [] }
+                
+                // Wiki normal
+                wiki: {
+                    published: '31 Aug 2009, 11:29',
+                    summary: `"Dog... Read more on Last.fm</a>.`,
+                    content: `"Dog... \n` + '\n' + `A... \n` + '\n' + ... + '... terms may apply.'
+                }
+                // Wiki abnormal (possibly due to Last.fm double-encoding special characters)
+                // *nothing*
             }
         }
      * ```
      */
     const data = await response.json();
-
-    /**
-     * _Same JSDoc as this function._
-     */
+    /**_Same JSDoc as this function._ */
     const genres = data.track.toptags.tag;
-
     return genres;
 }
 
 /**
  * Returns an array of objects with many keys. Example:
  *
- * ```json
+ * ```js
     [
         {
-            "name": "Ojos Tristes",
-            "playcount": 269596,
-            "mbid": "c602cfae-f290-4ce7-a1b9-fcda91292862",
-            "match": 1.0,
-            "url": "https://www.last.fm/music/Selena+Gomez/_/Ojos+Tristes",
-            "streamable": { "#text": "0", "fulltrack": "0" },
-            "duration": 201,
-            "artist": {
-                "name": "Selena Gomez",
-                "mbid": "e4bc69e2-a064-4f93-ada1-f7f209cc1cc3",
-                "url": "https://www.last.fm/music/Selena+Gomez"
+            name: "You've Got the Love",
+            playcount: 10170816,
+            match: 1,
+            url: 'https://www.last.fm/music/Florence+%252B+the+Machine/_/You%27ve+Got+the+Love',
+            streamable: { '#text': '0', fulltrack: '0' },
+            duration: 164,
+            artist: {
+                name: 'Florence + the Machine',
+                mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
+                url: 'https://www.last.fm/music/Florence+%252B+the+Machine'
             },
-            "image": [...]
-        }, 
-        ...
+            image: [ [Object], [Object], [Object], [Object], [Object], [Object] ]
+        },
+        // And repeat 99 more times
     ]
  * ```
  */
@@ -94,29 +135,35 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     const baseUrl = "http://ws.audioscrobbler.com";
     const method = "track.getSimilar";
     const apiKey = process.env.LASTFM_API_KEY;
-    const fullUrl = `${baseUrl}/2.0/?method=${method}&artist=${artistName}&track=${trackName}&api_key=${apiKey}&format=json`;
+    const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
+    const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
+    const fullUrl = `${baseUrl}/2.0/?method=${method}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&api_key=${apiKey}&format=json`;
+
+    // // TEST
+    // // Ensure "Florence + The Machine" --> "Florence%252B+the+Machine
+    // // Ensure "Pink + White"           --> "Pink%252B+White"
+    // console.log(`[!] @ ./src/libs/lastfm.ts::getLastFmSimilarTracks()`);
+    // console.log(`original:  ${artistName}`);
+    // console.log(`formatted: ${artistNameInLastFmFormat}`);
+    // console.log(`fullUrl:   ${fullUrl}`);
+    // console.log(`[!]`);
 
     const response = await fetch(fullUrl);
     if (!response.ok) return [];
-
     /**
      * Returns an object of an object. Example:
      * ```js
         {
             similartracks: {
-                track: [ [Object], ..., [Object] ], // Has 100x [Object]
-                '@attr': { artist: 'Selena Gomez', track: 'Ojos Tristes (with The Marías)' }
+                track: [[Object], ..., [Object]], // Has 100x [Object]
+                '@attr': { artist: 'Florence + the Machine', track: 'Dog Days Are Over' }
             }
         }
      * ```
      */
     const data = await response.json();
-
-    /**
-     * _Same JSDoc as this function._
-     */
+    /**_Same JSDoc as this function._ */
     const similarTracks = data.similartracks.track;
-
     return similarTracks;
 }
 

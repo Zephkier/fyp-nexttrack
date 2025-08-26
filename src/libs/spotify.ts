@@ -21,64 +21,52 @@ export async function getSpotifyApiToken() {
 
 /**
  * Returns an object with many keys. Example:
- * ```
+ * ```js
     {
         album: {
             album_type: 'album',
-            artists: [ [Object], [Object] ],
-            available_markets: [...],
-            external_urls: { spotify: 'https://open.spotify.com/album/5v7xYJyke25Nmt3l2R7YkR' },
-            href: 'https://api.spotify.com/v1/albums/5v7xYJyke25Nmt3l2R7YkR',
-            id: '5v7xYJyke25Nmt3l2R7YkR',
+            artists: [ [Object] ],
+            available_markets: ['AR', 'AU', ...],
+            external_urls: {
+                spotify: 'https://open.spotify.com/album/1rLLyY5p6HXNl2lKzINWp5'
+            },
+            href: 'https://api.spotify.com/v1/albums/1rLLyY5p6HXNl2lKzINWp5',
+            id: '1rLLyY5p6HXNl2lKzINWp5',
             images: [ [Object], [Object], [Object] ],
-            name: 'I Said I Love You First',
-            release_date: '2025-03-21',
-            release_date_precision: 'day',
-            total_tracks: 14,
+            name: 'Lungs (Deluxe Version)',
+            release_date: '2009',
+            release_date_precision: 'year',
+            total_tracks: 20,
             type: 'album',
-            uri: 'spotify:album:5v7xYJyke25Nmt3l2R7YkR'
+            uri: 'spotify:album:1rLLyY5p6HXNl2lKzINWp5'
         },
         artists: [
             {
                 external_urls: [Object],
-                href: 'https://api.spotify.com/v1/artists/0C8ZW7ezQVs4URX5aX7Kqx',
-                id: '0C8ZW7ezQVs4URX5aX7Kqx',
-                name: 'Selena Gomez',
+                href: 'https://api.spotify.com/v1/artists/1moxjboGR7GNWYIMWsRjgG',
+                id: '1moxjboGR7GNWYIMWsRjgG',
+                name: 'Florence + The Machine',
                 type: 'artist',
-                uri: 'spotify:artist:0C8ZW7ezQVs4URX5aX7Kqx'
-            },
-            {
-                external_urls: [Object],
-                href: 'https://api.spotify.com/v1/artists/5CiGnKThu5ctn9pBxv7DGa',
-                id: '5CiGnKThu5ctn9pBxv7DGa',
-                name: 'benny blanco',
-                type: 'artist',
-                uri: 'spotify:artist:5CiGnKThu5ctn9pBxv7DGa'
-            },
-            {
-                external_urls: [Object],
-                href: 'https://api.spotify.com/v1/artists/2sSGPbdZJkaSE2AbcGOACx',
-                id: '2sSGPbdZJkaSE2AbcGOACx',
-                name: 'The Marías',
-                type: 'artist',
-                uri: 'spotify:artist:2sSGPbdZJkaSE2AbcGOACx'
+                uri: 'spotify:artist:1moxjboGR7GNWYIMWsRjgG'
             }
         ],
-        available_markets: [...],
+        available_markets: ['AR', 'AU', ...],
         disc_number: 1,
-        duration_ms: 201920,
+        duration_ms: 252818,
         explicit: false,
-        external_ids: { isrc: 'USUG12408959' },
-        external_urls: { spotify: 'https://open.spotify.com/track/1DFmBjoeQN9DpOVTEewyx0' },
-        href: 'https://api.spotify.com/v1/tracks/1DFmBjoeQN9DpOVTEewyx0',
-        id: '1DFmBjoeQN9DpOVTEewyx0',
+        external_ids: { isrc: 'GBUM70900209' },
+        external_urls: {
+            spotify: 'https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd'
+        },
+        href: 'https://api.spotify.com/v1/tracks/456WNXWhDwYOSf5SpTuqxd',
+        id: '456WNXWhDwYOSf5SpTuqxd',
         is_local: false,
-        name: 'Ojos Tristes (with The Marías)',
-        popularity: 75,
+        name: 'Dog Days Are Over',
+        popularity: 79,
         preview_url: null,
-        track_number: 4,
+        track_number: 1,
         type: 'track',
-        uri: 'spotify:track:1DFmBjoeQN9DpOVTEewyx0'
+        uri: 'spotify:track:456WNXWhDwYOSf5SpTuqxd'
     }
  * ```
  */
