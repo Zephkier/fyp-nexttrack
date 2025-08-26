@@ -1,12 +1,53 @@
 // NOTE This (entire .TSX file) is temporary and is to be removed/deleted when deployed
-
 "use client";
 
-type exampleTrackProp = {
-    artistAndName: string;
-    notes: string[];
-    spotifyLink: string;
-};
+// NOTE This is temporary and is to be removed/deleted when deployed
+const temp_exampleTracks = [
+    {
+        artistAndName: '"Playboi Carti" - Bando',
+        notes: ["test unknown artist"],
+        spotifyLink: "https://open.spotify.com/track/6z7dQwXh9UJJl4wsWxexuI?si=308467749bd94d0d",
+    },
+    {
+        artistAndName: "The Beatles - Something",
+        notes: ["test singular artist"],
+        spotifyLink: "https://open.spotify.com/track/0pNeVovbiZHkulpGeOx1Gj?si=b9def5c53fe943a7",
+    },
+    {
+        artistAndName: "Selena Gomez, benny blanco, The Marías - Ojos Tristes",
+        notes: ["test multiple artists"],
+        spotifyLink: "https://open.spotify.com/track/1DFmBjoeQN9DpOVTEewyx0?si=210d4a8f264e4430",
+    },
+    {
+        artistAndName: "Florence + The Machine - Dog Days Are Over",
+        notes: ["test artist name character: +"],
+        spotifyLink: "https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe",
+    },
+    {
+        artistAndName: "AC/DC - Thunderstruck",
+        notes: ["test artist name character: /"],
+        spotifyLink: "https://open.spotify.com/track/57bgtoPSgt236HzfBOd8kj?si=1f3b7d2fbc074a5e",
+    },
+    {
+        artistAndName: "Dimitri Vegas & Like Mike - Thank You (Not So Bad)",
+        notes: ["test artist name character: &"],
+        spotifyLink: "https://open.spotify.com/track/09CnYHiZ5jGT1wr1TXJ9Zt?si=68c00376f8e7456a",
+    },
+    {
+        artistAndName: "Frank Ocean - Pink + White",
+        notes: ["test track name character: +"],
+        spotifyLink: "https://open.spotify.com/track/3xKsf9qdS1CyvXSMEid6g8?si=a806ea6aea05450c",
+    },
+    {
+        artistAndName: "The Marías - Déjate Llevar",
+        notes: [
+            // Format
+            "test artist name character: í",
+            "test track name character: é",
+        ],
+        spotifyLink: "https://open.spotify.com/track/4eevohYu5jHXgnCitivUVT?si=435a57ee92ac4463",
+    },
+];
 
 async function copyToClipboard(
     // Format
@@ -19,7 +60,7 @@ async function copyToClipboard(
     setTimeout(() => (button.innerText = "Copy"), 1000);
 }
 
-export default function Examples({ exampleTracks }: { exampleTracks: exampleTrackProp[] }) {
+export default function Examples() {
     return (
         <div>
             <h3
@@ -30,7 +71,7 @@ export default function Examples({ exampleTracks }: { exampleTracks: exampleTrac
                 Examples
             </h3>
             <ul className="list-inside list-disc">
-                {exampleTracks.map((exampleTrack, indexI) => (
+                {temp_exampleTracks.map((exampleTrack, indexI) => (
                     <li key={indexI} className="mb-4">
                         {exampleTrack.artistAndName}
                         <div className="text-gray-400 ml-4">
