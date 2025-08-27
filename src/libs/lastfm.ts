@@ -1,5 +1,7 @@
 import * as cheerio from "cheerio";
 
+type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
+
 /**
  * Returns a string in Last.fm's format. Example:
  *
@@ -195,7 +197,14 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
                 mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
                 url: 'https://www.last.fm/music/Florence+%252B+the+Machine'
             },
-            image: [ [Object], [Object], [Object], [Object], [Object], [Object] ]
+            // This key is removed
+            // image: [
+            //     {
+            //         '#text': 'https://lastfm...png',
+            //         size: 'small'
+            //     },
+            //     // And repeat a few more times
+            // ]
         },
         // And repeat 99 more times, for a total of 100 elements in this array
     ]
@@ -236,45 +245,51 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     const data = await response.json();
     /**_Same JSDoc as this function._ */
     const similarTracks = data.similartracks.track;
+    similarTracks.forEach((similarTrack: similarTrackType) => delete similarTrack.image);
     return similarTracks;
 }
 
 /**
- * Web scrapes and returns the value of `data-youtube-id`. Example:
+ * Web scrapes and returns `null` or the string of `data-youtube-id`. Example:
  * 
- * `"Ch6xdV_ZjdU"`
+ * `"7ICS45rZsvo"`
  * 
  * -----
+ * 
+ * Source:
+ * - https://www.last.fm/music/The+Marías/_/Déjate+Llevar                   (via navigating website)
+ * - https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar         (encoded once)
+ * - https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar (encoded twice)
  * 
  * On Last.fm's page, the HTML element containing its YouTube video is:
  * ```html
     <a
         id="track-page-video-playlink"
-        href="https://www.youtube.com/watch?v=Ch6xdV_ZjdU"
-        data-youtube-id="Ch6xdV_ZjdU"
-        data-youtube-url="https://www.youtube.com/watch?v=Ch6xdV_ZjdU"
+        href="https://www.youtube.com/watch?v=7ICS45rZsvo"
+        data-youtube-id="7ICS45rZsvo"
+        data-youtube-url="https://www.youtube.com/watch?v=7ICS45rZsvo"
         ...
     ></a>
  * ```
- *
  */
-export async function webScrapeLastFmYoutubeId(fullUrl: string) {
+export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
     try {
-        const response = await fetch(fullUrl, {
+        const response = await fetch(lastFmUrl, {
             // Avoid being detected as a bot
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
             cache: "no-store",
         });
         if (!response.ok) return null;
-
+        // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
-
-        // Select the HTML element via its "id" attribute, and then the desired attribute (i.e. data-youtube-id)
-        const youtubeId = $("#track-page-video-playlink").attr("data-youtube-id");
-
-        return youtubeId;
-    } catch {
+        // Extract text from specified HTML element's (via its "id") attribute
+        const htmlElementId = "#track-page-video-playlink";
+        const htmlElementAttribute = "data-youtube-id";
+        const selector = $(htmlElementId).attr(htmlElementAttribute);
+        return selector;
+    } catch (err) {
+        console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmYoutubeId():\n${err}`);
         return null;
     }
 }

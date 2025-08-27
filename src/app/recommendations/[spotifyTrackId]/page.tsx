@@ -30,10 +30,10 @@ export default async function RecommendationsWithId(
     const { spotifyTrackId } = await params;
 
     // ------------------------------------------------------------------------------------------------ //
-    // ----- 1. Get submitted track for "Submitted Track Details" and "Customise Recommendations" ----- //
+    // ----- 1. Get values for "Submitted Track Details" and "Customise Recommendations" ----- //
     // ------------------------------------------------------------------------------------------------ //
 
-    // ----- 1a. Get Spotify track details ----- //
+    // ----- 1a. Get incoming Spotify track details ----- //
     // - Was planning to get data from:
     //   - from track        @ https://developer.spotify.com/documentation/web-api/reference/get-track
     //   - to album          @ https://developer.spotify.com/documentation/web-api/reference/get-an-album
@@ -79,35 +79,35 @@ export default async function RecommendationsWithId(
     // ----- 3. Get values for "Recommended Tracks" ----- //
     // -------------------------------------------------- //
 
-    // FIXME
-    // TODO  Continue from here. Make helper functions consistent with above helper functions.
-    // FIXME
-
-    // ----- 3a. Use Last.fm's "track.getSimilar" method as recommended tracks for now NOTE This acts as a placeholder
+    // ----- 3a. Get recommended tracks NOTE Using similar tracks as placeholder TODO Recommended tracks should be based on "Customise Recommendations"
     let lastFmSimilarTracks = await getLastFmSimilarTracks(artistName, trackName);
-    if (lastFmSimilarTracks.length == 0) lastFmSimilarTracks = ["No similar tracks found"]; // TODO Handle the case where no similar tracks are found
-    const lastFmSimilarTracksWithYoutubeIds = await Promise.all(
+    if (lastFmSimilarTracks.length == 0) lastFmSimilarTracks = ["No similar tracks found"]; // TODO Handle the case where no similar tracks are found because, so far, every track HAS similar tracks
+
+    // ----- 3b. Get recommended tracks' YouTube ID for video embedding
+    const lastFmSimilarTracksWithYoutubeId = await Promise.all(
         lastFmSimilarTracks
-            // Limit to first 5 tracks TODO Allow user to change this value
+            // Limit number of results TODO Allow user to adjust this value, or create page navigation
             .slice(0, 5)
+            // Add `youtubeId` key to `lastFmSimilarTracksWithYoutubeId` object
             .map(async (similarTrack: similarTrackType) => {
-                // The URL leads to the similar track's respective Last.fm page
-                // Hover over function to see exactly what is being returned
                 const youtubeId = await webScrapeLastFmYoutubeId(similarTrack.url);
-                // Basically append/push it to the `lastFmSimilarTracks` object
                 return { ...similarTrack, youtubeId };
             })
     );
 
-    // ----- 3b. Get xxx TODO
+    // FIXME
+    // ----- 3c. Get recommended tracks' `link` values TODO Start with Spotify, go to a track's Last.fm page, F12, CTRL + F "spotify"
+    // FIXME
 
-    // ----- 3z (at the end). Convert the retrieved data into something suitable for the website ----- //
-    const recommendedTracks = lastFmSimilarTracksWithYoutubeIds.map((recommendedTrack) => ({
+    // ----- 3y. Get xxx TODO Work on replacing placeholders below
+
+    // ----- 3z. Convert the retrieved data into something suitable for the website ----- //
+    const recommendedTracks = lastFmSimilarTracksWithYoutubeId.map((recommendedTrack) => ({
         name: recommendedTrack.name,
         artists: [recommendedTrack.artist.name],
         link: {
             // TODO Find another to ensure `null` is handled
-            video: recommendedTrack.youtubeId ?? null,
+            video: recommendedTrack.youtubeId,
             // NOTE All these are placeholders TODO Replace with actual links to the recommended track
             spotify: "https://open.spotify.com/track/4u7EnebtmKWzUH433cf5Qv?si=d402b163ddcb40b9",
             appleMusic: "https://music.apple.com/us/song/bohemian-rhapsody/1440650711",
