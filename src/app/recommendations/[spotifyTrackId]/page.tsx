@@ -6,9 +6,13 @@ import CustomiseRecommendations from "@/ui/components/CustomiseRecommendations";
 import RecommendedTracks from "@/ui/components/RecommendedTracks";
 
 import { getSpotifyTrackDetails } from "@/libs/spotify";
-import { getLastFmGenres, getLastFmSimilarTracks, getLastFmYoutubeId } from "@/libs/lastfm";
+import {
+    getLastFmGenres_deprecated, // Hover over function to see why it is "deprecated"
+    webScrapeLastFmGenres,
+    getLastFmSimilarTracks,
+    getLastFmYoutubeId,
+} from "@/libs/lastfm";
 
-type trackDetailsFromSpotifyType = Awaited<ReturnType<typeof getSpotifyTrackDetails>>;
 type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
 
 export const metadata: Metadata = {
@@ -25,22 +29,32 @@ export default async function RecommendationsWithId(
     // As `params` is a Promise, we must `await` it (see demonstration from 3-nextjs-app-demo/src/app/users/[someUserID]/page.tsx::User())
     const { spotifyTrackId } = await params;
 
-    // 1. Get Spotify track details
-    //   - Could have gotten:
-    //     - track's audio features @ https://developer.spotify.com/documentation/web-api/reference/get-audio-features
-    //     - track's audio analysis @ https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis
-    //     - recommendations @ https://developer.spotify.com/documentation/web-api/reference/get-recommendations
-    //     - but all are deprecated...
-    //   - Could have went:
-    //     - from track @ https://developer.spotify.com/documentation/web-api/reference/get-track
-    //     - to album   @ https://developer.spotify.com/documentation/web-api/reference/get-an-album
-    //     - to get album's genres, but album's genres is deprecated...
-    //     - thus, next best thing is to get genres from Last.fm
-    let trackDetailsFromSpotify: trackDetailsFromSpotifyType;
+    // ------------------------------------------ //
+    // ----- 1. Get submitted track details ----- //
+    // ------------------------------------------ //
+
+    // ----- 1a. Get Spotify track details ----- //
+    // - Was planning to get data from:
+    //   - from track        @ https://developer.spotify.com/documentation/web-api/reference/get-track
+    //   - to album          @ https://developer.spotify.com/documentation/web-api/reference/get-an-album
+    //   - to album's genres @ https://developer.spotify.com/documentation/web-api/reference/get-an-album (scroll all the way down)
+    //   - but album's genres is deprecated...
+    // - After getting basic details, was planning to get data from:
+    //   - track's audio features @ https://developer.spotify.com/documentation/web-api/reference/get-audio-features
+    //   - track's audio analysis @ https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis
+    //   - recommendations        @ https://developer.spotify.com/documentation/web-api/reference/get-recommendations
+    //   - but all are deprecated...
+
+    // FIXME
+    // TODO  I want function in spotify.ts to return nulls, then adjust the below code accordingly (e.g. "if (!<someghing>) {}")
+    // FIXME
+
+    let trackDetailsFromSpotify;
     try {
         // Hover over function to see exactly what is being returned
         trackDetailsFromSpotify = await getSpotifyTrackDetails(spotifyTrackId);
-    } catch {
+    } catch (err) {
+        console.error(`[!] ./src/app/recommendations/[spotifyTrackID]/page.tsx::RecommendationsWithId():\n${err}`);
         return (
             <main className="container mx-auto">
                 <Hero customMarginBottom="mb-20" />
@@ -52,32 +66,39 @@ export default async function RecommendationsWithId(
         );
     }
 
-    // 2. Get Last.fm genres
-    //   - Last.fm calls it "tags", but we will call it genres for consistency
-    const artistName = trackDetailsFromSpotify.artists[0].name; // Must always get the main artist
-    const trackName = trackDetailsFromSpotify.name;
-    let genresFromLastFm: { name: string }[] = [];
-    try {
-        // Hover over function to see exactly what is being returned
-        genresFromLastFm = await getLastFmGenres(artistName, trackName);
-        if (genresFromLastFm.length == 0) genresFromLastFm = [{ name: "No genres found in Last.fm" }];
-    } catch {
-        genresFromLastFm = [];
-    }
+    // --------------------------------------------------------- //
+    // ----- 2. Get values for "Customise Recommendations" ----- //
+    // --------------------------------------------------------- //
 
-    // 3. Convert the retrieved data into something suitable for the website
+    // ----- 2a. Get Last.fm genres ----- //
+    // - Last.fm calls it "tags", but we shall call it "genres" for consistency
+    // Must always get the main artist
+    const artistName = trackDetailsFromSpotify.artists[0].name;
+    const trackName = trackDetailsFromSpotify.name;
+    // Hover over function to see exactly what is being returned
+    let genresFromLastFm = await webScrapeLastFmGenres(artistName, trackName);
+    if (genresFromLastFm.length == 0) genresFromLastFm = ["No genres found"];
+
+    // FIXME
+    // TODO  I want to follow the webScrapeLastFmGenres()'s standard (e.g. try-catch, returns, what to do if null (!) or [] or whatever)
+    // FIXME
+
+    // ----- 2b. Convert the retrieved data into something suitable for the website ----- //
     const submittedTrack = {
         name: trackDetailsFromSpotify.name,
         artists: trackDetailsFromSpotify.artists.map((artist) => artist.name),
         releaseDate: trackDetailsFromSpotify.album.release_date,
         popularity: trackDetailsFromSpotify.popularity,
-        genres: genresFromLastFm.map((genreObject) => genreObject.name),
-        // TODO  May want to remove `moods`... see what it can be replaced with
-        // NOTE Temporary placeholder
-        moods: ["Happy", "Sad", "Party", "Chill"],
+        genres: genresFromLastFm,
+        // TODO May want to replace "moods" with something more usable/realistic...
+        moods: ["Happy", "Sad", "Party", "Chill"], // NOTE Strings are placeholders
     };
 
-    // 4. Get similar tracks as recommended tracks
+    // -------------------------------------------------- //
+    // ----- 3. Get values for "Recommended Tracks" ----- //
+    // -------------------------------------------------- //
+
+    // ----- 3a. Use Last.fm's "track.getSimilar" method as recommended tracks for now
     let similarTracksFromLastFm;
     try {
         // Hover over function to see exactly what is being returned
@@ -85,22 +106,22 @@ export default async function RecommendationsWithId(
     } catch {
         similarTracksFromLastFm = [];
     }
-
-    // 5. Web scrape the similar track's Last.fm page and add a `youtubeId` key
-    //   - Hover over "getLastFmYoutubeId()" to see exactly what is being returned
     const similarTracksFromLastFmWithYoutubeIds = await Promise.all(
         similarTracksFromLastFm
             // Limit to first 5 tracks (TODO Allow user to change this value?)
             .slice(0, 5)
             .map(async (similarTrack: similarTrackType) => {
                 // The URL leads to the similar track's respective Last.fm page
+                // Hover over function to see exactly what is being returned
                 const youtubeId = await getLastFmYoutubeId(similarTrack.url);
                 // Basically append/push it to the `similarTracksFromLastFm` object
                 return { ...similarTrack, youtubeId };
             })
     );
 
-    // 6. Convert the retrieved data into something suitable for the website
+    // ----- 3b. Get xxx TODO
+
+    // ----- 3z. Convert the retrieved data into something suitable for the website ----- //
     const recommendedTracks = similarTracksFromLastFmWithYoutubeIds.map((recommendedTrack) => ({
         name: recommendedTrack.name,
         artists: [recommendedTrack.artist.name],
