@@ -44,8 +44,8 @@ export default async function RecommendationsWithId(
     //   - track's audio analysis @ https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis
     //   - recommendations        @ https://developer.spotify.com/documentation/web-api/reference/get-recommendations
     //   - but all are deprecated...
-    const trackDetailsFromSpotify = await getSpotifyTrackDetails(spotifyTrackId);
-    if (!trackDetailsFromSpotify) {
+    const spotifyTrackDetails = await getSpotifyTrackDetails(spotifyTrackId);
+    if (!spotifyTrackDetails) {
         // Return a page because, if this step fails, then nothing can happen anyway
         return (
             <main className="container mx-auto">
@@ -60,18 +60,18 @@ export default async function RecommendationsWithId(
 
     // ----- 1b. Get Last.fm genres ----- //
     // - Last.fm calls it "tags", but we shall call it "genres" for consistency
-    const artistName = trackDetailsFromSpotify.artists[0].name; // Must always get the main artist
-    const trackName = trackDetailsFromSpotify.name;
-    let genresFromLastFm = await webScrapeLastFmGenres(artistName, trackName);
-    if (genresFromLastFm.length == 0) genresFromLastFm = ["No genres found"];
+    const artistName = spotifyTrackDetails.artists[0].name; // Must always get the main artist
+    const trackName = spotifyTrackDetails.name;
+    let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
+    if (lastFmGenres.length == 0) lastFmGenres = ["No genres found"];
 
     // ----- 1c. Convert the retrieved data into something suitable for the website ----- //
     const submittedTrack = {
-        name: trackDetailsFromSpotify.name,
-        artists: trackDetailsFromSpotify.artists.map((artist) => artist.name),
-        releaseDate: trackDetailsFromSpotify.album.release_date,
-        popularity: trackDetailsFromSpotify.popularity,
-        genres: genresFromLastFm,
+        name: spotifyTrackDetails.name,
+        artists: spotifyTrackDetails.artists.map((artist) => artist.name),
+        releaseDate: spotifyTrackDetails.album.release_date,
+        popularity: spotifyTrackDetails.popularity,
+        genres: lastFmGenres,
         moods: ["Happy", "Sad", "Party", "Chill"], // NOTE Strings are placeholders // TODO May want to replace "moods" with something more usable/realistic...
     };
 
@@ -84,29 +84,31 @@ export default async function RecommendationsWithId(
     // FIXME
 
     // ----- 3a. Use Last.fm's "track.getSimilar" method as recommended tracks for now NOTE This acts as a placeholder
-    let similarTracksFromLastFm = await getLastFmSimilarTracks(artistName, trackName);
-    if (similarTracksFromLastFm.length == 0) similarTracksFromLastFm = ["No similar tracks found"]; // TODO Handle the case where no similar tracks are found
-    const similarTracksFromLastFmWithYoutubeIds = await Promise.all(
-        similarTracksFromLastFm
+    let lastFmSimilarTracks = await getLastFmSimilarTracks(artistName, trackName);
+    if (lastFmSimilarTracks.length == 0) lastFmSimilarTracks = ["No similar tracks found"]; // TODO Handle the case where no similar tracks are found
+    const lastFmSimilarTracksWithYoutubeIds = await Promise.all(
+        lastFmSimilarTracks
             // Limit to first 5 tracks TODO Allow user to change this value
             .slice(0, 5)
             .map(async (similarTrack: similarTrackType) => {
                 // The URL leads to the similar track's respective Last.fm page
                 // Hover over function to see exactly what is being returned
                 const youtubeId = await webScrapeLastFmYoutubeId(similarTrack.url);
-                // Basically append/push it to the `similarTracksFromLastFm` object
+                // Basically append/push it to the `lastFmSimilarTracks` object
                 return { ...similarTrack, youtubeId };
             })
     );
 
     // ----- 3b. Get xxx TODO
 
-    // ----- 3z. Convert the retrieved data into something suitable for the website ----- //
-    const recommendedTracks = similarTracksFromLastFmWithYoutubeIds.map((recommendedTrack) => ({
+    // ----- 3z (at the end). Convert the retrieved data into something suitable for the website ----- //
+    const recommendedTracks = lastFmSimilarTracksWithYoutubeIds.map((recommendedTrack) => ({
         name: recommendedTrack.name,
         artists: [recommendedTrack.artist.name],
         link: {
+            // TODO Find another to ensure `null` is handled
             video: recommendedTrack.youtubeId ?? null,
+            // NOTE All these are placeholders TODO Replace with actual links to the recommended track
             spotify: "https://open.spotify.com/track/4u7EnebtmKWzUH433cf5Qv?si=d402b163ddcb40b9",
             appleMusic: "https://music.apple.com/us/song/bohemian-rhapsody/1440650711",
             youtubeMusic: "https://music.youtube.com/watch?v=bSnlKl_PoQU&si=rizExhbi-h_Zog7w",
