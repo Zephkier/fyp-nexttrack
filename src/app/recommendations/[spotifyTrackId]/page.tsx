@@ -10,7 +10,7 @@ import {
     getLastFmGenres_deprecated, // Hover over function to see why it is "deprecated"
     webScrapeLastFmGenres,
     getLastFmSimilarTracks,
-    getLastFmYoutubeId,
+    webScrapeLastFmYoutubeId,
 } from "@/libs/lastfm";
 
 type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
@@ -29,9 +29,9 @@ export default async function RecommendationsWithId(
     // As `params` is a Promise, we must `await` it (see demonstration from 3-nextjs-app-demo/src/app/users/[someUserID]/page.tsx::User())
     const { spotifyTrackId } = await params;
 
-    // ------------------------------------------ //
-    // ----- 1. Get submitted track details ----- //
-    // ------------------------------------------ //
+    // ------------------------------------------------------------------------------------------------ //
+    // ----- 1. Get submitted track for "Submitted Track Details" and "Customise Recommendations" ----- //
+    // ------------------------------------------------------------------------------------------------ //
 
     // ----- 1a. Get Spotify track details ----- //
     // - Was planning to get data from:
@@ -44,17 +44,9 @@ export default async function RecommendationsWithId(
     //   - track's audio analysis @ https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis
     //   - recommendations        @ https://developer.spotify.com/documentation/web-api/reference/get-recommendations
     //   - but all are deprecated...
-
-    // FIXME
-    // TODO  I want function in spotify.ts to return nulls, then adjust the below code accordingly (e.g. "if (!<someghing>) {}")
-    // FIXME
-
-    let trackDetailsFromSpotify;
-    try {
-        // Hover over function to see exactly what is being returned
-        trackDetailsFromSpotify = await getSpotifyTrackDetails(spotifyTrackId);
-    } catch (err) {
-        console.error(`[!] ./src/app/recommendations/[spotifyTrackID]/page.tsx::RecommendationsWithId():\n${err}`);
+    const trackDetailsFromSpotify = await getSpotifyTrackDetails(spotifyTrackId);
+    if (!trackDetailsFromSpotify) {
+        // Return a page because, if this step fails, then nothing can happen anyway
         return (
             <main className="container mx-auto">
                 <Hero customMarginBottom="mb-20" />
@@ -66,54 +58,42 @@ export default async function RecommendationsWithId(
         );
     }
 
-    // --------------------------------------------------------- //
-    // ----- 2. Get values for "Customise Recommendations" ----- //
-    // --------------------------------------------------------- //
-
-    // ----- 2a. Get Last.fm genres ----- //
+    // ----- 1b. Get Last.fm genres ----- //
     // - Last.fm calls it "tags", but we shall call it "genres" for consistency
-    // Must always get the main artist
-    const artistName = trackDetailsFromSpotify.artists[0].name;
+    const artistName = trackDetailsFromSpotify.artists[0].name; // Must always get the main artist
     const trackName = trackDetailsFromSpotify.name;
-    // Hover over function to see exactly what is being returned
     let genresFromLastFm = await webScrapeLastFmGenres(artistName, trackName);
     if (genresFromLastFm.length == 0) genresFromLastFm = ["No genres found"];
 
-    // FIXME
-    // TODO  I want to follow the webScrapeLastFmGenres()'s standard (e.g. try-catch, returns, what to do if null (!) or [] or whatever)
-    // FIXME
-
-    // ----- 2b. Convert the retrieved data into something suitable for the website ----- //
+    // ----- 1c. Convert the retrieved data into something suitable for the website ----- //
     const submittedTrack = {
         name: trackDetailsFromSpotify.name,
         artists: trackDetailsFromSpotify.artists.map((artist) => artist.name),
         releaseDate: trackDetailsFromSpotify.album.release_date,
         popularity: trackDetailsFromSpotify.popularity,
         genres: genresFromLastFm,
-        // TODO May want to replace "moods" with something more usable/realistic...
-        moods: ["Happy", "Sad", "Party", "Chill"], // NOTE Strings are placeholders
+        moods: ["Happy", "Sad", "Party", "Chill"], // NOTE Strings are placeholders // TODO May want to replace "moods" with something more usable/realistic...
     };
 
     // -------------------------------------------------- //
     // ----- 3. Get values for "Recommended Tracks" ----- //
     // -------------------------------------------------- //
 
-    // ----- 3a. Use Last.fm's "track.getSimilar" method as recommended tracks for now
-    let similarTracksFromLastFm;
-    try {
-        // Hover over function to see exactly what is being returned
-        similarTracksFromLastFm = await getLastFmSimilarTracks(artistName, trackName);
-    } catch {
-        similarTracksFromLastFm = [];
-    }
+    // FIXME
+    // TODO  Continue from here. Make helper functions consistent with above helper functions.
+    // FIXME
+
+    // ----- 3a. Use Last.fm's "track.getSimilar" method as recommended tracks for now NOTE This acts as a placeholder
+    let similarTracksFromLastFm = await getLastFmSimilarTracks(artistName, trackName);
+    if (similarTracksFromLastFm.length == 0) similarTracksFromLastFm = ["No similar tracks found"]; // TODO Handle the case where no similar tracks are found
     const similarTracksFromLastFmWithYoutubeIds = await Promise.all(
         similarTracksFromLastFm
-            // Limit to first 5 tracks (TODO Allow user to change this value?)
+            // Limit to first 5 tracks TODO Allow user to change this value
             .slice(0, 5)
             .map(async (similarTrack: similarTrackType) => {
                 // The URL leads to the similar track's respective Last.fm page
                 // Hover over function to see exactly what is being returned
-                const youtubeId = await getLastFmYoutubeId(similarTrack.url);
+                const youtubeId = await webScrapeLastFmYoutubeId(similarTrack.url);
                 // Basically append/push it to the `similarTracksFromLastFm` object
                 return { ...similarTrack, youtubeId };
             })

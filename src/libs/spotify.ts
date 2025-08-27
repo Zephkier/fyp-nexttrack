@@ -1,26 +1,34 @@
 import SpotifyWebApi from "spotify-web-api-node";
 
 /**
+ * Returns `null` or the `SpotifyWebApi()` instance.
+ *
  * Creates a new instance of `SpotifyWebApi()` via variables from `./.env` file.
  *
  * Sets an access token.
- *
- * Returns the `SpotifyWebApi()` instance.
  */
 export async function getSpotifyApiToken() {
-    const spotifyApi = new SpotifyWebApi({
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    if (!clientId || !clientSecret) {
+        console.error('[!] ./src/libs/spotify.ts::getSpotifyApiToken():\nNo "SPOTIFY_CLIENT_ID" or "SPOTIFY_CLIENT_SECRET"');
+        return null;
+    }
+    try {
         // Key MUST be named "clientId" and not "clientID" or anything else
-        clientId: process.env.SPOTIFY_CLIENT_ID,
-        clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-    });
-    const data = await spotifyApi.clientCredentialsGrant();
-    const accessToken = data.body.access_token;
-    spotifyApi.setAccessToken(accessToken);
-    return spotifyApi;
+        const spotifyApi = new SpotifyWebApi({ clientId, clientSecret });
+        const data = await spotifyApi.clientCredentialsGrant();
+        const accessToken = data.body.access_token;
+        spotifyApi.setAccessToken(accessToken);
+        return spotifyApi;
+    } catch (err) {
+        console.error(`[!] ./src/libs/spotify.ts::getSpotifyApiToken():\n${err}`);
+        return null;
+    }
 }
 
 /**
- * Returns an object with many keys. Example:
+ * Returns `null` or an object with many keys. Example:
  * ```js
     {
         album: {
@@ -71,7 +79,13 @@ export async function getSpotifyApiToken() {
  * ```
  */
 export async function getSpotifyTrackDetails(trackId: string) {
-    const api = await getSpotifyApiToken();
-    const response = await api.getTrack(trackId);
-    return response.body;
+    try {
+        const api = await getSpotifyApiToken();
+        if (!api) return null;
+        const response = await api.getTrack(trackId);
+        return response.body;
+    } catch (err) {
+        console.error(`[!] ./src/libs/spotify.ts::getSpotifyTrackDetails():\n${err}`);
+        return null;
+    }
 }

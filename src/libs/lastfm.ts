@@ -1,9 +1,17 @@
 import * as cheerio from "cheerio";
 
 /**
+ * Returns a string in Last.fm's format. Example:
+ *
+ * - From `"Florence + The Machine"` to `"Florence+%252B+the+Machine"`
+ * - From `"The Marías"` to `"The+Mar%25C3%25ADas"`
+ *
+ * -----
+ *
  * Convert (artist or track) names into Last.fm's format.
  *
  * **NOTE THAT LAST.FM HAS INCONSISTENT ENCODING**. Example:
+ *
  * - Some special characters (e.g. "+") are encoded **TWICE**.
  *   - Tested with "Florence + The Machine - Dog Days Are Over".
  *   - Tested with "Frank Ocean - Pink + White".
@@ -15,11 +23,6 @@ import * as cheerio from "cheerio";
  *
  * - Spaces are not encoded.
  *   - Instead, they are replaced with "+".
- *
- * Returns a string in Last.fm's format. Example:
- *
- * - From `"Florence + The Machine"` to `"Florence+%252B+the+Machine"`
- * - From `"The Marías"` to `"The+Mar%25C3%25ADas"`
  */
 export function convertToLastFmFormat(name: string): string {
     /**
@@ -41,13 +44,7 @@ export function convertToLastFmFormat(name: string): string {
 }
 
 /**
- * **THIS IS DEPRECATED, USE `webScrapeLastFmGenres()` INSTEAD.**
- * 
- * **LAST.FM API INCONSISTENTLY RETRIEVES GENRES, SOMETIMES RETURNS EMPTY ARRAY.**
- * 
- * Source: https://www.last.fm/api/show/track.getInfo
- * 
- * Returns an array of objects with `name` and `url` keys. Example:
+ * Returns `[]` or an array of objects with `name` and `url` keys. Example:
  *
  * ```js
     [
@@ -58,6 +55,14 @@ export function convertToLastFmFormat(name: string): string {
         { name: 'british',          url: 'https://www.last.fm/tag/british'          }
     ]
  * ```
+ *  
+ * -----
+ * 
+ * **THIS IS DEPRECATED, USE `webScrapeLastFmGenres()` INSTEAD.**
+ * 
+ * **LAST.FM API INCONSISTENTLY RETRIEVES GENRES, SOMETIMES RETURNS EMPTY ARRAY.**
+ * 
+ * Source: https://www.last.fm/api/show/track.getInfo
  */
 export async function getLastFmGenres_deprecated(artistName: string, trackName: string) {
     const baseUrl = "http://ws.audioscrobbler.com";
@@ -69,6 +74,7 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
 
     const response = await fetch(fullUrl);
     if (!response.ok) return [];
+
     /**
      * Returns an object with many keys. Example:
      * ```js
@@ -111,6 +117,12 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
 }
 
 /**
+ * Web scrapes and returns `[]` or an array of strings within `<a>`. Example:
+ * 
+ * `["genre1", "genre2"]`
+ * 
+ * -----
+ * 
  * Source:
  * - https://www.last.fm/music/The+Marías/_/Déjate+Llevar                   (via navigating website)
  * - https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar         (encoded once)
@@ -133,12 +145,7 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
     <section class="catalogue-tags about-artist-tags">
         <!-- Same as above -->
     </section>
- * 
  * ```
- *
- * Web scrape and return an array of strings within `<a>`. Example:
- * 
- * `["genre1", "genre2"]` or `[]`
  */
 export async function webScrapeLastFmGenres(artistName: string, trackName: string) {
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
@@ -172,9 +179,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
 }
 
 /**
- * Source: https://www.last.fm/api/show/track.getSimilar
- *
- * Returns an array of objects with many keys. Example:
+ * Last.fm API returns `[]` or an array of objects with many keys. Example:
  *
  * ```js
     [
@@ -192,14 +197,21 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
             },
             image: [ [Object], [Object], [Object], [Object], [Object], [Object] ]
         },
-        // And repeat 99 more times
+        // And repeat 99 more times, for a total of 100 elements in this array
     ]
  * ```
+ *
+ * -----
+ * 
+ * Source: https://www.last.fm/api/show/track.getSimilar
+ * 
+ * Uses Last.fm API to retrieve similar tracks.
+ * 
+ * Note:
+ * - If certain tracks return no similar tracks (i.e. `[]`), but its Last.fm page **HAS** similar tracks...
+ * - Then replace this function with one that uses web scraping.
  */
 export async function getLastFmSimilarTracks(artistName: string, trackName: string) {
-    // FIXME
-    // TODO  I want to follow the webScrapeLastFmGenres()'s standard (e.g. try-catch, returns, what to do if null (!) or [] or whatever)
-    // FIXME
     const baseUrl = "http://ws.audioscrobbler.com";
     const method = "track.getSimilar";
     const apiKey = process.env.LASTFM_API_KEY;
@@ -209,6 +221,7 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
 
     const response = await fetch(fullUrl);
     if (!response.ok) return [];
+
     /**
      * Returns an object of an object. Example:
      * ```js
@@ -227,6 +240,12 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
 }
 
 /**
+ * Web scrapes and returns the value of `data-youtube-id`. Example:
+ * 
+ * `"Ch6xdV_ZjdU"`
+ * 
+ * -----
+ * 
  * On Last.fm's page, the HTML element containing its YouTube video is:
  * ```html
     <a
@@ -238,11 +257,8 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     ></a>
  * ```
  *
- * It web scraps and returns the value of `data-youtube-id`. Example:
- * 
- * `"Ch6xdV_ZjdU"`
  */
-export async function getLastFmYoutubeId(fullUrl: string) {
+export async function webScrapeLastFmYoutubeId(fullUrl: string) {
     try {
         const response = await fetch(fullUrl, {
             // Avoid being detected as a bot
