@@ -150,6 +150,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
     const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
     const fullUrl = `https://www.last.fm/music/${artistNameInLastFmFormat}/_/${trackNameInLastFmFormat}`;
+    console.log(fullUrl);
     try {
         const response = await fetch(fullUrl, {
             // Avoid being detected as a bot TODO Change to "+https://fyp-nexttrack.vercel.app/"

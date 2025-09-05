@@ -13,6 +13,7 @@ import {
     webScrapeLastFmYoutubeId,
 } from "@/libs/lastfm";
 import { inferMoodsFromGenres } from "@/libs/mood";
+import { webScrapeGeniusGenres } from "@/libs/genius";
 
 type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
 
@@ -34,7 +35,7 @@ export default async function RecommendationsWithId(
     // ----- 1. Get values for "Submitted Track Details" and "Customise Recommendations" ----- //
     // --------------------------------------------------------------------------------------- //
 
-    // ----- 1a. Get incoming Spotify track details ----- //
+    // ----- 1a. Get user-submitted Spotify track details ----- //
     // - Was planning to get data from:
     //   - from track        @ https://developer.spotify.com/documentation/web-api/reference/get-track
     //   - to album          @ https://developer.spotify.com/documentation/web-api/reference/get-an-album
@@ -71,10 +72,22 @@ export default async function RecommendationsWithId(
     // ----- 1b. Get Last.fm genres (Last.fm calls it "tags", but we shall call it "genres") ----- //
     let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
     if (lastFmGenres.length == 0) lastFmGenres = ["No genres found"];
+    if (lastFmGenres.length == 1) {
+        /**
+         * Sometimes, the Last.fm API returns an array of 1 genre, which is insufficient.
+         *
+         * Thus, use Genius API / web scrape Genius page to retrieve better genres.
+         *
+         * - Tested with "Dimitri Vegas & Like Mike - Thank You (Not So Bad)".
+         * - Last.fm API returned `["dimitri vegas and like mike"]` lol.
+         * - Source: https://www.last.fm/music/Dimitri+Vegas+%2526+Like+Mike/_/Thank+You+(Not+So+Bad)
+         */
+        lastFmGenres = await webScrapeGeniusGenres(`${artistName} - ${trackName}`);
 
-    // TODO
-    // If genres are bad (i.e. ".length == 1" like for "Thank You (Not So Bad)"),
-    // then get genres from Genius API or web scrape from Genius instead
+        // FIXME
+        // TODO  Write JSDoc for `genius.ts` in the same format as other `/libs/*.ts` files.
+        // FIXME
+    }
 
     // ----- 1c. Get custom-created moods inferred from genres ----- //
     // - Gotta "custom-create" and "infer" because:
