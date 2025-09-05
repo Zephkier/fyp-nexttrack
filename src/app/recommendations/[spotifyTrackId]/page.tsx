@@ -12,6 +12,7 @@ import {
     getLastFmSimilarTracks,
     webScrapeLastFmYoutubeId,
 } from "@/libs/lastfm";
+import { inferMoodsFromGenres } from "@/libs/mood";
 
 type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
 
@@ -71,18 +72,25 @@ export default async function RecommendationsWithId(
     let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
     if (lastFmGenres.length == 0) lastFmGenres = ["No genres found"];
 
-    // FIXME
-    // TODO  How... can i get mood? it really doesn't seem to exist on APIs...
-    // FIXME
+    // TODO
+    // If genres are bad (i.e. ".length == 1" like for "Thank You (Not So Bad)"),
+    // then get genres from Genius API or web scrape from Genius instead
 
-    // ----- 1c. Convert the retrieved data into something suitable for the website ----- //
+    // ----- 1c. Get custom-created moods inferred from genres ----- //
+    // - Gotta "custom-create" and "infer" because:
+    //   - Spotify API's "audio features" and "audio analysis" methods are deprecated
+    //   - Last.fm API has nothing else that is useful
+    const numberOfMoodsToRetrieve = 2;
+    const inferredMoods = inferMoodsFromGenres(lastFmGenres, numberOfMoodsToRetrieve);
+
+    // ----- 1z. Convert the retrieved data into something suitable for the website ----- //
     const submittedTrack = {
         name: spotifyTrackDetails.name,
-        artists: spotifyTrackDetails.artists.map((artist) => artist.name),
+        artists: spotifyTrackDetails.artists.map((a) => a.name),
         releaseDate: spotifyTrackDetails.album.release_date,
-        popularity: spotifyTrackDetails.popularity,
         genres: lastFmGenres,
-        moods: ["Happy", "Sad", "Party", "Chill"], // NOTE This is a placeholder TODO Replace "moods" or its elements with something more usable (i.e. retrievable from APIs)
+        popularity: spotifyTrackDetails.popularity,
+        moods: inferredMoods,
     };
 
     // -------------------------------------------------- //

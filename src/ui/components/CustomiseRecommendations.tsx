@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 // "type" is more flexible (allows for more use cases) than "interface"
 type submittedTrackProp = {
@@ -11,16 +11,28 @@ type submittedTrackProp = {
     moods: string[];
 };
 
-// TODO Split this into smaller components
+const allMoods = ["happy", "sad", "chill", "party"];
+
 export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackProp }) {
     const [similarity, setSimilarity] = useState(100);
     const [popularity, setPopularity] = useState(submittedTrack.popularity);
     const [dateRange, setDateRange] = useState(2000);
-    const [moods, setMoods] = useState<string[]>([]);
+    const [selectedMoods, setSelectedMoods] = useState<string[]>(submittedTrack.moods);
 
-    const handleCheckboxChange = (mood: string) => {
-        setMoods((prev) => (prev.includes(mood) ? prev.filter((m) => m !== mood) : [...prev, mood]));
-    };
+    function toggleMood(clickedMood: string) {
+        setSelectedMoods((currentSelectedMoods) => {
+            // If "clickedMood" is already checked (i.e. in array), then uncheck it (i.e. remove from array)
+            if (currentSelectedMoods.includes(clickedMood)) return currentSelectedMoods.filter((mood) => mood != clickedMood);
+            // Opposite of above ^
+            else return [...currentSelectedMoods, clickedMood];
+        });
+    }
+
+    function titleCase(s: string) {
+        const firstLetter = s.charAt(0).toUpperCase();
+        const restOfTheLetters = s.slice(1);
+        return `${firstLetter}${restOfTheLetters}`;
+    }
 
     return (
         <section>
@@ -32,15 +44,16 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 Customise Recommendations
             </h3>
 
-            {/* Similarity */}
+            {/* Genres */}
             <div
                 // Format
                 className="mb-4 p-4"
                 style={{ background: "var(--secondary)" }}
             >
-                <h4 className="text-xl font-bold">Genres</h4>
-                <p className="mb-4">
-                    <b>Current:</b> {submittedTrack.genres.join(", ")} <br />
+                <h4 className="mb-1 text-xl font-bold">Genres</h4>
+                <p className="mb-2">
+                    <b>Current:</b> {submittedTrack.genres.join(", ")}
+                    <br />
                     <b>Recommended track&apos;s similarity:</b> {similarity}%
                 </p>
                 <input
@@ -61,9 +74,10 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 className="mb-4 p-4"
                 style={{ background: "var(--secondary)" }}
             >
-                <h4 className="text-xl font-bold">Popularity</h4>
-                <p className="mb-4">
-                    <b>Current:</b> {submittedTrack.popularity}% <br />
+                <h4 className="mb-1 text-xl font-bold">Popularity</h4>
+                <p className="mb-2">
+                    <b>Current:</b> {submittedTrack.popularity}%
+                    <br />
                     <b>Recommended track&apos;s popularity:</b> {popularity}%
                 </p>
                 <input
@@ -78,15 +92,16 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 />
             </div>
 
-            {/* Release date */}
+            {/* Release date range */}
             <div
                 // Format
                 className="mb-4 p-4"
                 style={{ background: "var(--secondary)" }}
             >
-                <h4 className="text-xl font-bold">Release Date Range (Y-M-D)</h4>
-                <p className="mb-4">
-                    <b>Current:</b> {submittedTrack.releaseDate} <br />
+                <h4 className="mb-1 text-xl font-bold">Release Date Range (Y-M-D)</h4>
+                <p className="mb-2">
+                    <b>Current:</b> {submittedTrack.releaseDate}
+                    <br />
                     <b>Recommended track&apos;s release date:</b> {dateRange}
                 </p>
                 <input
@@ -107,16 +122,22 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 className="mb-4 p-4"
                 style={{ background: "var(--secondary)" }}
             >
-                <h4 className="text-xl font-bold">Moods</h4>
-                {submittedTrack.moods.map((mood, index) => (
-                    <label key={index} className="flex items-center space-x-2">
+                <h4 className="mb-1 text-xl font-bold">Mood(s)</h4>
+                <p className="mb-2">
+                    <b>Current:</b> {submittedTrack.moods.join(", ")}
+                    <br />
+                    <b>Recommended track&apos;s mood(s):</b>
+                </p>
+                {/* Checkbox and mood */}
+                {allMoods.map((mood) => (
+                    <label key={mood} className="flex w-fit space-x-2">
                         <input
-                            // Format
                             type="checkbox"
-                            checked={moods.includes(mood.toLowerCase())}
-                            onChange={() => handleCheckboxChange(mood.toLowerCase())}
+                            checked={selectedMoods.includes(mood)}
+                            // Not using "setSelectedMoods(mood)" as we are dealing with checkboxes (i.e. array)
+                            onChange={() => toggleMood(mood)}
                         />
-                        <span>{mood}</span>
+                        <span>{titleCase(mood)}</span>
                     </label>
                 ))}
             </div>
