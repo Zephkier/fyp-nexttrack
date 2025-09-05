@@ -1,17 +1,23 @@
+import "server-only";
 import * as cheerio from "cheerio";
 
 function authHeaders(): HeadersInit {
     const clientAccessToken = process.env.GENIUS_CLIENT_ACCESS_TOKEN;
     if (!clientAccessToken) {
-        console.error('[!] ./src/libs/genius.ts::authHeaders():\nNo "GENIUS_CLIENT_ACCESS_TOKEN"');
-        return {};
+        throw new Error('[!] ./src/libs/genius.ts::authHeaders():\nNo "GENIUS_CLIENT_ACCESS_TOKEN"');
     }
     return { Authorization: `Bearer ${clientAccessToken}` };
 }
 
-async function getGeniusSearchFirstItem(trackArtistAndName: string) {
+/**
+ * Returns a string. Example:
+ *
+ * `'https://genius.com/Dimitri-vegas-and-like-mike-tiesto-dido-and-w-w-thank-you-not-so-bad-lyrics'`
+ */
+export async function getGeniusSearchFirstItemGeniusUrl(trackArtistAndName: string) {
     const encodedTrackArtistAndName = encodeURIComponent(trackArtistAndName);
-    const response = await fetch(`https://api.genius.com/search?q=${encodedTrackArtistAndName}`, {
+    const geniusUrl = `https://api.genius.com/search?q=${encodedTrackArtistAndName}`;
+    const response = await fetch(geniusUrl, {
         headers: authHeaders(),
         cache: "no-store",
     });
@@ -22,9 +28,10 @@ async function getGeniusSearchFirstItem(trackArtistAndName: string) {
     }
 
     const data = await response.json();
-    const firstItem = data.response.hits[0];
-    return firstItem;
+    const firstItemGeniusUrl = data.response.hits[0].result.url;
+    return firstItemGeniusUrl;
 }
+
 /**
  * Web scraping returns `[]` or an array of strings. Example:
  * 
@@ -50,13 +57,16 @@ async function getGeniusSearchFirstItem(trackArtistAndName: string) {
     </div>
  * ```
  */
-export async function webScrapeGeniusGenres(trackArtistAndName: string) {
-    const firstItem = await getGeniusSearchFirstItem(trackArtistAndName);
-    const geniusUrl = firstItem.result.url;
+export async function webScrapeGeniusGenres(geniusUrl: string) {
     try {
         const response = await fetch(geniusUrl, {
             // Avoid being detected as a bot TODO Change to "+https://fyp-nexttrack.vercel.app/"
-            headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
+            // headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
+            // Avoid being detected as a bot and look like a normal browser
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36",
+                "Accept-Language": "en-US,en;q=0.9",
+            },
             cache: "no-store",
         });
         if (!response.ok) return [];

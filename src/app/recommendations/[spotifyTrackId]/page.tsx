@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import type { Metadata } from "next";
 
 import Hero from "@/ui/components/Hero";
@@ -6,14 +8,9 @@ import CustomiseRecommendations from "@/ui/components/CustomiseRecommendations";
 import RecommendedTracks from "@/ui/components/RecommendedTracks";
 
 import { getSpotifyTrackDetails } from "@/libs/spotify";
-import {
-    getLastFmGenres_deprecated, // Hover over function to see why it is "deprecated"
-    webScrapeLastFmGenres,
-    getLastFmSimilarTracks,
-    webScrapeLastFmYoutubeId,
-} from "@/libs/lastfm";
+import { webScrapeLastFmGenres, getLastFmSimilarTracks, webScrapeLastFmYoutubeId } from "@/libs/lastfm";
+import { getGeniusSearchFirstItemGeniusUrl, webScrapeGeniusGenres } from "@/libs/genius";
 import { inferMoodsFromGenres } from "@/libs/mood";
-import { webScrapeGeniusGenres } from "@/libs/genius";
 
 type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
 
@@ -68,21 +65,23 @@ export default async function RecommendationsWithId(
     // Set artist and track names for future uses
     const artistName = spotifyTrackDetails.artists[0].name; // Must get the main artist
     const trackName = spotifyTrackDetails.name;
+    const artistAndTrackName = `${artistName} - ${trackName}`;
 
     // ----- 1b. Get Last.fm genres (Last.fm calls it "tags", but we shall call it "genres") ----- //
     let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
     if (lastFmGenres.length == 0) lastFmGenres = ["No genres found"];
+    /**
+     * Sometimes, the Last.fm API returns an array of 1 genre, which is insufficient.
+     *
+     * Thus, use Genius API / web scrape Genius page to retrieve better genres.
+     *
+     * - Tested with "Dimitri Vegas & Like Mike - Thank You (Not So Bad)".
+     * - Last.fm API returned `["dimitri vegas and like mike"]` lol.
+     * - Source: https://www.last.fm/music/Dimitri+Vegas+%2526+Like+Mike/_/Thank+You+(Not+So+Bad)
+     */
     if (lastFmGenres.length == 1) {
-        /**
-         * Sometimes, the Last.fm API returns an array of 1 genre, which is insufficient.
-         *
-         * Thus, use Genius API / web scrape Genius page to retrieve better genres.
-         *
-         * - Tested with "Dimitri Vegas & Like Mike - Thank You (Not So Bad)".
-         * - Last.fm API returned `["dimitri vegas and like mike"]` lol.
-         * - Source: https://www.last.fm/music/Dimitri+Vegas+%2526+Like+Mike/_/Thank+You+(Not+So+Bad)
-         */
-        lastFmGenres = await webScrapeGeniusGenres(`${artistName} - ${trackName}`);
+        const firstItemGeniusUrl = await getGeniusSearchFirstItemGeniusUrl(artistAndTrackName);
+        if (firstItemGeniusUrl) lastFmGenres = await webScrapeGeniusGenres(firstItemGeniusUrl);
 
         // FIXME
         // TODO  Write JSDoc for `genius.ts` in the same format as other `/libs/*.ts` files.
