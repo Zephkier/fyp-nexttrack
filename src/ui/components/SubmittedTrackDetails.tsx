@@ -19,10 +19,10 @@ export default function SubmittedTrackDetails({ submittedTrack }: { submittedTra
                     <b>Name:</b> {submittedTrack.name}
                 </li>
                 <li>
-                    <b>Artist(s):</b> {submittedTrack.artists.join(", ")}
+                    <b>Artist:</b> {submittedTrack.artists.join(", ")}
                 </li>
                 <li>
-                    <b>Release Date:</b> {submittedTrack.releaseDate}
+                    <b>Release Date (Y-M-D):</b> {submittedTrack.releaseDate}
                 </li>
             </ul>
         </div>

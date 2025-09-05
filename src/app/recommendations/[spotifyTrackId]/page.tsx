@@ -29,9 +29,9 @@ export default async function RecommendationsWithId(
     // As `params` is a Promise, we must `await` it (see demonstration from 3-nextjs-app-demo/src/app/users/[someUserID]/page.tsx::User())
     const { spotifyTrackId } = await params;
 
-    // ------------------------------------------------------------------------------------------------ //
+    // --------------------------------------------------------------------------------------- //
     // ----- 1. Get values for "Submitted Track Details" and "Customise Recommendations" ----- //
-    // ------------------------------------------------------------------------------------------------ //
+    // --------------------------------------------------------------------------------------- //
 
     // ----- 1a. Get incoming Spotify track details ----- //
     // - Was planning to get data from:
@@ -58,12 +58,22 @@ export default async function RecommendationsWithId(
         );
     }
 
-    // ----- 1b. Get Last.fm genres ----- //
-    // - Last.fm calls it "tags", but we shall call it "genres" for consistency
-    const artistName = spotifyTrackDetails.artists[0].name; // Must always get the main artist
+    // Ensure track's ".album.release_date" is YYYY-MM-DD as it may be YYYY or YYYY-MM
+    const releaseDate = spotifyTrackDetails.album.release_date;
+    if (releaseDate.length == 4) spotifyTrackDetails.album.release_date = `${releaseDate}-01-01`;
+    if (releaseDate.length == 7) spotifyTrackDetails.album.release_date = `${releaseDate}-01`;
+
+    // Set artist and track names for future uses
+    const artistName = spotifyTrackDetails.artists[0].name; // Must get the main artist
     const trackName = spotifyTrackDetails.name;
+
+    // ----- 1b. Get Last.fm genres (Last.fm calls it "tags", but we shall call it "genres") ----- //
     let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
     if (lastFmGenres.length == 0) lastFmGenres = ["No genres found"];
+
+    // FIXME
+    // TODO  How... can i get mood? it really doesn't seem to exist on APIs...
+    // FIXME
 
     // ----- 1c. Convert the retrieved data into something suitable for the website ----- //
     const submittedTrack = {
@@ -72,14 +82,14 @@ export default async function RecommendationsWithId(
         releaseDate: spotifyTrackDetails.album.release_date,
         popularity: spotifyTrackDetails.popularity,
         genres: lastFmGenres,
-        moods: ["Happy", "Sad", "Party", "Chill"], // NOTE Strings are placeholders // TODO May want to replace "moods" with something more usable/realistic...
+        moods: ["Happy", "Sad", "Party", "Chill"], // NOTE This is a placeholder TODO Replace "moods" or its elements with something more usable (i.e. retrievable from APIs)
     };
 
     // -------------------------------------------------- //
     // ----- 3. Get values for "Recommended Tracks" ----- //
     // -------------------------------------------------- //
 
-    // ----- 3a. Get recommended tracks NOTE Using similar tracks as placeholder TODO Recommended tracks should be based on "Customise Recommendations"
+    // ----- 3a. Get recommended tracks NOTE Similar tracks are placeholder TODO Replace based on parameters under "Customise Recommendations"
     let lastFmSimilarTracks = await getLastFmSimilarTracks(artistName, trackName);
     if (lastFmSimilarTracks.length == 0) lastFmSimilarTracks = ["No similar tracks found"]; // TODO Handle the case where no similar tracks are found because, so far, every track HAS similar tracks
 
@@ -96,10 +106,12 @@ export default async function RecommendationsWithId(
     );
 
     // FIXME
-    // ----- 3c. Get recommended tracks' `link` values TODO Start with Spotify, go to a track's Last.fm page, F12, CTRL + F "spotify"
+    // ----- 3c. Get recommended tracks' `link` values (for "Listen at:" buttons) TODO Check out the track's Last.fm page and web scrape music platform links
     // FIXME
 
+    // FIXME
     // ----- 3y. Get xxx TODO Work on replacing placeholders below
+    // FIXME
 
     // ----- 3z. Convert the retrieved data into something suitable for the website ----- //
     const recommendedTracks = lastFmSimilarTracksWithYoutubeId.map((recommendedTrack) => ({
@@ -108,7 +120,7 @@ export default async function RecommendationsWithId(
         link: {
             // TODO Find another to ensure `null` is handled
             video: recommendedTrack.youtubeId,
-            // NOTE All these are placeholders TODO Replace with actual links to the recommended track
+            // NOTE All these are placeholders TODO Replace with actual links
             spotify: "https://open.spotify.com/track/4u7EnebtmKWzUH433cf5Qv?si=d402b163ddcb40b9",
             appleMusic: "https://music.apple.com/us/song/bohemian-rhapsody/1440650711",
             youtubeMusic: "https://music.youtube.com/watch?v=bSnlKl_PoQU&si=rizExhbi-h_Zog7w",

@@ -1,12 +1,6 @@
 import SpotifyWebApi from "spotify-web-api-node";
 
-/**
- * Returns `null` or the `SpotifyWebApi()` instance.
- *
- * Creates a new instance of `SpotifyWebApi()` via variables from `./.env` file.
- *
- * Sets an access token.
- */
+/**Spotify API returns `null` or the `SpotifyWebApi()` instance with an access token. */
 export async function getSpotifyApiToken() {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -28,7 +22,8 @@ export async function getSpotifyApiToken() {
 }
 
 /**
- * Returns `null` or an object with many keys. Example:
+ * Spotify API returns `null` or an object with many keys. Example:
+ * 
  * ```js
     {
         album: {
@@ -42,7 +37,9 @@ export async function getSpotifyApiToken() {
             id: '1rLLyY5p6HXNl2lKzINWp5',
             images: [ [Object], [Object], [Object] ],
             name: 'Lungs (Deluxe Version)',
+            // Ensure this is YYYY-MM-DD
             release_date: '2009',
+            // Could be 'year', 'month', or 'day'
             release_date_precision: 'year',
             total_tracks: 20,
             type: 'album',
@@ -77,6 +74,10 @@ export async function getSpotifyApiToken() {
         uri: 'spotify:track:456WNXWhDwYOSf5SpTuqxd'
     }
  * ```
+ * 
+ * ---
+ * 
+ * Source: https://developer.spotify.com/documentation/web-api/reference/get-track
  */
 export async function getSpotifyTrackDetails(trackId: string) {
     try {

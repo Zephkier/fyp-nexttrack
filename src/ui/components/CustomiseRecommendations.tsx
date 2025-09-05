@@ -11,6 +11,7 @@ type submittedTrackProp = {
     moods: string[];
 };
 
+// TODO Split this into smaller components
 export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackProp }) {
     const [similarity, setSimilarity] = useState(100);
     const [popularity, setPopularity] = useState(submittedTrack.popularity);
@@ -83,7 +84,7 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 className="mb-4 p-4"
                 style={{ background: "var(--secondary)" }}
             >
-                <h4 className="text-xl font-bold">Release Date Range</h4>
+                <h4 className="text-xl font-bold">Release Date Range (Y-M-D)</h4>
                 <p className="mb-4">
                     <b>Current:</b> {submittedTrack.releaseDate} <br />
                     <b>Recommended track&apos;s release date:</b> {dateRange}
