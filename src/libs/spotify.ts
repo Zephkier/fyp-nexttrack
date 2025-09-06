@@ -1,6 +1,12 @@
 import SpotifyWebApi from "spotify-web-api-node";
 
-/**Spotify API returns `null` or the `SpotifyWebApi()` instance with an access token. */
+/**
+ * Spotify API returns `null` or the `SpotifyWebApi()` instance with an access token.
+ *
+ * -----
+ *
+ * Source: https://www.npmjs.com/package/spotify-web-api-node
+ */
 export async function getSpotifyApiToken() {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -75,9 +81,11 @@ export async function getSpotifyApiToken() {
     }
  * ```
  * 
- * ---
+ * -----
  * 
- * Source: https://developer.spotify.com/documentation/web-api/reference/get-track
+ * Source:
+ * - https://www.npmjs.com/package/spotify-web-api-node
+ * - https://developer.spotify.com/documentation/web-api/reference/get-track
  */
 export async function getSpotifyTrackDetails(trackId: string) {
     try {

@@ -25,13 +25,12 @@ import * as cheerio from "cheerio";
  *   - Tested with "The Marías - Déjate Llevar".
  *   - Source: https://www.last.fm/music/The+Marías/_/Déjate+Llevar.
  *
- * # Just encode everything twice!
- * # Last.fm still understands it (thankfully).
+ * **Just encode everything twice! Last.fm still understands it (thankfully).**
  *
  * - Spaces are not encoded.
  *   - Instead, they are replaced with "+".
  */
-export function convertToLastFmFormat(incomingString: string): string {
+export function convertToLastFmFormat(incomingString: string) {
     const encodedOnce = encodeURIComponent(incomingString);
     const encodedTwice = encodeURIComponent(encodedOnce);
     // Spaces went from " " to "%20" to "%2520", which must then be "+"
@@ -40,10 +39,10 @@ export function convertToLastFmFormat(incomingString: string): string {
 }
 
 /**
- * **THIS IS DEPRECATED, USE `webScrapeLastFmGenres()` INSTEAD.**
+ * **THIS IS DEPRECATED. USE `webScrapeLastFmGenres()` INSTEAD.**
  * 
  * - The Last.fm API retrieves genres inconsistently.
- * - Despite a track's Last.fm page having genres listed, the API would return an empty array.
+ * - Despite a track's Last.fm page having genres listed, the API returns an empty array.
  * - Thus, safer to web scrape via `webScrapeLastFmGenres()`.
  * 
  * ---
@@ -71,10 +70,8 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
     const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
     const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&format=json`;
-
     const response = await fetch(fullUrl);
     if (!response.ok) return [];
-
     /**
      * Returns an object with many keys. Example:
      * ```js
@@ -108,7 +105,9 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
      * ```
      */
     const data = await response.json();
-    /**_Same JSDoc as this function._ */
+    /**
+     * _Same JSDoc as this function._
+     */
     const genres = data.track.toptags.tag;
     return genres;
 }
@@ -119,12 +118,6 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
  * `["genre1", "genre2"]`
  * 
  * -----
- * 
- * Source:
- * - https://www.last.fm/music/The+Marías/_/Déjate+Llevar                   (via browser navigation)
- * - https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar         (encoded once)
- * - https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar (encoded twice)
- * 
  * In a track's Last.fm page, the HTML element containing genres is:
  * ```html
     <section class="catalogue-tags">
@@ -143,6 +136,14 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
         <!-- Same as above -->
     </section>
  * ```
+ * 
+ * -----
+ * 
+ * Source:
+ * - https://www.last.fm/music/The+Marías/_/Déjate+Llevar                   (via browser navigation)
+ * - https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar         (encoded once)
+ * - https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar (encoded twice)
+ * 
  */
 export async function webScrapeLastFmGenres(artistName: string, trackName: string) {
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
@@ -220,10 +221,8 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
     const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
     const fullUrl = `${baseUrl}/2.0/?method=${method}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&api_key=${apiKey}&format=json`;
-
     const response = await fetch(fullUrl);
     if (!response.ok) return [];
-
     /**
      * Returns an object of an object. Example:
      * ```js
@@ -236,7 +235,9 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
      * ```
      */
     const data = await response.json();
-    /**_Same JSDoc as this function._ */
+    /**
+     * _Same JSDoc as this function._
+     */
     const similarTracks = data.similartracks.track;
     return similarTracks;
 }
@@ -247,12 +248,6 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
  * `"7ICS45rZsvo"`
  * 
  * -----
- * 
- * Source:
- * - https://www.last.fm/music/The+Marías/_/Déjate+Llevar                   (via browser navigation)
- * - https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar         (encoded once)
- * - https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar (encoded twice)
- * 
  * In a track's Last.fm page, the HTML element containing the YouTube video ID is:
  * ```html
     <a
@@ -263,6 +258,14 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
         ...
     ></a>
  * ```
+ * 
+ * -----
+ * 
+ * Source:
+ * - https://www.last.fm/music/The+Marías/_/Déjate+Llevar                   (via browser navigation)
+ * - https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar         (encoded once)
+ * - https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar (encoded twice)
+ * 
  */
 export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
     try {

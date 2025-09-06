@@ -1,5 +1,3 @@
-export const runtime = "nodejs";
-
 import type { Metadata } from "next";
 
 import Hero from "@/ui/components/Hero";
@@ -9,7 +7,7 @@ import RecommendedTracks from "@/ui/components/RecommendedTracks";
 
 import { getSpotifyTrackDetails } from "@/libs/spotify";
 import { webScrapeLastFmGenres, getLastFmSimilarTracks, webScrapeLastFmYoutubeId } from "@/libs/lastfm";
-import { getGeniusSearchFirstItemGeniusUrl, webScrapeGeniusGenres } from "@/libs/genius";
+import { getGeniusSearch, webScrapeGeniusGenres } from "@/libs/genius";
 import { inferMoodsFromGenres } from "@/libs/mood";
 
 type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
@@ -33,16 +31,21 @@ export default async function RecommendationsWithId(
     // --------------------------------------------------------------------------------------- //
 
     // ----- 1a. Get user-submitted Spotify track details ----- //
-    // - Was planning to get data from:
-    //   - from track        @ https://developer.spotify.com/documentation/web-api/reference/get-track
-    //   - to album          @ https://developer.spotify.com/documentation/web-api/reference/get-an-album
-    //   - to album's genres @ https://developer.spotify.com/documentation/web-api/reference/get-an-album (scroll all the way down)
-    //   - but album's genres is deprecated...
-    // - After getting basic details, was planning to get data from:
-    //   - track's audio features @ https://developer.spotify.com/documentation/web-api/reference/get-audio-features
-    //   - track's audio analysis @ https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis
-    //   - recommendations        @ https://developer.spotify.com/documentation/web-api/reference/get-recommendations
-    //   - but all are deprecated...
+
+    /**
+     * Was planning to get data (i.e. `spotifyTrackDetails`) via:
+     *   - track          @ https://developer.spotify.com/documentation/web-api/reference/get-track
+     *   - album          @ https://developer.spotify.com/documentation/web-api/reference/get-an-album
+     *   - album's genres @ https://developer.spotify.com/documentation/web-api/reference/get-an-album (scroll all the way down)
+     * but album's genres method is deprecated...
+     *
+     * Nonetheless, after getting data (i.e. `spotifyTrackDetails`), was planning to get parameters via:
+     *   - track's audio features @ https://developer.spotify.com/documentation/web-api/reference/get-audio-features
+     *   - track's audio analysis @ https://developer.spotify.com/documentation/web-api/reference/get-audio-analysis
+     *   - recommendations        @ https://developer.spotify.com/documentation/web-api/reference/get-recommendations
+     * but all methods are deprecated...
+     */
+
     const spotifyTrackDetails = await getSpotifyTrackDetails(spotifyTrackId);
     if (!spotifyTrackDetails) {
         // Return a page because, if this step fails, then nothing can happen anyway
@@ -57,48 +60,53 @@ export default async function RecommendationsWithId(
         );
     }
 
-    // Ensure track's ".album.release_date" is YYYY-MM-DD as it may be YYYY or YYYY-MM
+    // Ensure track's ".album.release_date" is YYYY-MM-DD
     const releaseDate = spotifyTrackDetails.album.release_date;
-    if (releaseDate.length == 4) spotifyTrackDetails.album.release_date = `${releaseDate}-01-01`;
-    if (releaseDate.length == 7) spotifyTrackDetails.album.release_date = `${releaseDate}-01`;
+    if (releaseDate.length == 4) spotifyTrackDetails.album.release_date = `${releaseDate}-01-01`; // When it is only YYYY
+    if (releaseDate.length == 7) spotifyTrackDetails.album.release_date = `${releaseDate}-01`; //    When it is only YYYY-MM
 
     // Set artist and track names for future uses
-    const artistName = spotifyTrackDetails.artists[0].name; // Must get the main artist
+    const artistName = spotifyTrackDetails.artists[0].name; // Must get main artist at index 0
     const trackName = spotifyTrackDetails.name;
     const artistAndTrackName = `${artistName} - ${trackName}`;
 
     // ----- 1b. Get Last.fm genres (Last.fm calls it "tags", but we shall call it "genres") ----- //
-    let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
-    if (lastFmGenres.length == 0) lastFmGenres = ["No genres found"];
-    /**
-     * Sometimes, the Last.fm API returns an array of 1 genre, which is insufficient.
-     *
-     * Thus, use Genius API / web scrape Genius page to retrieve better genres.
-     *
-     * - Tested with "Dimitri Vegas & Like Mike - Thank You (Not So Bad)".
-     * - Last.fm API returned `["dimitri vegas and like mike"]` lol.
-     * - Source: https://www.last.fm/music/Dimitri+Vegas+%2526+Like+Mike/_/Thank+You+(Not+So+Bad)
-     */
-    if (lastFmGenres.length == 1) {
-        const firstItemGeniusUrl = await getGeniusSearchFirstItemGeniusUrl(artistAndTrackName);
-        if (firstItemGeniusUrl) lastFmGenres = await webScrapeGeniusGenres(firstItemGeniusUrl);
 
-        // FIXME
-        // TODO  Write JSDoc for `genius.ts` in the same format as other `/libs/*.ts` files.
-        // FIXME
+    let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
+    /**
+     * Last.fm API may return only 1 genre element, which is insufficient.
+     *
+     * Thus, use Genius API (or web scrape Genius page) to retrieve better user-generated genres.
+     *
+     * Tested with "Dimitri Vegas & Like Mike - Thank You (Not So Bad)"
+     * where Last.API returned: `["dimitri vegas and like mike"]`.
+     *
+     * Source (can manually compare genres too):
+     * - https://www.last.fm/music/Dimitri+Vegas+%2526+Like+Mike/_/Thank+You+(Not+So+Bad)
+     * - https://genius.com/Dimitri-vegas-and-like-mike-tiesto-dido-and-w-w-thank-you-not-so-bad-lyrics
+     */
+    if (lastFmGenres.length == 0 || lastFmGenres.length == 1) {
+        const searchResults = await getGeniusSearch(artistAndTrackName);
+        const firstItemGeniusUrl = searchResults[0].result.url;
+        lastFmGenres = await webScrapeGeniusGenres(firstItemGeniusUrl);
     }
 
     // ----- 1c. Get custom-created moods inferred from genres ----- //
-    // - Gotta "custom-create" and "infer" because:
-    //   - Spotify API's "audio features" and "audio analysis" methods are deprecated
-    //   - Last.fm API has nothing else that is useful
+    // FIXME TODO FIXME Continue making sure everything below here is a-okay (everything above is indeed a-okay now)
+
+    /**
+     * Gotta "custom-create" and "infer" because:
+     * - Spotify API's "audio features" and "audio analysis" methods are deprecated
+     * - Last.fm API retrieves nothing useful
+     */
     const numberOfMoodsToRetrieve = 2;
     const inferredMoods = inferMoodsFromGenres(lastFmGenres, numberOfMoodsToRetrieve);
 
-    // ----- 1z. Convert the retrieved data into something suitable for the website ----- //
+    // ----- 1z. Convert the retrieved data into something suitable (i.e. its type) for frontend components ----- //
+
     const submittedTrack = {
         name: spotifyTrackDetails.name,
-        artists: spotifyTrackDetails.artists.map((a) => a.name),
+        artists: spotifyTrackDetails.artists.map((artist) => artist.name),
         releaseDate: spotifyTrackDetails.album.release_date,
         genres: lastFmGenres,
         popularity: spotifyTrackDetails.popularity,
