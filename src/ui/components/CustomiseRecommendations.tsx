@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 
+import { moods } from "@/libs/mood";
+
 // "type" is more flexible (allows for more use cases) than "interface"
 type submittedTrackProp = {
     name: string;
@@ -10,8 +12,6 @@ type submittedTrackProp = {
     genres: string[];
     moods: string[];
 };
-
-const allMoods = ["happy", "sad", "chill", "party"];
 
 export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackProp }) {
     const [similarity, setSimilarity] = useState(100);
@@ -129,12 +129,13 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                     <b>Recommended track&apos;s mood(s):</b>
                 </p>
                 {/* Checkbox and mood */}
-                {allMoods.map((mood) => (
+                {moods.map((mood) => (
                     <label key={mood} className="flex w-fit space-x-2">
                         <input
                             type="checkbox"
                             checked={selectedMoods.includes(mood)}
-                            // Not using "setSelectedMoods(mood)" as we are dealing with checkboxes (i.e. array)
+                            // Not using "setSelectedMoods(mood)" as we are dealing with checkboxes (i.e. array of selected moods)
+                            // If it was radio buttons (i.e. only 1 selection allowed), then can use "setSelectedMood(mood)"
                             onChange={() => toggleMood(mood)}
                         />
                         <span>{titleCase(mood)}</span>

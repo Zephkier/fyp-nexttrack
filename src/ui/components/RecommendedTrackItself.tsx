@@ -5,20 +5,9 @@ import { useState } from "react";
 type recommendedTrackProp = {
     name: string;
     artists: string[];
-    link: {
-        spotify: string;
-        appleMusic: string;
-        youtubeMusic: string;
-        video: string;
-    };
-    about: {
-        genius: string;
-        lastFm: string;
-    };
-    comments: {
-        genius: string;
-        lastFm: string;
-    };
+    link: { [key: string]: string };
+    about: { [key: string]: string };
+    comments: { [key: string]: string };
 };
 
 export default function RecommendedTrackItself({ recommendedTrack }: { recommendedTrack: recommendedTrackProp }) {

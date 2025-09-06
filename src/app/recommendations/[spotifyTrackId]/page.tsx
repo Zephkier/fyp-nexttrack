@@ -70,9 +70,8 @@ export default async function RecommendationsWithId(
     const trackName = spotifyTrackDetails.name;
     const artistAndTrackName = `${artistName} - ${trackName}`;
 
-    // ----- 1b. Get Last.fm genres (Last.fm calls it "tags", but we shall call it "genres") ----- //
+    // ----- 1b. Get Last.fm (or Genius) genres (they call it "tags" but we shall call it "genres") ----- //
 
-    let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
     /**
      * Last.fm API may return only 1 genre element, which is insufficient.
      *
@@ -85,22 +84,25 @@ export default async function RecommendationsWithId(
      * - https://www.last.fm/music/Dimitri+Vegas+%2526+Like+Mike/_/Thank+You+(Not+So+Bad)
      * - https://genius.com/Dimitri-vegas-and-like-mike-tiesto-dido-and-w-w-thank-you-not-so-bad-lyrics
      */
+
+    let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
     if (lastFmGenres.length == 0 || lastFmGenres.length == 1) {
         const searchResults = await getGeniusSearch(artistAndTrackName);
         const firstItemGeniusUrl = searchResults[0].result.url;
         lastFmGenres = await webScrapeGeniusGenres(firstItemGeniusUrl);
     }
 
-    // ----- 1c. Get custom-created moods inferred from genres ----- //
-    // FIXME TODO FIXME Continue making sure everything below here is a-okay (everything above is indeed a-okay now)
+    // ----- 1c. Get (custom-created) moods (inferred from genres) ----- //
 
     /**
      * Gotta "custom-create" and "infer" because:
-     * - Spotify API's "audio features" and "audio analysis" methods are deprecated
+     * - Spotify API's "audio features" and "audio analysis" methods are deprecated (would've been so useful...)
      * - Last.fm API retrieves nothing useful
+     * - Genius API retrieves nothing useful
      */
-    const numberOfMoodsToRetrieve = 2;
-    const inferredMoods = inferMoodsFromGenres(lastFmGenres, numberOfMoodsToRetrieve);
+
+    const numberOfMoodsToGet = 2;
+    const inferredMoods = inferMoodsFromGenres(lastFmGenres, numberOfMoodsToGet);
 
     // ----- 1z. Convert the retrieved data into something suitable (i.e. its type) for frontend components ----- //
 
@@ -117,14 +119,21 @@ export default async function RecommendationsWithId(
     // ----- 3. Get values for "Recommended Tracks" ----- //
     // -------------------------------------------------- //
 
-    // ----- 3a. Get recommended tracks NOTE Similar tracks are placeholder TODO Replace based on parameters under "Customise Recommendations"
-    let lastFmSimilarTracks = await getLastFmSimilarTracks(artistName, trackName);
-    if (lastFmSimilarTracks.length == 0) lastFmSimilarTracks = ["No similar tracks found"]; // TODO Handle the case where no similar tracks are found because, so far, every track HAS similar tracks
+    // ----- 3a. Get recommended tracks ----- //
 
-    // ----- 3b. Get recommended tracks' YouTube ID for video embedding
+    // NOTE Current recommendations are placeholders - it uses Last.fm API's "similar tracks" method
+    // TODO Actual recommendations are dynamic and based on "submittedTrack.genres (similarity)", ".popularity", and ".moods"
+    // NOTE This is not so urgent, work on FIXMEs below first!
+
+    let lastFmSimilarTracks = await getLastFmSimilarTracks(artistName, trackName);
+    // TODO Handle cases where there no similar tracks (so far, while testing, every track HAS some similar tracks)
+    if (lastFmSimilarTracks.length == 0) lastFmSimilarTracks = ["No similar tracks found"];
+
+    // ----- 3b. Get recommended tracks' YouTube ID for video embedding ----- //
     const lastFmSimilarTracksWithYoutubeId = await Promise.all(
         lastFmSimilarTracks
-            // Limit number of results TODO Allow user to adjust this value, or create page navigation
+            // TODO Allow user to adjust this value, could create page navigation?
+            // Limit number of results
             .slice(0, 5)
             // Add `youtubeId` key to `lastFmSimilarTracksWithYoutubeId` object
             .map(async (similarTrack: similarTrackType) => {
@@ -134,11 +143,11 @@ export default async function RecommendationsWithId(
     );
 
     // FIXME
-    // ----- 3c. Get recommended tracks' `link` values (for "Listen at:" buttons) TODO Check out the track's Last.fm page and web scrape music platform links
+    // ----- 3c. Get recommended tracks' `link` values (for "Listen at:" buttons) TODO Check out the track's Last.fm page and web scrape music platform links ----- //
     // FIXME
 
     // FIXME
-    // ----- 3y. Get xxx TODO Work on replacing placeholders below
+    // ----- 3y. Get xxx TODO Work on replacing placeholders below ----- //
     // FIXME
 
     // ----- 3z. Convert the retrieved data into something suitable for the website ----- //
