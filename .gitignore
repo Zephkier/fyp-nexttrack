@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+my-own-notes.md
+.vscode
 
 # debug
 npm-debug.log*
