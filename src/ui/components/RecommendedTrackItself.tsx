@@ -5,7 +5,8 @@ import { useState } from "react";
 type recommendedTrackProp = {
     name: string;
     artists: string[];
-    link: { [key: string]: string };
+    video: string | null;
+    links: { [key: string]: string };
     about: { [key: string]: string };
     comments: { [key: string]: string };
 };
@@ -38,7 +39,7 @@ export default function RecommendedTrackItself({ recommendedTrack }: { recommend
             {/* Details when expanded */}
             <div>
                 {/* Video */}
-                {recommendedTrack.link.video == null ? (
+                {recommendedTrack.video == null ? (
                     // When there IS NO YouTube video
                     <p className="mb-4 text-center text-gray-400 italic">No YouTube video available...</p>
                 ) : (
@@ -47,7 +48,7 @@ export default function RecommendedTrackItself({ recommendedTrack }: { recommend
                         // Format
                         width="100%"
                         height="360"
-                        src={`https://www.youtube.com/embed/${recommendedTrack.link.video}`}
+                        src={`https://www.youtube.com/embed/${recommendedTrack.video}`}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         className="mb-4"
@@ -57,13 +58,13 @@ export default function RecommendedTrackItself({ recommendedTrack }: { recommend
                 {/* Links */}
                 <div className="mb-4 flex items-center space-x-2">
                     <span>Listen at:</span>
-                    <a className="px-2 py-1 bg-green-700 text-white hover:bg-green-500" href={recommendedTrack.link.spotify} target="_blank">
+                    <a className="px-2 py-1 bg-green-700 text-white hover:bg-green-500" href={recommendedTrack.links.spotify} target="_blank">
                         Spotify
                     </a>
-                    <a className="px-2 py-1 bg-pink-700 text-white hover:bg-pink-500" href={recommendedTrack.link.appleMusic} target="_blank">
+                    <a className="px-2 py-1 bg-pink-700 text-white hover:bg-pink-500" href={recommendedTrack.links.appleMusic} target="_blank">
                         Apple Music
                     </a>
-                    <a className="px-2 py-1 bg-red-700 text-white hover:bg-red-500" href={recommendedTrack.link.youtubeMusic} target="_blank">
+                    <a className="px-2 py-1 bg-red-700 text-white hover:bg-red-500" href={recommendedTrack.links.youtubeMusic} target="_blank">
                         YouTube Music
                     </a>
                 </div>

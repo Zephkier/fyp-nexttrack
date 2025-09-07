@@ -118,7 +118,9 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
  * `["genre1", "genre2"]`
  * 
  * -----
+ * 
  * In a track's Last.fm page, the HTML element containing genres is:
+ * 
  * ```html
     <section class="catalogue-tags">
         <ul class="tags-list tags-list--global">
@@ -131,6 +133,7 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
  * ```
  * 
  * Note that there is a similar section (i.e. artist's tags) that should be avoided:
+ * 
  * ```html
     <section class="catalogue-tags about-artist-tags">
         <!-- Same as above -->
@@ -140,10 +143,9 @@ export async function getLastFmGenres_deprecated(artistName: string, trackName: 
  * -----
  * 
  * Source:
- * - https://www.last.fm/music/The+Marías/_/Déjate+Llevar                   (via browser navigation)
- * - https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar         (encoded once)
- * - https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar (encoded twice)
- * 
+ * - Via browser navigation: https://www.last.fm/music/The+Marías/_/Déjate+Llevar
+ * - Encoded once: https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar
+ * - Encoded twice: https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar
  */
 export async function webScrapeLastFmGenres(artistName: string, trackName: string) {
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
@@ -159,7 +161,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
-        // Extract text from specified HTML element, remember to avoid the artist's tags
+        // Extract specified HTML element's text, ensure to avoid the similar section (i.e. artist's tags)
         const htmlElement1 = "section.catalogue-tags:not(.about-artist-tags)";
         const htmlElement2 = "ul.tags-list";
         const htmlElement3 = "li.tag";
@@ -194,10 +196,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
                 url: 'https://www.last.fm/music/Florence+%252B+the+Machine'
             },
             image: [
-                {
-                    '#text': 'https://lastfm...png',
-                    size: 'small'
-                },
+                { '#text': 'https://lastfm...png', size: 'small' },
                 // And repeat a few more times
             ]
         },
@@ -247,8 +246,16 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
  * 
  * `"7ICS45rZsvo"`
  * 
+ * Note that the ID can be used for anything YouTube-related:
+ * 
+ * - Normal YouTube: `https://www.youtube.com/watch?v={id}`
+ * - Embedded YouTube: `https://www.youtube.com/embed/${id}`
+ * - YouTube Music: `https://music.youtube.com/watch?v=${id}`
+ * 
  * -----
+ * 
  * In a track's Last.fm page, the HTML element containing the YouTube video ID is:
+ * 
  * ```html
     <a
         id="track-page-video-playlink"
@@ -262,10 +269,9 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
  * -----
  * 
  * Source:
- * - https://www.last.fm/music/The+Marías/_/Déjate+Llevar                   (via browser navigation)
- * - https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar         (encoded once)
- * - https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar (encoded twice)
- * 
+ * - Via browser navigation: https://www.last.fm/music/The+Marías/_/Déjate+Llevar
+ * - Encoded once: https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar
+ * - Encoded twice: https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar
  */
 export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
     try {
@@ -278,13 +284,149 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
-        // Extract text from specified HTML element's (via its "id") attribute
+        // Extract specified HTML element's attribute's text
         const htmlElementId = "#track-page-video-playlink";
         const htmlElementAttribute = "data-youtube-id";
-        const selector = $(htmlElementId).attr(htmlElementAttribute);
-        return selector;
+        const selector = $(htmlElementId);
+        const youtubeId = selector.attr(htmlElementAttribute);
+        return youtubeId;
     } catch (err) {
         console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmYoutubeId():\n${err}`);
+        return null;
+    }
+}
+
+/**
+ * Web scraping returns a `links` object with 3 keys, either:
+ * 
+ * ```js
+    // If no links are found
+    links: {
+        spotify: 'https://open.spotify.com',
+        appleMusic: 'https://geo.music.apple.com',
+        youtubeMusic: 'https://music.youtube.com'
+    }
+ * ```
+ * 
+ * Or:
+ * 
+ * ```js
+ *  // If links are found (ideal scenario)
+    links: {
+        spotify: 'https://open.spotify.com/track/1CcLA0eaauck34YEIrvAAq',
+        appleMusic: 'https://geo.music.apple.com/album/id1713571199?i=1713571204&at=10l3Sh',
+        youtubeMusic: 'https://music.youtube.com/watch?v=YBGtzfK5Bak'
+    }
+ * ```
+ * 
+ * -----
+ * 
+ * In a track's Last.fm page, the HTML element containing links to other music platform is:
+ * 
+ * # (1 of 2) Under the "Play this track" section:
+ * 
+ * ```html
+    <ul class="play-this-track-playlinks">
+        <li>
+            <a
+                class="play-this-track-playlink play-this-track-playlink--youtube js-playlink"
+                href="https://www.youtube.com/watch?v=YBGtzfK5Bak"
+                ...
+            >YouTube</a>
+        </li>
+        <li>
+            <a
+                class="hidden-xs play-this-track-playlink play-this-track-playlink--spotify js-playlink"
+                href="https://open.spotify.com/track/1CcLA0eaauck34YEIrvAAq"
+                ...
+            >Spotify</a>
+        </li>
+        <li>
+            <a
+                class="hidden-xs play-this-track-playlink play-this-track-playlink--itunes"
+                href="https://geo.music.apple.com/album/id1713571199?i=1713571204&amp;at=10l3Sh"
+                ...
+            >Apple Music</a>
+        </li>
+    </ul>
+ * ```
+ * 
+ * # (2 of 2) Under the "External Links" section:
+ * 
+ * ```html
+    <ul class="resource-external-links">
+        <li>
+            <!-- There is a weird "itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;" string consistently (even in other tracks that are lacking links) that should be removed -->
+            <a
+                class="resource-external-link resource-external-link--apple-music"
+                href="https://music.apple.com/SG/search?itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;term=mikeeysmind-Tayk_hard_x_resonance"
+                ...
+            >Apple Music</a>
+        </li>
+    </ul>
+ * ```
+ * 
+ * -----
+ * 
+ * Source:
+ * - Has all links: https://www.last.fm/music/David+Guetta/_/When+We+Were+Young+(The+Logical+Song)
+ *   - How to reach ^?
+ *     - Submit "Thank You (Not So Bad)"
+ *     - via https://open.spotify.com/track/09CnYHiZ5jGT1wr1TXJ9Zt?si=68c00376f8e7456a
+ *     - and it will be the first default result.
+ * - Has no links: https://www.last.fm/music/mikeeysmind/_/Tayk+hard+x+resonance
+ *   - How to reach ^?
+ *     - Submit "Bando"
+ *     - via https://open.spotify.com/track/6z7dQwXh9UJJl4wsWxexuI?si=308467749bd94d0d
+ *     - and it will be the first default result.
+ */
+export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
+    let links = {
+        spotify: "",
+        appleMusic: "",
+        youtubeMusic: "",
+    };
+    try {
+        const response = await fetch(lastFmUrl, {
+            // Avoid being detected as a bot TODO Change to "+https://fyp-nexttrack.vercel.app/"
+            headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
+            cache: "no-store",
+        });
+        if (!response.ok) return null;
+        // Parse HTML using Cheerio
+        const html = await response.text();
+        const $ = cheerio.load(html);
+        // Extract specified HTML element's attribute's text
+        // - For YouTube Music
+        let htmlElement = "a.play-this-track-playlink--youtube";
+        let htmlElementAttribute = "href";
+        let selector = $(htmlElement);
+        let link = selector.attr(htmlElementAttribute);
+        if (link) links.youtubeMusic = link.replace("https://www.", "https://music.");
+        else links.youtubeMusic = "https://music.youtube.com"; // TODO If no link, then I want a window popup that informs user there's no link found
+        // - For Spotify
+        htmlElement = "a.play-this-track-playlink--spotify";
+        selector = $(htmlElement);
+        link = selector.attr(htmlElementAttribute);
+        if (link) links.spotify = link;
+        else links.spotify = "https://open.spotify.com"; // TODO Same as above ^
+        // - For Apple Music (under the "Play this track" section)
+        htmlElement = "a.play-this-track-playlink--itunes";
+        selector = $(htmlElement);
+        link = selector.attr(htmlElementAttribute);
+        if (link) links.appleMusic = link;
+        else {
+            // - For Apple Music (under the "External Links" section)
+            htmlElement = "a.resource-external-link--apple-music";
+            selector = $(htmlElement);
+            link = selector.attr(htmlElementAttribute);
+            if (link) links.appleMusic = link.replace("itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;", "");
+            else links.appleMusic = "https://geo.music.apple.com"; // TODO Same as above ^
+        }
+        // - Done
+        return links;
+    } catch (err) {
+        console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmListenAtLinks():\n${err}`);
         return null;
     }
 }

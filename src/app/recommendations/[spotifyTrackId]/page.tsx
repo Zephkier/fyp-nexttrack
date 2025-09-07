@@ -6,7 +6,7 @@ import CustomiseRecommendations from "@/ui/components/CustomiseRecommendations";
 import RecommendedTracks from "@/ui/components/RecommendedTracks";
 
 import { getSpotifyTrackDetails } from "@/libs/spotify";
-import { webScrapeLastFmGenres, getLastFmSimilarTracks, webScrapeLastFmYoutubeId } from "@/libs/lastfm";
+import { webScrapeLastFmGenres, getLastFmSimilarTracks, webScrapeLastFmYoutubeId, webScrapeLastFmListenAtLinks } from "@/libs/lastfm";
 import { getGeniusSearch, webScrapeGeniusGenres } from "@/libs/genius";
 import { inferMoodsFromGenres } from "@/libs/mood";
 
@@ -70,39 +70,51 @@ export default async function RecommendationsWithId(
     const trackName = spotifyTrackDetails.name;
     const artistAndTrackName = `${artistName} - ${trackName}`;
 
-    // ----- 1b. Get Last.fm (or Genius) genres (they call it "tags" but we shall call it "genres") ----- //
+    // ----- 1b. Get Last.fm/Genius genres (they call it "tags" but we shall call it "genres") ----- //
 
     /**
-     * Last.fm API may return only 1 genre element, which is insufficient.
+     * Choices for getting genres:
+     * - Spotify API           (but it has no genre-related data)
+     * - Last.fm API           (but it may return different genres compared to its actual Last.fm page; inconsistent)
+     * - Last.fm web scrape    (but it may return only 1 genre, which is insufficient)
+     * - Genius API            (but it has no genre-related data)
+     * - Genius web scrape     (last resort)
+     * - `["no genres found"]` (fail-safe)
      *
-     * Thus, use Genius API (or web scrape Genius page) to retrieve better user-generated genres.
+     * -----
      *
      * Tested with "Dimitri Vegas & Like Mike - Thank You (Not So Bad)"
-     * where Last.API returned: `["dimitri vegas and like mike"]`.
+     * where Last.fm API and web scrape returns only:
      *
-     * Source (can manually compare genres too):
+     * `["dimitri vegas and like mike"]`.
+     *
+     * Source (note how Genius page has more informative genres):
      * - https://www.last.fm/music/Dimitri+Vegas+%2526+Like+Mike/_/Thank+You+(Not+So+Bad)
      * - https://genius.com/Dimitri-vegas-and-like-mike-tiesto-dido-and-w-w-thank-you-not-so-bad-lyrics
      */
 
-    let lastFmGenres = await webScrapeLastFmGenres(artistName, trackName);
-    if (lastFmGenres.length == 0 || lastFmGenres.length == 1) {
+    // If nothing in Spotify API, and inconsistent Last.fm API, then use Last.fm web scrape
+    let retrievedGenres = await webScrapeLastFmGenres(artistName, trackName);
+    // If Last.fm web scrapes insufficient genres, and nothing in Genius API, then use Genius web scrape
+    if (retrievedGenres.length < 2) {
         const searchResults = await getGeniusSearch(artistAndTrackName);
         const firstItemGeniusUrl = searchResults[0].result.url;
-        lastFmGenres = await webScrapeGeniusGenres(firstItemGeniusUrl);
+        retrievedGenres = await webScrapeGeniusGenres(firstItemGeniusUrl);
     }
+    // If Genius web scrapes insufficient genres, then set fail-safe
+    if (retrievedGenres.length < 2) retrievedGenres = ["no genres found"];
 
-    // ----- 1c. Get (custom-created) moods (inferred from genres) ----- //
+    // ----- 1c. Get (custom-created) moods (that are inferred from genres) ----- //
 
     /**
-     * Gotta "custom-create" and "infer" because:
+     * Must "custom-create" and "infer" because:
      * - Spotify API's "audio features" and "audio analysis" methods are deprecated (would've been so useful...)
      * - Last.fm API retrieves nothing useful
      * - Genius API retrieves nothing useful
      */
 
     const numberOfMoodsToGet = 2;
-    const inferredMoods = inferMoodsFromGenres(lastFmGenres, numberOfMoodsToGet);
+    const inferredMoods = inferMoodsFromGenres(retrievedGenres, numberOfMoodsToGet);
 
     // ----- 1z. Convert the retrieved data into something suitable (i.e. its type) for frontend components ----- //
 
@@ -110,7 +122,7 @@ export default async function RecommendationsWithId(
         name: spotifyTrackDetails.name,
         artists: spotifyTrackDetails.artists.map((artist) => artist.name),
         releaseDate: spotifyTrackDetails.album.release_date,
-        genres: lastFmGenres,
+        genres: retrievedGenres,
         popularity: spotifyTrackDetails.popularity,
         moods: inferredMoods,
     };
@@ -121,48 +133,96 @@ export default async function RecommendationsWithId(
 
     // ----- 3a. Get recommended tracks ----- //
 
-    // NOTE Current recommendations are placeholders - it uses Last.fm API's "similar tracks" method
-    // TODO Actual recommendations are dynamic and based on "submittedTrack.genres (similarity)", ".popularity", and ".moods"
-    // NOTE This is not so urgent, work on FIXMEs below first!
+    // NOTE This is not so urgent, work on others below first
+    // NOTE Current recommendations are placeholders, in fact, it simply uses Last.fm API's "similar tracks" method
+    // TODO Actual recommendations must be dynamic and based on "submittedTrack.genres (similarity)", ".popularity", and ".moods"
 
-    let lastFmSimilarTracks = await getLastFmSimilarTracks(artistName, trackName);
+    /**
+     * This is either `["No similar tracks found"]` or the same as `getLastFmSimilarTracks()`:
+     * 
+     * ```js
+        [
+            {
+                name: "You've Got the Love",
+                playcount: 10170816,
+                match: 1,
+                url: 'https://www.last.fm/music/Florence+%252B+the+Machine/_/You%27ve+Got+the+Love',
+                streamable: { '#text': '0', fulltrack: '0' },
+                duration: 164,
+                artist: {
+                    name: 'Florence + the Machine',
+                    mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
+                    url: 'https://www.last.fm/music/Florence+%252B+the+Machine'
+                },
+                image: [
+                    { '#text': 'https://lastfm...png', size: 'small' },
+                    // And repeat a few more times
+                ]
+            },
+            // And repeat 99 more times, for a total of 100 elements in this array
+        ]
+     * ```
+     */
+    let lastFmSimilarTracks1 = await getLastFmSimilarTracks(artistName, trackName);
+    // Limit number of results
+    lastFmSimilarTracks1 = lastFmSimilarTracks1
+        // TODO Allow user to adjust this value via page navigation?
+        .slice(0, 10);
     // TODO Handle cases where there no similar tracks (so far, while testing, every track HAS some similar tracks)
-    if (lastFmSimilarTracks.length == 0) lastFmSimilarTracks = ["No similar tracks found"];
+    // lastFmSimilarTracks1 = [];
+    if (lastFmSimilarTracks1.length == 0) lastFmSimilarTracks1 = ["No similar tracks found"];
 
-    // ----- 3b. Get recommended tracks' YouTube ID for video embedding ----- //
-    const lastFmSimilarTracksWithYoutubeId = await Promise.all(
-        lastFmSimilarTracks
-            // TODO Allow user to adjust this value, could create page navigation?
-            // Limit number of results
-            .slice(0, 5)
-            // Add `youtubeId` key to `lastFmSimilarTracksWithYoutubeId` object
-            .map(async (similarTrack: similarTrackType) => {
-                const youtubeId = await webScrapeLastFmYoutubeId(similarTrack.url);
-                return { ...similarTrack, youtubeId };
-            })
+    // ----- 3b. Get recommended tracks' additional details ----- //
+
+    /**
+     * From this point onwards, the Spotify/Last.fm/Genius APIs are unable to retrieve anything useful.
+     * Thus, web scraping is used to get more details.
+     */
+
+    /**
+     * This is the same as `lastFmSimilarTracks1` but with additional keys:
+     * 
+     * ```js
+        [
+            {
+                ...lastFmSimilarTracks1[0],
+                // Via `webScrapeLastFmYoutubeId()`
+                youtubeId: "X_SEwgDl02E"
+                // Via `webScrapeLastFmListenAtLinks()`
+                link: {
+                    spotify: 'https://open.spotify.com/track/35xSkNIXi504fcEwz9USRB',
+                    appleMusic: 'https://geo.music.apple.com/album/id1146195596?i=1146195716&at=10l3Sh',
+                    youtubeMusic: 'https://music.youtube.com/watch?v=X_SEwgDl02E'
+                }
+            },
+            // And repeat however more times based on `.slice()` amount after calling `getLastFmSimilarTracks()` above
+        ]
+     * ```
+     */
+    const lastFmSimilarTracks2 = await Promise.all(
+        lastFmSimilarTracks1.map(async (similarTrack: similarTrackType) => {
+            // ----- 3b.i. Additional detail: YouTube ID for video embed ----- //
+            const youtubeId = await webScrapeLastFmYoutubeId(similarTrack.url);
+            // ----- 3b.ii. Additional detail: Links for "Listen at" buttons ----- //
+            const links = await webScrapeLastFmListenAtLinks(similarTrack.url);
+            return { ...similarTrack, youtubeId, links };
+        })
     );
 
-    // FIXME
-    // ----- 3c. Get recommended tracks' `link` values (for "Listen at:" buttons) TODO Check out the track's Last.fm page and web scrape music platform links ----- //
-    // FIXME
-
-    // FIXME
     // ----- 3y. Get xxx TODO Work on replacing placeholders below ----- //
-    // FIXME
+
+    // x
 
     // ----- 3z. Convert the retrieved data into something suitable for the website ----- //
-    const recommendedTracks = lastFmSimilarTracksWithYoutubeId.map((recommendedTrack) => ({
+    const recommendedTracks = lastFmSimilarTracks2.map((recommendedTrack) => ({
         name: recommendedTrack.name,
         artists: [recommendedTrack.artist.name],
-        link: {
-            // TODO Find another to ensure `null` is handled
-            video: recommendedTrack.youtubeId,
-            // NOTE All these are placeholders TODO Replace with actual links
-            spotify: "https://open.spotify.com/track/4u7EnebtmKWzUH433cf5Qv?si=d402b163ddcb40b9",
-            appleMusic: "https://music.apple.com/us/song/bohemian-rhapsody/1440650711",
-            youtubeMusic: "https://music.youtube.com/watch?v=bSnlKl_PoQU&si=rizExhbi-h_Zog7w",
+        video: recommendedTrack.youtubeId, // May pass in a `null`
+        links: {
+            spotify: recommendedTrack.links.spotify,
+            appleMusic: recommendedTrack.links.appleMusic,
+            youtubeMusic: recommendedTrack.links.youtubeMusic,
         },
-        lyrics: "https://genius.com/Queen-bohemian-rhapsody-lyrics",
         about: {
             genius: "https://genius.com/Queen-bohemian-rhapsody-lyrics",
             lastFm: "https://www.last.fm/music/Queen/_/Bohemian+Rhapsody+-+Remastered+2011/+wiki",
@@ -171,6 +231,7 @@ export default async function RecommendationsWithId(
             genius: "https://genius.com/Queen-bohemian-rhapsody-lyrics#comments",
             lastFm: "https://www.last.fm/music/Queen/_/Bohemian+Rhapsody+-+Remastered+2011#shoutbox",
         },
+        lyrics: "https://genius.com/Queen-bohemian-rhapsody-lyrics",
     }));
 
     return (
