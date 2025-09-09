@@ -10,7 +10,7 @@
 export const moods = ["happy", "sad", "chill", "party"];
 
 /**
- * This is the mapping for genres to its mood(s) and weight(s). Example:
+ * The mapping for a genre to its mood(s) and weight(s). Example:
  *
  * ```js
     "neo-soul": [
@@ -19,16 +19,16 @@ export const moods = ["happy", "sad", "chill", "party"];
     ],
  * ```
  *
+ * Note:
+ * 
  * - `mood` is based on `export const moods`.
  * - `weight` has values 1, 2, 3.
  * 
- * -----
+ * Additional note:
  * 
- * It **DOES NOT** contain every user-generated genre in Last.fm and Genius!
- *
- * Must manually add new genres into this variable!
- *
- * Recommended to sort and group by similar genres.
+ * - This variable **does not** contain every user-generated genre in Last.fm and Genius.
+ * - You (the developer) must manually add new genres into it.
+ * - It is recommended to sort and group by similar genres.
  */
 export const genreToMoodMapping: { [key: string]: { mood: string; weight: number }[] } = {
     pop: [
@@ -158,25 +158,27 @@ export const genreToMoodMapping: { [key: string]: { mood: string; weight: number
  */
 export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: number) {
     if (numberOfMoodsToGet > moods.length) {
-        console.error(`[!] ./src/libs/mood.ts::inferMoodsFromGenres(): Max value allowed for "numberOfMoodsToGet" is ${moods.length} (current: ${numberOfMoodsToGet}).`);
+        console.error(`[!] ./src/libs/mood.ts::inferMoodsFromGenres():\nMax value allowed for "numberOfMoodsToGet" is ${moods.length} (current: ${numberOfMoodsToGet}).`);
         return [];
     }
     /**
      * This will eventually become something like:
+     * 
      * ```js
         { chill: 9, party: 2, happy: 3 }
      * ```
      * 
      * Where...
      *
-     * - The keys are `mood`s based on `genreToMoodMapping`.
-     * - The values are the sum of that `mood`'s `weight`.
+     * - The key is the `mood` (based on `genreToMoodMapping`).
+     * - The value is the sum of that `mood`'s `weight`.
      */
     const summedMappingObject: { [key: string]: number } = {};
     // Iterate through track's genres
     for (const genre of genres) {
         /**
-         * Returns either `undefined` or an array of mapping (object with `mood` and `weight` keys) for the current `genre`. Example:
+         * Returns either `undefined` or an array of mapping. Example:
+         * 
          * ```js
             [
                 { mood: 'happy', weight: 3 },
@@ -186,7 +188,7 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
          * ```
          */
         const mapping = genreToMoodMapping[genre];
-        // Continue even if one of track's genre did not match anything in "genreToMoodMapping"
+        // Continue even if one of track's genre did not match anything in `genreToMoodMapping`
         if (!mapping) continue;
         // Iterate through genre's mappings to sum its mood's weight
         for (const { mood, weight } of mapping) {
@@ -195,27 +197,32 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
         }
     }
     /**
-     * Convert from object to an array of arrays. Example:
+     * Convert from an object to an array. Example:
+     * 
      * ```js
-        // From (above):
+        // From (as per above):
         { chill: 9, party: 2, happy: 3 }
+        
         // To:
         [ [ 'chill', 9 ], [ 'party', 2 ], [ 'happy', 3 ] ]
      * ```
      */
     const summedMappingArray = Object.entries(summedMappingObject);
-    // When all of track's genres did not match anything in "genreToMoodMapping"
+    // When all of track's genres did not match anything in `genreToMoodMapping`
     if (summedMappingArray.length == 0) return [];
     /**
-     * Sorts by weight, then return top `numberOfMoodsToGet` (e.g. 2) moods. Example:
+     * Sorts by weight, then return the top `numberOfMoodsToGet` (e.g. 2) moods. Example:
      * 
      * ```js
-        // From (above):
+        // From (as per above):
         [ [ 'chill', 9 ], [ 'party', 2 ], [ 'happy', 3 ] ]
+        
         // To:
         [ [ 'chill', 9 ], [ 'happy', 3 ], [ 'party', 2 ] ]
+        
         // To:
         [ 'chill', 'happy', 'party' ]
+        
         // To:
         [ 'chill', 'happy' ]
      * ```
