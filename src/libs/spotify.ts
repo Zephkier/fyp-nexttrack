@@ -87,17 +87,19 @@ export async function getSpotifyApiToken() {
  * - https://www.npmjs.com/package/spotify-web-api-node
  * - https://developer.spotify.com/documentation/web-api/reference/get-track
  * 
- * View various outputs (ensure to uncomment `console.log()` lines):
+ * View provided example (single artist):
  * 
- * - View provided example:
- *   - Submit "Florence + The Machine - Dog Days Are Over" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * - Uncomment `console.log()` lines.
+ * - Submit "Florence + The Machine - Dog Days Are Over" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  * 
- * - View multiple artists:
- *   - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * View multiple artists:
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  */
 export async function getSpotifyTrackDetails(trackId: string) {
     try {

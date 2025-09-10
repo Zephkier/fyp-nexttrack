@@ -73,10 +73,12 @@ export function authHeaders(): HeadersInit {
  * 
  * Source: https://docs.genius.com/#/search-h2
  * 
- * View provided example (ensure to uncomment `console.log()` lines):
- *   - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * View provided example:
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  */
 export async function getGeniusSearch(artistAndTrackName: string) {
     const encodedArtistAndTrackName = encodeURIComponent(artistAndTrackName);
@@ -90,15 +92,17 @@ export async function getGeniusSearch(artistAndTrackName: string) {
         return null;
     }
     /**
-     * Returns an object. Example:
+     * Returns an object of objects. Example:
      * 
      * ```js
         {
             meta: { status: 200 },
-            response: { hits: [
-                [Object],
-                // Repeat `[Object]` for however many search results there are
-            ] }
+            response: {
+                hits: [
+                    [Object],
+                    // Repeat `[Object]` for however many search results there are
+                ]
+            }
         }
      * ```
      */
@@ -119,7 +123,7 @@ export async function getGeniusSearch(artistAndTrackName: string) {
  * 
  * -----
  * 
- * Genius API returns an object. Example:
+ * Genius API returns an object of an object. Example:
  * 
  * ```js
     {
@@ -231,10 +235,12 @@ export async function getGeniusSearch(artistAndTrackName: string) {
  * 
  * Source: https://docs.genius.com/#/songs-h2
  * 
- * View provided example (ensure to uncomment `console.log()` lines):
- *   - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * View provided example:
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  */
 export async function getGeniusSong_deprecated(id: number) {
     const geniusUrl = `https://api.genius.com/songs/${id}`;
@@ -247,7 +253,7 @@ export async function getGeniusSong_deprecated(id: number) {
         return null;
     }
     /**
-     * Returns an object. Example:
+     * Returns an object of objects. Example:
      * 
      * ```js
         {
@@ -291,10 +297,12 @@ export async function getGeniusSong_deprecated(id: number) {
  * 
  * Source: https://genius.com/Dimitri-vegas-and-like-mike-tiesto-dido-and-w-w-thank-you-not-so-bad-lyrics
  * 
- * View provided example (ensure to uncomment `console.log()` lines):
- *   - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * View provided example:
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  */
 export async function webScrapeGeniusGenres(geniusUrl: string) {
     try {

@@ -63,6 +63,10 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      *   to get its recommendations based on the user-submitted artist and track names.
      */
 
+    /**
+     * Spotify API returns `null` or an object with many keys.
+     * @see {@linkcode getSpotifyTrackDetails()}
+     */
     const spotifyTrackDetails = await getSpotifyTrackDetails(spotifyTrackId);
     // Return a page because, if this step fails, then nothing can happen anyway
     if (!spotifyTrackDetails) {
@@ -110,7 +114,11 @@ export default async function RecommendationsWithId({ params }: { params: Promis
     // NIL
 
     // Doing "Priority 2. Last.fm API"
-    let retrievedGenres = await getLastFmGenres(artistName, trackName);
+    /**
+     * Last.fm API returns `[]` or an array of strings.
+     * @see {@linkcode getLastFmGenres()}
+     */
+    let retrievedGenres: string[] = await getLastFmGenres(artistName, trackName);
 
     // Doing "Priority 3. Last.fm web scrape" when the above returns insufficient genres
     if (retrievedGenres.length < 2) retrievedGenres = await webScrapeLastFmGenres(artistName, trackName);
@@ -141,6 +149,10 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      */
 
     const numberOfMoodsToGet = 2;
+    /**
+     * Helper function returns `[]` or an array of strings.
+     * @see {@linkcode inferMoodsFromGenres()}
+     */
     const inferredMoods = inferMoodsFromGenres(retrievedGenres, numberOfMoodsToGet);
 
     // ----- (Last step) Convert and standardise retrieved data into suitable types for frontend components to render ----- //
@@ -149,7 +161,7 @@ export default async function RecommendationsWithId({ params }: { params: Promis
         name: spotifyTrackDetails.name,
         artists: spotifyTrackDetails.artists.map((artist) => artist.name),
         releaseDate: spotifyTrackDetails.album.release_date,
-        genres: retrievedGenres.map((genre: string) => genre.toLowerCase()),
+        genres: retrievedGenres.map((genre) => genre.toLowerCase()),
         popularity: spotifyTrackDetails.popularity,
         moods: inferredMoods,
     };
@@ -162,8 +174,9 @@ export default async function RecommendationsWithId({ params }: { params: Promis
 
     /**
      * NOTE
+     * TODO
      *
-     * This is not urgent. Work on others (below) first.
+     * This is not urgent, work on others (below) first.
      *
      * Current recommendations are placeholders.
      *
@@ -178,17 +191,23 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      * - `submittedTrack.moods` value
      */
 
-    let lastFmSimilarTracks1 = await getLastFmSimilarTracks(artistName, trackName);
+    /**
+     * Last.fm API returns `[]` or an array of objects.
+     * @see {@linkcode getLastFmSimilarTracks()}
+     */
+    let lastFmSimilarTracks1: object[] = await getLastFmSimilarTracks(artistName, trackName);
 
+    // NOTE This is not urgent, work on others (below) first
     // TODO Allow users to adjust this value via page navigation?
     // Limit number of results (done here for better separation of concerns)
     const numberOfRecommendations = 10;
     lastFmSimilarTracks1 = lastFmSimilarTracks1.slice(0, numberOfRecommendations);
 
-    // // TEST Handle cases where there are no recommended tracks (done in "./src/ui/components/RecommendedTracks.tsx")
+    /**
+     * TEST Handle cases where there are no recommended tracks.
+     * @see {@link RecommendedTracks}
+     */
     // lastFmSimilarTracks1 = [];
-
-    // DONE Continue housekeeping from below here DONE
 
     // ----- Get recommended tracks' additional details ----- //
 
@@ -199,34 +218,43 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      */
 
     /**
-     * Contains the same as `lastFmSimilarTracks1` but with additional keys:
-     * 
+     * Last.fm API returns `[]` or an array of objects, where each object has additional keys like:
+     *
      * ```js
-        [
-            {
-                ...lastFmSimilarTracks1[0],
-                // Via `webScrapeLastFmYoutubeId()`
-                youtubeId: "X_SEwgDl02E"
-                // Via `webScrapeLastFmListenAtLinks()`
-                link: {
-                    spotify: 'https://open.spotify.com/track/35xSkNIXi504fcEwz9USRB',
-                    appleMusic: 'https://geo.music.apple.com/album/id1146195596?i=1146195716&at=10l3Sh',
-                    youtubeMusic: 'https://music.youtube.com/watch?v=X_SEwgDl02E'
-                }
-            },
-            // And repeat however more times based on `.slice()` amount after calling `getLastFmSimilarTracks()` above
-        ]
+        {
+            ...lastFmSimilarTracks1[0],
+            youtubeId: 'WbN0nX61rIs',
+            listenAtLinks: {
+                spotify: 'https://open.spotify.com/track/71iSmEeF0qRVyULABxP75P',
+                appleMusic: 'https://geo.music.apple.com/album/id1440862789?i=1440862797&at=10l3Sh',
+                youtubeMusic: 'https://music.youtube.com/watch?v=WbN0nX61rIs'
+            }
+        },
+        // Repeat `{}` for `numberOfRecommendations` more times
      * ```
+     *
+     * @see {@linkcode getLastFmSimilarTracks()}
+     * @see `youtubeId` via {@linkcode webScrapeLastFmYoutubeId()}
+     * @see `listenAtLinks` via {@linkcode webScrapeLastFmListenAtLinks()}
      */
     const lastFmSimilarTracks2 = await Promise.all(
         lastFmSimilarTracks1.map(async (similarTrack: similarTrackType) => {
-            // ----- 3b.i. Additional detail: YouTube ID for video embed ----- //
+            /**
+             * **Additional detail 1: YouTube ID for video embed** \
+             * Web scraping Last.fm page returns `null` or a string.
+             * @see {@linkcode webScrapeLastFmYoutubeId()}
+             */
             const youtubeId = await webScrapeLastFmYoutubeId(similarTrack.url);
 
-            // ----- 3b.ii. Additional detail: "Listen at" buttons' link ----- //
+            /**
+             * **Additional detail 2: "Listen at" buttons' link** \
+             * Web scraping Last.fm page returns a `listenAtLinks` object with 3 keys.
+             * @see {@linkcode webScrapeLastFmListenAtLinks()}
+             */
             const listenAtLinks = await webScrapeLastFmListenAtLinks(similarTrack.url);
 
-            // ----- 3b.iii. Additional detail: "About" buttons' link ----- //
+            // DONE Continue housekeeping from below here DONE
+            // ----- Additional detail 3: "About" buttons' link ----- //
             const artistAndTrackName = `${similarTrack.artist.name} - ${similarTrack.name}`;
             // // TEST Start
             // /**
@@ -261,10 +289,12 @@ export default async function RecommendationsWithId({ params }: { params: Promis
 
     // FIXME TODO Continue replacing placeholders below. For now, it is for the `about` key.
 
-    // TEST
-    // console.log("[!] v from '...[spotifyTrackID]/page.tsx' @ line ~222");
-    // console.log(lastFmSimilarTracks2[1]);
-    // console.log("[!] ^ from '...[spotifyTrackID]/page.tsx' @ line ~228");
+    // // TEST
+    // // console.log(`youtubeId: ${lastFmSimilarTracks2[1].youtubeId}\tname: ${lastFmSimilarTracks2[1].name}`);
+    // for (const similarTrack of lastFmSimilarTracks2) {
+    //     console.log(`${similarTrack.youtubeId} - ${similarTrack.name}`);
+    // }
+    // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
     // ----- 3y. Get xxx FIXME Work on replacing placeholders below FIXME ----- //
 

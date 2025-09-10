@@ -39,16 +39,10 @@ export function convertToLastFmFormat(incomingString: string) {
 }
 
 /**
- * Last.fm API returns `[]` or an array of objects. Example:
+ * Last.fm API returns `[]` or an array of strings. Example:
  *
  * ```js
-    [
-        { name: 'indie',            url: 'https://www.last.fm/tag/indie'            },
-        { name: 'female vocalists', url: 'https://www.last.fm/tag/female+vocalists' },
-        { name: 'alternative',      url: 'https://www.last.fm/tag/alternative'      },
-        { name: 'indie pop',        url: 'https://www.last.fm/tag/indie+pop'        },
-        { name: 'british',          url: 'https://www.last.fm/tag/british'          }
-    ]
+    [ 'indie', 'female vocalists', 'alternative', 'indie pop', 'british' ]
  * ```
  *
  * - Last.fm API may return 0 genres (i.e. `[]`) even if its Last.fm page has genres listed.
@@ -57,17 +51,17 @@ export function convertToLastFmFormat(incomingString: string) {
  * 
  * Source: https://www.last.fm/api/show/track.getInfo
  * 
- * View various outputs (ensure to uncomment `console.log()` lines):
+ * View provided example (with `tag: [Array]` and `wiki: { Object }`):
+ * - Uncomment `console.log()` lines.
+ * - Submit "Florence + The Machine - Dog Days Are Over" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  * 
- * - View provided example:
- *   - Submit "Florence + The Machine - Dog Days Are Over" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
- * 
- * - View `[]` and non-existent `wiki:` key:
- *   - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * View `tag: []` and non-existent `wiki` key:
+ * - Uncomment `console.log()` lines.
+ * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  */
 export async function getLastFmGenres(artistName: string, trackName: string) {
     const baseUrl = "http://ws.audioscrobbler.com";
@@ -169,17 +163,19 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
  * 
  * Source: https://www.last.fm/music/Florence+%252B+the+Machine/_/Dog+Days+Are+Over
  * 
- * View various outputs (ensure to uncomment `console.log()` lines):
+ * View provided example (more than 2 genres):
  * 
- * - View provided example:
- *   - Submit "Florence + The Machine - Dog Days Are Over" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * - Uncomment `console.log()` lines.
+ * - Submit "Florence + The Machine - Dog Days Are Over" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  * 
- * - View insufficient genres:
- *   - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * View insufficient genres:
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  */
 export async function webScrapeLastFmGenres(artistName: string, trackName: string) {
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
@@ -248,10 +244,12 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
  * 
  * Source: https://www.last.fm/api/show/track.getSimilar
  * 
- * - View provided example:
- *   - Submit "Florence + The Machine - Dog Days Are Over" \
- *     via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *     as NextTrack's user-submitted track.
+ * View provided example:
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit "Florence + The Machine - Dog Days Are Over" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
  */
 export async function getLastFmSimilarTracks(artistName: string, trackName: string) {
     const baseUrl = "http://ws.audioscrobbler.com";
@@ -285,13 +283,11 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     return similarTracks;
 }
 
-// DONE Continue housekeeping from below here DONE
-
 /**
  * Web scraping Last.fm page returns `null` or a string. Example:
  * 
  * ```js
-    "7ICS45rZsvo"
+    "PQZhN65vq9E"
  * ```
  * 
  * -----
@@ -301,9 +297,9 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
  * ```html
     <a
         id="track-page-video-playlink"
-        href="https://www.youtube.com/watch?v=7ICS45rZsvo"
-        data-youtube-id="7ICS45rZsvo"
-        data-youtube-url="https://www.youtube.com/watch?v=7ICS45rZsvo"
+        href="https://www.youtube.com/watch?v=PQZhN65vq9E"
+        data-youtube-id="PQZhN65vq9E"
+        data-youtube-url="https://www.youtube.com/watch?v=PQZhN65vq9E"
         ...
     ></a>
  * ```
@@ -317,9 +313,25 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
  * -----
  * 
  * Source:
- * - Via browser navigation: https://www.last.fm/music/The+Marías/_/Déjate+Llevar
- * - Encoded once: https://www.last.fm/music/The+Mar%C3%ADas/_/D%C3%A9jate+Llevar
- * - Encoded twice: https://www.last.fm/music/The+Mar%25C3%25ADas/_/D%25C3%25A9jate+Llevar
+ * 
+ * - Has video: https://www.last.fm/music/Florence+%252B+the+Machine/_/You%27ve+Got+the+Love
+ * - Has no video: https://www.last.fm/music/mikeeysmind/_/Tayk+hard+x+resonance
+ * 
+ * View provided example (has video):
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit "Florence + The Machine - Dog Days Are Over" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
+ * - Check the first recommendation.
+ * 
+ * View no video:
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit '"Playboi Carti" - Bando' \
+ *   via https://open.spotify.com/track/6z7dQwXh9UJJl4wsWxexuI?si=308467749bd94d0d \
+ *   as NextTrack's user-submitted track.
+ * - Check the first recommendation.
  */
 export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
     try {
@@ -336,6 +348,11 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
         const htmlElementAttribute = "data-youtube-id";
         const selector = $(htmlElementId);
         const youtubeId = selector.attr(htmlElementAttribute);
+        // // TEST
+        // console.log();
+        // console.log(youtubeId);
+        // console.log(lastFmUrl);
+        // console.log("[!] ^ from ./src/libs/lastfm.ts::webScrapeLastFmYoutubeId()");
         return youtubeId;
     } catch (err) {
         console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmYoutubeId():\n${err}`);
@@ -344,21 +361,9 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
 }
 
 /**
- * Web scraping returns a `listenAtLinks` object with 3 keys, either:
+ * Web scraping Last.fm page returns a `listenAtLinks` object with 3 keys. Example:
  * 
  * ```js
-    // If no links are found
-    listenAtLinks: {
-        spotify: 'https://open.spotify.com',
-        appleMusic: 'https://geo.music.apple.com',
-        youtubeMusic: 'https://music.youtube.com'
-    }
- * ```
- * 
- * Or:
- * 
- * ```js
- *  // If links are found (ideal scenario)
     listenAtLinks: {
         spotify: 'https://open.spotify.com/track/1CcLA0eaauck34YEIrvAAq',
         appleMusic: 'https://geo.music.apple.com/album/id1713571199?i=1713571204&at=10l3Sh',
@@ -366,46 +371,50 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
     }
  * ```
  * 
+ * If no links are found, then it will default to its respective index pages. Example:
+ * 
+ * - `'https://open.spotify.com'`
+ * - `'https://geo.music.apple.com'`
+ * - `'https://music.youtube.com'`
+ * 
  * -----
  * 
  * In a track's Last.fm page, the HTML element containing links to other music platform is:
  * 
- * # (1 of 2) Under the "Play this track" section:
- * 
  * ```html
+    <!-- Under the page's "Play this track" section -->
     <ul class="play-this-track-playlinks">
         <li>
             <a
-                class="play-this-track-playlink play-this-track-playlink--youtube js-playlink"
-                href="https://www.youtube.com/watch?v=YBGtzfK5Bak"
+                <!-- 1 of 4 -->
+                class="play-this-track-playlink--youtube ..."
+                href="https://www.youtube.com/watch?v=PQZhN65vq9E"
                 ...
-            >YouTube</a>
-        </li>
-        <li>
-            <a
-                class="hidden-xs play-this-track-playlink play-this-track-playlink--spotify js-playlink"
-                href="https://open.spotify.com/track/1CcLA0eaauck34YEIrvAAq"
+                <!-- 2 of 4 -->
+                class="play-this-track-playlink--spotify ..."
+                href="https://open.spotify.com/track/244AvzGQ4Ksa5637JQu5Gy"
                 ...
-            >Spotify</a>
-        </li>
-        <li>
-            <a
-                class="hidden-xs play-this-track-playlink play-this-track-playlink--itunes"
-                href="https://geo.music.apple.com/album/id1713571199?i=1713571204&amp;at=10l3Sh"
+                <!-- 3 of 4 -->
+                class="play-this-track-playlink--itunes ..."
+                href="https://geo.music.apple.com/album/id1440729743?i=1440729760&at=10l3Sh"
                 ...
-            >Apple Music</a>
+            >
+                <!-- Respective music platform's name -->
+            </a>
         </li>
     </ul>
- * ```
- * 
- * # (2 of 2) Under the "External Links" section:
- * 
- * ```html
+    
+    <!-- Sometimes, only Apple Music link is under the page's "External Links" section -->
     <ul class="resource-external-links">
         <li>
-            <!-- There is a weird "itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;" string consistently (even in other tracks that are lacking links) that should be removed -->
+            <!--
+            The same weird "itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;" string
+            appears consistently across different tracks
+            that should be removed
+            -->
             <a
-                class="resource-external-link resource-external-link--apple-music"
+                <!-- 4 of 4 -->
+                class="resource-external-link--apple-music ..."
                 href="https://music.apple.com/SG/search?itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;term=mikeeysmind-Tayk_hard_x_resonance"
                 ...
             >Apple Music</a>
@@ -417,17 +426,27 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
  * 
  * Source:
  * 
- * - Has all links: https://www.last.fm/music/David+Guetta/_/When+We+Were+Young+(The+Logical+Song)
- *   - How to reach ^?
- *     - Submit "Thank You (Not So Bad)"
- *     - via https://open.spotify.com/track/09CnYHiZ5jGT1wr1TXJ9Zt?si=68c00376f8e7456a
- *     - and it will be the first default result.
+ * - Has all "Play this track" links: \
+ *   https://www.last.fm/music/Florence+%252B+the+Machine/_/You%27ve+Got+the+Love
  * 
- * - Has no links: https://www.last.fm/music/mikeeysmind/_/Tayk+hard+x+resonance
- *   - How to reach ^?
- *     - Submit "Bando"
- *     - via https://open.spotify.com/track/6z7dQwXh9UJJl4wsWxexuI?si=308467749bd94d0d
- *     - and it will be the first default result.
+ * - Has no "Play this track" links, only has "External Links" links: \
+ *   https://www.last.fm/music/mikeeysmind/_/Tayk+hard+x+resonance
+ * 
+ * View provided example (has all "Play this track" links):
+ *
+ * - Uncomment `console.log()` lines.
+ * - Submit "Florence + The Machine - Dog Days Are Over" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
+ * - Check the first recommendation.
+ *
+ * View only has "External Links" links:
+ *
+ * - Uncomment `console.log()` lines.
+ * - Submit '"Playboi Carti" - Bando' \
+ *   via https://open.spotify.com/track/6z7dQwXh9UJJl4wsWxexuI?si=308467749bd94d0d \
+ *   as NextTrack's user-submitted track.
+ * - Check the first recommendation.
  */
 export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
     let listenAtLinks = {
@@ -444,7 +463,9 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
+
         // Extract specified HTML element's attribute's text
+
         // - For YouTube Music
         let htmlElement = "a.play-this-track-playlink--youtube";
         let htmlElementAttribute = "href";
@@ -453,6 +474,7 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
         if (link) listenAtLinks.youtubeMusic = link.replace("https://www.", "https://music.");
         // TODO If no link, then I want a window popup that informs user there's no link found
         else listenAtLinks.youtubeMusic = "https://music.youtube.com";
+
         // - For Spotify
         htmlElement = "a.play-this-track-playlink--spotify";
         selector = $(htmlElement);
@@ -460,6 +482,7 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
         if (link) listenAtLinks.spotify = link;
         // TODO Same as above ^
         else listenAtLinks.spotify = "https://open.spotify.com";
+
         // - For Apple Music (under the "Play this track" section)
         htmlElement = "a.play-this-track-playlink--itunes";
         selector = $(htmlElement);
@@ -474,6 +497,13 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
             // TODO Same as above ^
             else listenAtLinks.appleMusic = "https://geo.music.apple.com";
         }
+
+        // // TEST
+        // console.log();
+        // console.log(listenAtLinks);
+        // console.log(lastFmUrl);
+        // console.log("[!] ^ from ./src/libs/lastfm.ts::webScrapeLastFmListenAtLinks()");
+
         // - Done
         return listenAtLinks;
     } catch (err) {

@@ -143,7 +143,7 @@ export const genreToMoodMapping: { [key: string]: { mood: string; weight: number
 };
 
 /**
- * Returns `[]` or an array of strings. Example:
+ * Helper function returns `[]` or an array of strings. Example:
  *
  * - If `numberOfMoodsToGet = 2`, then returns `[ "mood1", "mood2" ]`.
  * - If `numberOfMoodsToGet = 4`, then returns `[ "mood1", ..., "mood4" ]`.
