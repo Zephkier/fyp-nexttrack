@@ -1,6 +1,52 @@
 import * as cheerio from "cheerio";
 
 /**
+ * Helper function returns a string that has been encoded as per **Genius URL's** format. Example:
+ *
+ * - If string is `"Joey Bada$$ - Killuminati (feat. Capital STEEZ)"`, \
+ *   then its URL is `"https://genius.com/Joey-bada-killuminati-lyrics"`
+ *
+ * - If string is `"Sherane a.k.a Master Splinter’s Daughter"` (note its **special** single-quote (i.e. ’)), \
+ *   then its URL is `"https://genius.com/Kendrick-lamar-sherane-aka-master-splinters-daughter-lyrics"`
+ *
+ * - If string is `"You've Got the Love"` , \
+ *   then its URL is `"https://genius.com/Florence-the-machine-youve-got-the-love-lyrics"`
+ */
+function convertToGeniusUrlFormat(incomingString: string) {
+    return (
+        incomingString
+            .toLowerCase()
+            // "(" and ")" are excluded because of `.split()` in the next line
+            // Special single-quote (i.e. ’) is included
+            .replace(/[`~!@#$%^&*-_=+[{\]\}\\\|;:'’",<.>\/\?]/g, "")
+            .split("(")[0]
+            .trim()
+            .replaceAll(" ", "-")
+    );
+}
+
+/**
+ * Helper function returns a string that has been encoded as per **Genius HTML page's** format. Example:
+ *
+ * - If string is `"Like A G6 (with Naeleck)"`, \
+ *   then its HTML text is `"Like A G6"`
+ * 
+ * Unsure if need to enclose strings in double-quotes or not. Example:
+ * 
+ * ```js
+    incomingString = `"${incomingString}"`;
+ * ```
+ */
+function convertToGeniusHtmlFormat(incomingString: string) {
+    return (
+        incomingString
+            // Format
+            .split("(")[0]
+            .trim()
+    );
+}
+
+/**
  * Helper function returns `{}` or an object with `Authorization` key for Genius API.
  *
  * -----
@@ -80,7 +126,10 @@ export function authHeaders(): HeadersInit {
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function getGeniusSearch(artistAndTrackName: string) {
+export async function getGeniusSearch(artistName: string, trackName: string) {
+    // The API (and even via manual browser navigation) works best when track name is minimal
+    const minimalTrackName = convertToGeniusHtmlFormat(trackName);
+    const artistAndTrackName = `${artistName} - ${minimalTrackName}`;
     const encodedArtistAndTrackName = encodeURIComponent(artistAndTrackName);
     const geniusUrl = `https://api.genius.com/search?q=${encodedArtistAndTrackName}`;
     const response = await fetch(geniusUrl, {
@@ -108,13 +157,19 @@ export async function getGeniusSearch(artistAndTrackName: string) {
      */
     const data = await response.json();
     const searchResults = data.response.hits;
-    // // TEST
-    // console.log(`Search results for: ${artistAndTrackName}`);
+    // // TEST Ensure that the first search result is usually correct
+    // console.log(`Searched for: ${artistAndTrackName}`);
+    // console.log(`Encoded into: ${encodedArtistAndTrackName}`);
+    // console.log(`API endpoint: ${geniusUrl}`);
+    // console.log();
     // for (const searchResult of searchResults) {
-    //     console.log(searchResult.result.id);
-    //     console.log(searchResult.result.url);
+    //     console.log(searchResult.result.primary_artist.name);
+    //     console.log(searchResult.result.title);
+    //     console.log(`id: ${searchResult.result.id}, url: ${searchResult.result.url}`);
+    //     console.log();
     // }
     // console.log("[!] ^ from ./src/libs/genius.ts::getGeniusSearch()");
+    // console.log();
     return searchResults;
 }
 
@@ -322,12 +377,148 @@ export async function webScrapeGeniusGenres(geniusUrl: string) {
             // Must iterate as there are multiple genres
             .map((index, htmlElement) => $(htmlElement).text().trim().toLowerCase())
             .get();
-        // // TEST
+        // // TEST Ensure that genres retrieved are displayed on NextTrack
         // console.log(genres);
         // console.log("[!] ^ from ./src/libs/genius.ts::webScrapeGeniusGenres()");
         return genres;
     } catch (err) {
         console.error(`[!] ./src/libs/genius.ts::webScrapeGeniusGenres():\n${err}`);
         return [];
+    }
+}
+
+/**
+ * Genius API and web scraping Genius page returns `"https://genius.com/"` or a string. Example:
+ * 
+ * ```js
+    "https://genius.com/Timmy-trumpet-and-poltergst-like-a-g6-lyrics"
+ * ```
+ * 
+ * -----
+ * 
+ * 1. If the incoming `geniusUrl` via Genius API is **correct**, then **return** it.
+ * 
+ *    - _you may stop reading this JSDoc :)_
+ * 
+ * 2. If the incoming `geniusUrl` via Genius API is **wrong**, then **access and web scrape** the (wrong) page nonetheless. \
+ *    This is because it may be the **one and only** `geniusUrl` available.
+ * 
+ *    - _you should continue reading this JSDoc :(_
+ * 
+ * In the (wrong) Genius page, the HTML element containing the correct URL has text that matches the track's name:
+ * 
+ * ```html
+    <!-- Example 1 -->
+    <a href="https://genius.com/Timmy-trumpet-and-poltergst-like-a-g6-lyrics" ...>
+    "Like A G6"
+    </a>
+ * ```
+ * 
+ * -----
+ * 
+ * Source to view provided example:
+ * 
+ * - Uncomment `console.log()` lines.
+ * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
+ *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
+ *   as NextTrack's user-submitted track.
+ * - Access https://genius.com/Genius-may-2024-singles-release-calendar-annotated \
+ *   and `CTRL + F` "Like A G6".
+ * 
+ * -----
+ * 
+ * Explanation:
+ * 
+ * 1. FIXME
+ * 
+ * 2. Test via the following code (in `./src/app/recommendations/[spotifyTrackId]/page.tsx`):
+ * 
+ * ```js
+    const demoWrong1 = "Timmy Trumpet - Like A G6 (with Naeleck)";
+    const demoWrong2 = "Alesso - I Like It (with Nate Smith)";
+    if (artistAndTrackName == demoWrong1 || artistAndTrackName == demoWrong2) {
+        console.log(`Searching for: ${artistAndTrackName}`);
+        console.log("Results' URL:");
+        for (const searchResult of searchResults) {
+            console.log(searchResult.result.url);
+        }
+        console.log();
+    }
+ * ```
+ *  
+ * 3. Note the console output:
+ *  
+ * ```text
+    Searching for: Timmy Trumpet - Like A G6 (with Naeleck)
+    Results' URL:
+    https://genius.com/Genius-may-2024-singles-release-calendar-annotated
+    
+    Searching for: Alesso - I Like It (with Nate Smith)
+    Results' URL:
+    https://genius.com/Genius-july-2024-singles-release-calendar-annotated
+    https://genius.com/Genius-august-2024-singles-release-calendar-annotated
+    ...
+ * ```
+ */
+export async function getGeniusAboutLink(geniusUrl: string, trackName: string) {
+    if (!geniusUrl) return "https://genius.com/";
+
+    // ----- Genius URLs that are correct: the URLs are already the "about" link, so just return them ----- //
+
+    const similarTrackNameInUrlFormat = convertToGeniusUrlFormat(trackName);
+    const isTrackNameInUrl = geniusUrl.includes(similarTrackNameInUrlFormat);
+    // // TEST
+    // console.log(`Track name before:       ${trackName}`);
+    // console.log(`Track name after :       ${similarTrackNameInUrlFormat}`);
+    // console.log(`Its Genius URL from API: ${geniusUrl}`);
+    // console.log(`Is track name in URL?    ${isTrackNameInUrl}`);
+    // console.log("[!] ^ from ./src/libs/genius.ts::getGeniusAboutLink()");
+    // console.log();
+    if (isTrackNameInUrl) return geniusUrl;
+
+    // ----- Genius URLs that are wrong: find track's name in current Genius page, return matching text's `href` link ----- //
+
+    // NOTE The track's name is usually present even in the wrong Genius page
+    const similarTrackNameInHtmlFormat = convertToGeniusHtmlFormat(trackName);
+
+    // TODO Modularise into its own function
+    try {
+        const response = await fetch(geniusUrl, {
+            headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
+            cache: "no-store",
+        });
+        if (!response.ok) return "https://genius.com/";
+        // Parse HTML using Cheerio
+        const html = await response.text();
+        const $ = cheerio.load(html);
+        // Extract specified HTML element's attribute's text
+        const htmlElement = "a";
+        const htmlElementAttribute = "href";
+        const selector = $(htmlElement);
+        const matchingHtmlElement = selector
+            // Get the element whose text matches with the track's name
+            .filter((index, element) => {
+                const htmlElementText = $(element).text();
+                const isMatching = htmlElementText.includes(similarTrackNameInHtmlFormat);
+                return isMatching;
+            })
+            // NOTE The first matching element is usually correct
+            .first();
+        const correctGeniusUrl = matchingHtmlElement.attr(htmlElementAttribute);
+        // TEST
+        console.log(`Track name before:       ${trackName}`);
+        console.log(`Track name after :       ${similarTrackNameInUrlFormat}`);
+        console.log(`Its Genius URL from API: ${geniusUrl}`);
+        console.log(`Is track name in URL?    ${isTrackNameInUrl}`);
+        console.log("So...");
+        console.log(`In URL, search for this track name: ${similarTrackNameInHtmlFormat}`);
+        console.log(`The matching HTML element's text:   ${matchingHtmlElement.text() ?? null}`);
+        console.log(`Its Genius URL this time:           ${correctGeniusUrl}`);
+        console.log("[!] ^ from ./src/libs/genius.ts::getGeniusAboutLink()");
+        console.log();
+        return correctGeniusUrl ?? "https://genius.com/";
+    } catch (err) {
+        console.error(`[!] ./src/libs/genius.ts::getGeniusAboutLink():\n${err}`);
+        return "https://genius.com/";
     }
 }

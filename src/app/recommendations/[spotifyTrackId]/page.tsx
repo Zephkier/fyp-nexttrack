@@ -6,8 +6,23 @@ import CustomiseRecommendations from "@/ui/components/CustomiseRecommendations";
 import RecommendedTracks from "@/ui/components/RecommendedTracks";
 
 import { getSpotifyTrackDetails } from "@/libs/spotify";
-import { getLastFmGenres, webScrapeLastFmGenres, getLastFmSimilarTracks, webScrapeLastFmYoutubeId, webScrapeLastFmListenAtLinks } from "@/libs/lastfm";
-import { getGeniusSearch, getGeniusSong_deprecated, webScrapeGeniusGenres } from "@/libs/genius";
+import {
+    // Format
+    getLastFmGenres,
+    webScrapeLastFmGenres,
+    getLastFmSimilarTracks,
+    webScrapeLastFmYoutubeId,
+    webScrapeLastFmListenAtLinks,
+    // TODO This is very similar to previous `get...()` functions, could further modularise
+    getLastFmAboutLink,
+} from "@/libs/lastfm";
+import {
+    // Format
+    getGeniusSearch,
+    getGeniusSong_deprecated,
+    webScrapeGeniusGenres,
+    getGeniusAboutLink,
+} from "@/libs/genius";
 import { inferMoodsFromGenres } from "@/libs/mood";
 
 type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
@@ -91,7 +106,6 @@ export default async function RecommendationsWithId({ params }: { params: Promis
     // Set artist (must get main artist at `[0]`) and track names for future use
     const artistName = spotifyTrackDetails.artists[0].name;
     const trackName = spotifyTrackDetails.name;
-    const artistAndTrackName = `${artistName} - ${trackName}`;
 
     // --------------------------------------------------------- //
     // ----- 2. Get values for "Customise Recommendations" ----- //
@@ -110,32 +124,60 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      * Priority 6. Set `["no genres found"]` - fail-safe
      */
 
-    // Doing "Priority 1. Spotify API"
-    // NIL
-
-    // Doing "Priority 2. Last.fm API"
     /**
+     * **Doing "Priority 1. Spotify API"** \
+     * NIL
+     */
+
+    /**
+     * **Doing "Priority 2. Last.fm API"** \
      * Last.fm API returns `[]` or an array of strings.
      * @see {@linkcode getLastFmGenres()}
      */
     let retrievedGenres: string[] = await getLastFmGenres(artistName, trackName);
 
-    // Doing "Priority 3. Last.fm web scrape" when the above returns insufficient genres
+    // // TEST Handle cases where there are insufficient genres
+    // retrievedGenres = [];
+
+    /**
+     * **Doing "Priority 3. Last.fm web scrape" when the above returns insufficient genres** \
+     * Last.fm API returns `[]` or an array of strings.
+     * @see {@linkcode getLastFmGenres()}
+     */
     if (retrievedGenres.length < 2) retrievedGenres = await webScrapeLastFmGenres(artistName, trackName);
 
-    // Doing "Priority 4. Genius API"
-    // NIL, in "./src/libs/genius.ts", created `getGeniusSong_deprecated()` function
-    // only to find out that it has no genre-related data.
+    // // TEST Handle cases where there (still) are insufficient genres
+    // retrievedGenres = [];
 
-    // Doing "Priority 5. Genius web scrape" when the above (still) returns insufficient genres
+    /**
+     * **Doing "Priority 4. Genius API"** \
+     * Created `getGeniusSong_deprecated()` function only to find out \
+     * that it has no genre-related data.
+     * @see {@linkcode getGeniusSong_deprecated()}
+     */
+
+    /**
+     * **Doing "Priority 5. Genius web scrape" when the above (still) returns insufficient genres**
+     * @see {@linkcode getGeniusSearch()}
+     * @see {@linkcode webScrapeGeniusGenres()}
+     */
     if (retrievedGenres.length < 2) {
-        const searchResults = await getGeniusSearch(artistAndTrackName);
-        // NOTE The first search result is usually correct
-        const firstResultGeniusUrl = searchResults[0].result.url;
-        retrievedGenres = await webScrapeGeniusGenres(firstResultGeniusUrl);
+        const searchResults = await getGeniusSearch(artistName, trackName);
+        const firstSearchResultGeniusUrl: string = searchResults[0]?.result?.url;
+        // // TEST Ensure that the first search result is usually correct
+        // console.log(searchResults[0].result.primary_artist.name);
+        // console.log(searchResults[0].result.title);
+        // console.log(`id: ${searchResults[0].result.id}, url: ${searchResults[0].result.url}`);
+        // console.log();
+        retrievedGenres = await webScrapeGeniusGenres(firstSearchResultGeniusUrl);
     }
 
-    // Doing "Priority 6. Set..." when the above (still) returns insufficient genres
+    // // TEST Handle cases where there (still) are insufficient genres
+    // retrievedGenres = [];
+
+    /**
+     * **Doing "Priority 6. Set..." when the above (still) returns insufficient genres**
+     */
     if (retrievedGenres.length < 2) retrievedGenres = ["no genres found"];
 
     // ----- Get moods that are custom-created and inferred from genres ----- //
@@ -173,7 +215,6 @@ export default async function RecommendationsWithId({ params }: { params: Promis
     // ----- Get recommended tracks ----- //
 
     /**
-     * NOTE
      * TODO
      *
      * This is not urgent, work on others (below) first.
@@ -197,16 +238,18 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      */
     let lastFmSimilarTracks1: object[] = await getLastFmSimilarTracks(artistName, trackName);
 
-    // NOTE This is not urgent, work on others (below) first
-    // TODO Allow users to adjust this value via page navigation?
+    /**
+     * TODO
+     *
+     * This is not urgent, work on others (below) first.
+     *
+     * Allow users to adjust this value via page navigation?
+     */
     // Limit number of results (done here for better separation of concerns)
     const numberOfRecommendations = 10;
     lastFmSimilarTracks1 = lastFmSimilarTracks1.slice(0, numberOfRecommendations);
 
-    /**
-     * TEST Handle cases where there are no recommended tracks.
-     * @see {@link RecommendedTracks}
-     */
+    // // TEST Handle cases where there are no recommended tracks.
     // lastFmSimilarTracks1 = [];
 
     // ----- Get recommended tracks' additional details ----- //
@@ -253,67 +296,67 @@ export default async function RecommendationsWithId({ params }: { params: Promis
              */
             const listenAtLinks = await webScrapeLastFmListenAtLinks(similarTrack.url);
 
-            // DONE Continue housekeeping from below here DONE
-            // ----- Additional detail 3: "About" buttons' link ----- //
-            const artistAndTrackName = `${similarTrack.artist.name} - ${similarTrack.name}`;
-            // // TEST Start
-            // /**
-            //  * Not using `getGeniusSearch()` because its first (and, sometimes, only) search result may be wrong.
-            //  *
-            //  * The following demo uses "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
-            //  * (via https://open.spotify.com/track/09CnYHiZ5jGT1wr1TXJ9Zt?si=68c00376f8e7456a) \
-            //  * as NextTrack's user-submitted track.
-            //  */
-            // const searchResults = await getGeniusSearch(artistAndTrackName);
-            // const firstResultGeniusUrl = searchResults[0].result.url;
-            // // Demo of both correct and wrong search results
-            // const demoCorrect = "David Guetta - When We Were Young (The Logical Song)";
-            // if (artistAndTrackName == demoCorrect) {
-            //     console.log("\nCorrect URL:");
-            //     console.log(`Name: ${artistAndTrackName}`);
-            //     console.log(`URL : ${firstResultGeniusUrl}`);
-            // }
-            // const demoWrong1 = "Timmy Trumpet - Like A G6 (with Naeleck)";
-            // const demoWrong2 = "Alesso - I Like It (with Nate Smith)";
-            // if (artistAndTrackName == demoWrong1 || artistAndTrackName == demoWrong2) {
-            //     console.log("\nWrong URL:");
-            //     console.log(`Name: ${artistAndTrackName}`);
-            //     console.log(`URL : ${firstResultGeniusUrl}`);
-            // }
-            // // TEST End
+            /**
+             * **Additional detail 3: "About" buttons' link** \
+             * Genius API returns `null` or an array of objects.
+             * @see {@linkcode getGeniusSearch()}
+             */
+            const searchResults = await getGeniusSearch(similarTrack.artist.name, similarTrack.name);
+            const firstSearchResultGeniusUrl = searchResults[0]?.result?.url;
+            // // TEST Ensure that the first search result is usually correct
+            // console.log(searchResults[0].result.primary_artist.name);
+            // console.log(searchResults[0].result.title);
+            // console.log(`id: ${searchResults[0].result.id}, url: ${searchResults[0].result.url}`);
+            // console.log();
+
+            /**
+             * Genius API and web scraping Genius page returns `null` or a string.
+             * @see {@link getGeniusAboutLink}
+             */
+            const geniusAboutLink = await getGeniusAboutLink(firstSearchResultGeniusUrl, similarTrack.name);
+            // FIXME Continue working on getting this to link
+            // const lastFmAboutLink = await getLastFmAboutLink(similarTrack.artist.name, similarTrack.name);
 
             // ----- Done ----- //
-            return { ...similarTrack, youtubeId, listenAtLinks };
+            return {
+                ...similarTrack,
+                // Format
+                youtubeId,
+                listenAtLinks,
+                aboutLinks: {
+                    genius: geniusAboutLink,
+                    // FIXME Continue working on getting this to link
+                    // lastFm: lastFmAboutLink,
+                },
+            };
         })
     );
 
-    // FIXME TODO Continue replacing placeholders below. For now, it is for the `about` key.
-
     // // TEST
-    // // console.log(`youtubeId: ${lastFmSimilarTracks2[1].youtubeId}\tname: ${lastFmSimilarTracks2[1].name}`);
+    // // console.log(lastFmSimilarTracks2);
     // for (const similarTrack of lastFmSimilarTracks2) {
-    //     console.log(`${similarTrack.youtubeId} - ${similarTrack.name}`);
+    //     console.log(similarTrack.aboutLinks);
     // }
     // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
-    // ----- 3y. Get xxx FIXME Work on replacing placeholders below FIXME ----- //
+    // ----- FIXME Replacing placeholders as seen below FIXME ----- //
 
     // x
 
     // ----- (Last step) Convert retrieved data into suitable types for frontend components to render ----- //
 
     const recommendedTracks = lastFmSimilarTracks2.map((recommendedTrack) => ({
-        name: recommendedTrack.name,
-        artists: [recommendedTrack.artist.name],
-        video: recommendedTrack.youtubeId, // May pass in a `null`
+        name: recommendedTrack?.name,
+        artists: [recommendedTrack?.artist.name],
+        video: recommendedTrack?.youtubeId,
         links: {
-            spotify: recommendedTrack.listenAtLinks.spotify,
-            appleMusic: recommendedTrack.listenAtLinks.appleMusic,
-            youtubeMusic: recommendedTrack.listenAtLinks.youtubeMusic,
+            spotify: recommendedTrack?.listenAtLinks.spotify,
+            appleMusic: recommendedTrack?.listenAtLinks.appleMusic,
+            youtubeMusic: recommendedTrack?.listenAtLinks.youtubeMusic,
         },
         about: {
-            genius: "https://genius.com/Queen-bohemian-rhapsody-lyrics",
-            lastFm: "https://www.last.fm/music/Queen/_/Bohemian+Rhapsody+-+Remastered+2011/+wiki",
+            genius: recommendedTrack?.aboutLinks.genius,
+            lastFm: recommendedTrack?.aboutLinks.lastFm,
         },
         comments: {
             genius: "https://genius.com/Queen-bohemian-rhapsody-lyrics#comments",
@@ -337,6 +380,7 @@ export default async function RecommendationsWithId({ params }: { params: Promis
          *
          * R side ("Recommended Tracks"):
          * - Make video's size responsive? 360p size? Ultimately, it must scale to video's width.
+         * - Make buttons without links greyed out.
          */
         <main className="container mx-auto">
             <Hero customMarginBottom="mb-20" />
