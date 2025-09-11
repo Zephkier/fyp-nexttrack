@@ -13,19 +13,19 @@ export const moods = ["happy", "sad", "chill", "party"];
  * The mapping for a genre to its mood(s) and weight(s). Example:
  *
  * ```js
-    "neo-soul": [
-        { mood: moods[1], weight: 1 },
-        { mood: moods[2], weight: 2 },
-    ],
+ * "neo-soul": [
+ *     { mood: moods[1], weight: 1 },
+ *     { mood: moods[2], weight: 2 },
+ * ],
  * ```
  *
  * Note:
- * 
+ *
  * - `mood` is based on `export const moods`.
  * - `weight` has values 1, 2, 3.
- * 
+ *
  * Additional note:
- * 
+ *
  * - This variable **does not** contain every user-generated genre in Last.fm and Genius.
  * - You (the developer) must manually add new genres into it.
  * - It is recommended to sort and group by similar genres.
@@ -163,11 +163,11 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
     }
     /**
      * This will eventually become something like:
-     * 
+     *
      * ```js
-        { chill: 9, party: 2, happy: 3 }
+     * { chill: 9, party: 2, happy: 3 }
      * ```
-     * 
+     *
      * Where...
      *
      * - The key is the `mood` (based on `genreToMoodMapping`).
@@ -178,13 +178,13 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
     for (const genre of genres) {
         /**
          * Returns either `undefined` or an array of mapping. Example:
-         * 
+         *
          * ```js
-            [
-                { mood: 'happy', weight: 3 },
-                { mood: 'chill', weight: 3 },
-                { mood: 'party', weight: 1 }
-            ]
+         * [
+         *     { mood: 'happy', weight: 3 },
+         *     { mood: 'chill', weight: 3 },
+         *     { mood: 'party', weight: 1 }
+         * ]
          * ```
          */
         const mapping = genreToMoodMapping[genre];
@@ -198,13 +198,13 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
     }
     /**
      * Convert from an object to an array. Example:
-     * 
+     *
      * ```js
-        // From (as per above):
-        { chill: 9, party: 2, happy: 3 }
-        
-        // To:
-        [ [ 'chill', 9 ], [ 'party', 2 ], [ 'happy', 3 ] ]
+     * // From (as per above):
+     * { chill: 9, party: 2, happy: 3 }
+     *
+     * // To:
+     * [ [ 'chill', 9 ], [ 'party', 2 ], [ 'happy', 3 ] ]
      * ```
      */
     const summedMappingArray = Object.entries(summedMappingObject);
@@ -212,19 +212,19 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
     if (summedMappingArray.length == 0) return [];
     /**
      * Sorts by weight, then return the top `numberOfMoodsToGet` (e.g. 2) moods. Example:
-     * 
+     *
      * ```js
-        // From (as per above):
-        [ [ 'chill', 9 ], [ 'party', 2 ], [ 'happy', 3 ] ]
-        
-        // To:
-        [ [ 'chill', 9 ], [ 'happy', 3 ], [ 'party', 2 ] ]
-        
-        // To:
-        [ 'chill', 'happy', 'party' ]
-        
-        // To:
-        [ 'chill', 'happy' ]
+     * // From (as per above):
+     * [ [ 'chill', 9 ], [ 'party', 2 ], [ 'happy', 3 ] ]
+     *
+     * // To:
+     * [ [ 'chill', 9 ], [ 'happy', 3 ], [ 'party', 2 ] ]
+     *
+     * // To:
+     * [ 'chill', 'happy', 'party' ]
+     *
+     * // To:
+     * [ 'chill', 'happy' ]
      * ```
      */
     const inferredMoods = summedMappingArray

@@ -42,21 +42,21 @@ function convertToLastFmFormat(incomingString: string) {
  * Last.fm API returns `[]` or an array of strings. Example:
  *
  * ```js
-    [ 'indie', 'female vocalists', 'alternative', 'indie pop', 'british' ]
+ * [ 'indie', 'female vocalists', 'alternative', 'indie pop', 'british' ]
  * ```
  *
  * - Last.fm API may return 0 genres (i.e. `[]`) even if its Last.fm page has genres listed.
- * 
+ *
  * -----
- * 
+ *
  * Source: https://www.last.fm/api/show/track.getInfo
- * 
+ *
  * View provided example (with `tag: [Array]` and `wiki: { Object }`):
  * - Uncomment `console.log()` lines.
  * - Submit "Florence + The Machine - Dog Days Are Over" \
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
- * 
+ *
  * View `tag: []` and non-existent `wiki` key:
  * - Uncomment `console.log()` lines.
  * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
@@ -75,37 +75,37 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
     if (!response.ok) return [];
     /**
      * Returns an object with many keys. Example:
-     * 
+     *
      * ```js
-        {
-            track: {
-                name: 'Dog Days Are Over',
-                mbid: '52587f93-2a1d-45fb-a8ba-97aafa2c1f28',
-                url: 'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over',
-                duration: '0',
-                streamable: { '#text': '0', fulltrack: '0' },
-                // `listeners` and `playcount` could be potential parameters
-                // but Spotify's `popularity` key seems better
-                listeners: '2537',
-                playcount: '8492',
-                artist: {
-                    name: 'Florence   The Machine',
-                    // Some artists do not have `mbid` key
-                    mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
-                    url: 'https://www.last.fm/music/Florence+++The+Machine'
-                },
-                // ----- Normal ----- //
-                toptags: { tag: [Array] },
-                wiki: {
-                    published: '31 Aug 2009, 11:29',
-                    summary: `"Dog... Read more on Last.fm</a>.`,
-                    content: `"Dog... \n` + '\n' + '...' + '... terms may apply.'
-                }
-                // ----- Abnormal ----- //
-                toptags: { tag: [] }
-                // `wiki:` does not exist at all
-            }
-        }
+     * {
+     *     track: {
+     *         name: 'Dog Days Are Over',
+     *         mbid: '52587f93-2a1d-45fb-a8ba-97aafa2c1f28',
+     *         url: 'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over',
+     *         duration: '0',
+     *         streamable: { '#text': '0', fulltrack: '0' },
+     *         // `listeners` and `playcount` could be potential parameters
+     *         // but Spotify's `popularity` key seems better
+     *         listeners: '2537',
+     *         playcount: '8492',
+     *         artist: {
+     *             name: 'Florence   The Machine',
+     *             // Some artists do not have `mbid` key
+     *             mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
+     *             url: 'https://www.last.fm/music/Florence+++The+Machine'
+     *         },
+     *         // ----- Normal ----- //
+     *         toptags: { tag: [Array] },
+     *         wiki: {
+     *             published: '31 Aug 2009, 11:29',
+     *             summary: `"Dog... Read more on Last.fm</a>.`,
+     *             content: `"Dog... \n` + '\n' + '...' + '... terms may apply.'
+     *         }
+     *         // ----- Abnormal ----- //
+     *         toptags: { tag: [] }
+     *         // `wiki:` does not exist at all
+     *     }
+     * }
      * ```
      */
     let data = await response.json();
@@ -113,13 +113,13 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
      * Returns an array of objects. Example:
      *
      * ```js
-        [
-            { name: 'indie',            url: 'https://www.last.fm/tag/indie'            },
-            { name: 'female vocalists', url: 'https://www.last.fm/tag/female+vocalists' },
-            { name: 'alternative',      url: 'https://www.last.fm/tag/alternative'      },
-            { name: 'indie pop',        url: 'https://www.last.fm/tag/indie+pop'        },
-            { name: 'british',          url: 'https://www.last.fm/tag/british'          }
-        ]
+     * [
+     *     { name: 'indie',            url: 'https://www.last.fm/tag/indie'            },
+     *     { name: 'female vocalists', url: 'https://www.last.fm/tag/female+vocalists' },
+     *     { name: 'alternative',      url: 'https://www.last.fm/tag/alternative'      },
+     *     { name: 'indie pop',        url: 'https://www.last.fm/tag/indie+pop'        },
+     *     { name: 'british',          url: 'https://www.last.fm/tag/british'          }
+     * ]
      * ```
      */
     const genresAndUrls = data.track.toptags.tag;
@@ -134,44 +134,44 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
 
 /**
  * Web scraping Last.fm page returns `[]` or an array of strings. Example:
- * 
+ *
  * ```js
-    [ 'indie', 'female vocalists', 'alternative', 'indie pop', 'british' ]
+ * [ 'indie', 'female vocalists', 'alternative', 'indie pop', 'british' ]
  * ```
- * 
+ *
  * -----
- * 
+ *
  * In a track's Last.fm page, the HTML element containing genres is:
- * 
+ *
  * ```html
-    <section class="catalogue-tags">
-        <ul class="tags-list tags-list--global">
-            <li class="tag">
-                <a href="/tag/indie">indie</a>
-            </li>
-            <!-- Repeat `<li>` for however many genres there are -->
-        </ul>
-    </section>
-    
-    <!-- There is a similar section (i.e. artist's tags) to avoid -->
-    <section class="catalogue-tags about-artist-tags">
-        <!-- Possibly the exact same content as above -->
-    </section>
+ * <section class="catalogue-tags">
+ *     <ul class="tags-list tags-list--global">
+ *         <li class="tag">
+ *             <a href="/tag/indie">indie</a>
+ *         </li>
+ *         <!-- Repeat `<li>` for however many genres there are -->
+ *     </ul>
+ * </section>
+ *
+ * <!-- There is a similar section (i.e. artist's tags) to avoid -->
+ * <section class="catalogue-tags about-artist-tags">
+ *     <!-- Possibly the exact same content as above -->
+ * </section>
  * ```
- * 
+ *
  * -----
- * 
+ *
  * Source: https://www.last.fm/music/Florence+%252B+the+Machine/_/Dog+Days+Are+Over
- * 
+ *
  * View provided example (more than 2 genres):
- * 
+ *
  * - Uncomment `console.log()` lines.
  * - Submit "Florence + The Machine - Dog Days Are Over" \
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
- * 
+ *
  * View insufficient genres:
- * 
+ *
  * - Uncomment `console.log()` lines.
  * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
@@ -215,37 +215,37 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
  * Last.fm API returns `[]` or an array of objects. Example:
  *
  * ```js
-    [
-        {
-            name: "You've Got the Love",
-            playcount: 10210622,
-            match: 1,
-            url: 'https://www.last.fm/music/Florence+%252B+the+Machine/_/You%27ve+Got+the+Love',
-            streamable: { '#text': '0', fulltrack: '0' },
-            duration: 164,
-            artist: {
-                name: 'Florence + the Machine',
-                mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
-                url: 'https://www.last.fm/music/Florence+%252B+the+Machine'
-            },
-            image: [
-                {
-                    '#text': 'https://lastfm.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png',
-                    size: 'small'
-                },
-                // Repeat `{}` for however many times
-            ]
-        },
-        // Repeat `{}` for 99 more times until 100 elements
-    ]
+ * [
+ *     {
+ *         name: "You've Got the Love",
+ *         playcount: 10210622,
+ *         match: 1,
+ *         url: 'https://www.last.fm/music/Florence+%252B+the+Machine/_/You%27ve+Got+the+Love',
+ *         streamable: { '#text': '0', fulltrack: '0' },
+ *         duration: 164,
+ *         artist: {
+ *             name: 'Florence + the Machine',
+ *             mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
+ *             url: 'https://www.last.fm/music/Florence+%252B+the+Machine'
+ *         },
+ *         image: [
+ *             {
+ *                 '#text': 'https://lastfm.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png',
+ *                 size: 'small'
+ *             },
+ *             // Repeat `{}` for however many times
+ *         ]
+ *     },
+ *     // Repeat `{}` for 99 more times until 100 elements
+ * ]
  * ```
- * 
+ *
  * -----
- * 
+ *
  * Source: https://www.last.fm/api/show/track.getSimilar
- * 
+ *
  * View provided example:
- * 
+ *
  * - Uncomment `console.log()` lines.
  * - Submit "Florence + The Machine - Dog Days Are Over" \
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
@@ -262,17 +262,17 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     if (!response.ok) return [];
     /**
      * Returns an object of an object. Example:
-     * 
+     *
      * ```js
-        {
-            similartracks: {
-                track: [
-                    [Object],
-                    // Repeat `[Object]` for 99 more times until 100 elements
-                ],
-                '@attr': { artist: 'Florence + the Machine', track: 'Dog Days Are Over' }
-            }
-        }
+     * {
+     *     similartracks: {
+     *         track: [
+     *             [Object],
+     *             // Repeat `[Object]` for 99 more times until 100 elements
+     *         ],
+     *         '@attr': { artist: 'Florence + the Machine', track: 'Dog Days Are Over' }
+     *     }
+     * }
      * ```
      */
     const data = await response.json();
@@ -288,48 +288,48 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
 
 /**
  * Web scraping Last.fm page returns `null` or a string. Example:
- * 
+ *
  * ```js
-    "PQZhN65vq9E"
+ * "PQZhN65vq9E"
  * ```
- * 
+ *
  * -----
- * 
+ *
  * In a track's Last.fm page, the HTML element containing the YouTube video ID is:
- * 
+ *
  * ```html
-    <a
-        id="track-page-video-playlink"
-        href="https://www.youtube.com/watch?v=PQZhN65vq9E"
-        data-youtube-id="PQZhN65vq9E"
-        data-youtube-url="https://www.youtube.com/watch?v=PQZhN65vq9E"
-        ...
-    ></a>
+ * <a
+ *     id="track-page-video-playlink"
+ *     href="https://www.youtube.com/watch?v=PQZhN65vq9E"
+ *     data-youtube-id="PQZhN65vq9E"
+ *     data-youtube-url="https://www.youtube.com/watch?v=PQZhN65vq9E"
+ *     ...
+ * ></a>
  * ```
- * 
+ *
  * Note that the returned string (i.e. `id`) can be used for anything YouTube-related:
- * 
+ *
  * - Normal YouTube: `https://www.youtube.com/watch?v={id}`
  * - Embedded YouTube: `https://www.youtube.com/embed/${id}`
  * - YouTube Music: `https://music.youtube.com/watch?v=${id}`
- * 
+ *
  * -----
- * 
+ *
  * Source:
- * 
+ *
  * - Has video: https://www.last.fm/music/Florence+%252B+the+Machine/_/You%27ve+Got+the+Love
  * - Has no video: https://www.last.fm/music/mikeeysmind/_/Tayk+hard+x+resonance
- * 
+ *
  * View provided example (has video):
- * 
+ *
  * - Uncomment `console.log()` lines.
  * - Submit "Florence + The Machine - Dog Days Are Over" \
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  * - Check the first recommendation.
- * 
+ *
  * View no video:
- * 
+ *
  * - Uncomment `console.log()` lines.
  * - Submit '"Playboi Carti" - Bando' \
  *   via https://open.spotify.com/track/6z7dQwXh9UJJl4wsWxexuI?si=308467749bd94d0d \
@@ -365,76 +365,76 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
 
 /**
  * Web scraping Last.fm page returns a `listenAtLinks` object with 3 keys. Example:
- * 
+ *
  * ```js
-    listenAtLinks: {
-        spotify: 'https://open.spotify.com/track/1CcLA0eaauck34YEIrvAAq',
-        appleMusic: 'https://geo.music.apple.com/album/id1713571199?i=1713571204&at=10l3Sh',
-        youtubeMusic: 'https://music.youtube.com/watch?v=YBGtzfK5Bak'
-    }
+ * listenAtLinks: {
+ *     spotify: 'https://open.spotify.com/track/1CcLA0eaauck34YEIrvAAq',
+ *     appleMusic: 'https://geo.music.apple.com/album/id1713571199?i=1713571204&at=10l3Sh',
+ *     youtubeMusic: 'https://music.youtube.com/watch?v=YBGtzfK5Bak'
+ * }
  * ```
- * 
+ *
  * If no links are found, then it will default to its respective index pages. Example:
- * 
+ *
  * - `'https://open.spotify.com'`
  * - `'https://geo.music.apple.com'`
  * - `'https://music.youtube.com'`
- * 
+ *
  * -----
- * 
+ *
  * In a track's Last.fm page, the HTML element containing links to other music platform is:
- * 
+ *
  * ```html
-    <!-- Under the page's "Play this track" section -->
-    <ul class="play-this-track-playlinks">
-        <li>
-            <a
-                <!-- 1 of 4 -->
-                class="play-this-track-playlink--youtube ..."
-                href="https://www.youtube.com/watch?v=PQZhN65vq9E"
-                ...
-                <!-- 2 of 4 -->
-                class="play-this-track-playlink--spotify ..."
-                href="https://open.spotify.com/track/244AvzGQ4Ksa5637JQu5Gy"
-                ...
-                <!-- 3 of 4 -->
-                class="play-this-track-playlink--itunes ..."
-                href="https://geo.music.apple.com/album/id1440729743?i=1440729760&at=10l3Sh"
-                ...
-            >
-                <!-- Respective music platform's name -->
-            </a>
-        </li>
-    </ul>
-    
-    <!-- Sometimes, only Apple Music link is under the page's "External Links" section -->
-    <ul class="resource-external-links">
-        <li>
-            <!--
-            The same weird "itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;" string
-            appears consistently across different tracks
-            that should be removed
-            -->
-            <a
-                <!-- 4 of 4 -->
-                class="resource-external-link--apple-music ..."
-                href="https://music.apple.com/SG/search?itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;term=mikeeysmind-Tayk_hard_x_resonance"
-                ...
-            >Apple Music</a>
-        </li>
-    </ul>
+ * <!-- Under the page's "Play this track" section -->
+ * <ul class="play-this-track-playlinks">
+ *     <li>
+ *         <a
+ *             <!-- 1 of 4 -->
+ *             class="play-this-track-playlink--youtube ..."
+ *             href="https://www.youtube.com/watch?v=PQZhN65vq9E"
+ *             ...
+ *             <!-- 2 of 4 -->
+ *             class="play-this-track-playlink--spotify ..."
+ *             href="https://open.spotify.com/track/244AvzGQ4Ksa5637JQu5Gy"
+ *             ...
+ *             <!-- 3 of 4 -->
+ *             class="play-this-track-playlink--itunes ..."
+ *             href="https://geo.music.apple.com/album/id1440729743?i=1440729760&at=10l3Sh"
+ *             ...
+ *         >
+ *             <!-- Respective music platform's name -->
+ *         </a>
+ *     </li>
+ * </ul>
+ *
+ * <!-- Sometimes, only Apple Music link is under the page's "External Links" section -->
+ * <ul class="resource-external-links">
+ *     <li>
+ *         <!--
+ *         The same weird "itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;" string
+ *         appears consistently across different tracks
+ *         that should be removed
+ *         -->
+ *         <a
+ *             <!-- 4 of 4 -->
+ *             class="resource-external-link--apple-music ..."
+ *             href="https://music.apple.com/SG/search?itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;term=mikeeysmind-Tayk_hard_x_resonance"
+ *             ...
+ *         >Apple Music</a>
+ *     </li>
+ * </ul>
  * ```
- * 
+ *
  * -----
- * 
+ *
  * Source:
- * 
+ *
  * - Has all "Play this track" links: \
  *   https://www.last.fm/music/Florence+%252B+the+Machine/_/You%27ve+Got+the+Love
- * 
+ *
  * - Has no "Play this track" links, only has "External Links" links: \
  *   https://www.last.fm/music/mikeeysmind/_/Tayk+hard+x+resonance
- * 
+ *
  * View provided example (has all "Play this track" links):
  *
  * - Uncomment `console.log()` lines.
@@ -523,21 +523,21 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
  * Last.fm API returns `[]` or an array of strings. Example:
  *
  * ```js
-    [ 'indie', 'female vocalists', 'alternative', 'indie pop', 'british' ]
+ * [ 'indie', 'female vocalists', 'alternative', 'indie pop', 'british' ]
  * ```
  *
  * - Last.fm API may return 0 genres (i.e. `[]`) even if its Last.fm page has genres listed.
- * 
+ *
  * -----
- * 
+ *
  * Source: https://www.last.fm/api/show/track.getInfo
- * 
+ *
  * View provided example (with `tag: [Array]` and `wiki: { Object }`):
  * - Uncomment `console.log()` lines.
  * - Submit "Florence + The Machine - Dog Days Are Over" \
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
- * 
+ *
  * View `tag: []` and non-existent `wiki` key:
  * - Uncomment `console.log()` lines.
  * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
@@ -557,37 +557,37 @@ export async function getLastFmAboutLink(artistName: string, trackName: string) 
         if (!response.ok) return "https://www.last.fm/";
         /**
          * Returns an object with many keys. Example:
-         * 
+         *
          * ```js
-            {
-                track: {
-                    name: 'Dog Days Are Over',
-                    mbid: '52587f93-2a1d-45fb-a8ba-97aafa2c1f28',
-                    url: 'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over',
-                    duration: '0',
-                    streamable: { '#text': '0', fulltrack: '0' },
-                    // `listeners` and `playcount` could be potential parameters
-                    // but Spotify's `popularity` key seems better
-                    listeners: '2537',
-                    playcount: '8492',
-                    artist: {
-                        name: 'Florence   The Machine',
-                        // Some artists do not have `mbid` key
-                        mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
-                        url: 'https://www.last.fm/music/Florence+++The+Machine'
-                    },
-                    // ----- Normal ----- //
-                    toptags: { tag: [Array] },
-                    wiki: {
-                        published: '31 Aug 2009, 11:29',
-                        summary: `"Dog... Read more on Last.fm</a>.`,
-                        content: `"Dog... \n` + '\n' + '...' + '... terms may apply.'
-                    }
-                    // ----- Abnormal ----- //
-                    toptags: { tag: [] }
-                    // `wiki:` does not exist at all
-                }
-            }
+         * {
+         *     track: {
+         *         name: 'Dog Days Are Over',
+         *         mbid: '52587f93-2a1d-45fb-a8ba-97aafa2c1f28',
+         *         url: 'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over',
+         *         duration: '0',
+         *         streamable: { '#text': '0', fulltrack: '0' },
+         *         // `listeners` and `playcount` could be potential parameters
+         *         // but Spotify's `popularity` key seems better
+         *         listeners: '2537',
+         *         playcount: '8492',
+         *         artist: {
+         *             name: 'Florence   The Machine',
+         *             // Some artists do not have `mbid` key
+         *             mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
+         *             url: 'https://www.last.fm/music/Florence+++The+Machine'
+         *         },
+         *         // ----- Normal ----- //
+         *         toptags: { tag: [Array] },
+         *         wiki: {
+         *             published: '31 Aug 2009, 11:29',
+         *             summary: `"Dog... Read more on Last.fm</a>.`,
+         *             content: `"Dog... \n` + '\n' + '...' + '... terms may apply.'
+         *         }
+         *         // ----- Abnormal ----- //
+         *         toptags: { tag: [] }
+         *         // `wiki:` does not exist at all
+         *     }
+         * }
          * ```
          */
         let data = await response.json();
@@ -595,7 +595,7 @@ export async function getLastFmAboutLink(artistName: string, trackName: string) 
          * Returns a string. Example:
          *
          * ```js
-            'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over'
+         * 'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over'
          * ```
          */
         const aboutLink = data?.track?.url;

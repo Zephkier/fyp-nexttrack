@@ -264,16 +264,16 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      * Last.fm API returns `[]` or an array of objects, where each object has additional keys like:
      *
      * ```js
-        {
-            ...lastFmSimilarTracks1[0],
-            youtubeId: 'WbN0nX61rIs',
-            listenAtLinks: {
-                spotify: 'https://open.spotify.com/track/71iSmEeF0qRVyULABxP75P',
-                appleMusic: 'https://geo.music.apple.com/album/id1440862789?i=1440862797&at=10l3Sh',
-                youtubeMusic: 'https://music.youtube.com/watch?v=WbN0nX61rIs'
-            }
-        },
-        // Repeat `{}` for `numberOfRecommendations` more times
+     * {
+     *     ...lastFmSimilarTracks1[0],
+     *     youtubeId: 'WbN0nX61rIs',
+     *     listenAtLinks: {
+     *         spotify: 'https://open.spotify.com/track/71iSmEeF0qRVyULABxP75P',
+     *         appleMusic: 'https://geo.music.apple.com/album/id1440862789?i=1440862797&at=10l3Sh',
+     *         youtubeMusic: 'https://music.youtube.com/watch?v=WbN0nX61rIs'
+     *     }
+     * },
+     * // Repeat `{}` for `numberOfRecommendations` more times
      * ```
      *
      * @see {@linkcode getLastFmSimilarTracks()}
