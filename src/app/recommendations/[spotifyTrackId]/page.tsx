@@ -302,7 +302,7 @@ export default async function RecommendationsWithId({ params }: { params: Promis
              * @see {@linkcode getGeniusSearch()}
              */
             const searchResults = await getGeniusSearch(similarTrack.artist.name, similarTrack.name);
-            const firstSearchResultGeniusUrl = searchResults[0]?.result?.url;
+            let firstSearchResultGeniusUrl = searchResults[0]?.result?.url;
             // // TEST Ensure that the first search result is usually correct
             // console.log(searchResults[0].result.primary_artist.name);
             // console.log(searchResults[0].result.title);
@@ -314,8 +314,7 @@ export default async function RecommendationsWithId({ params }: { params: Promis
              * @see {@link getGeniusAboutLink}
              */
             const geniusAboutLink = await getGeniusAboutLink(firstSearchResultGeniusUrl, similarTrack.name);
-            // FIXME Continue working on getting this to link
-            // const lastFmAboutLink = await getLastFmAboutLink(similarTrack.artist.name, similarTrack.name);
+            const lastFmAboutLink = await getLastFmAboutLink(similarTrack.artist.name, similarTrack.name);
 
             // ----- Done ----- //
             return {
@@ -325,8 +324,7 @@ export default async function RecommendationsWithId({ params }: { params: Promis
                 listenAtLinks,
                 aboutLinks: {
                     genius: geniusAboutLink,
-                    // FIXME Continue working on getting this to link
-                    // lastFm: lastFmAboutLink,
+                    lastFm: lastFmAboutLink,
                 },
             };
         })
@@ -339,9 +337,7 @@ export default async function RecommendationsWithId({ params }: { params: Promis
     // }
     // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
-    // ----- FIXME Replacing placeholders as seen below FIXME ----- //
-
-    // x
+    // ----- FIXME Replace placeholders as seen below FIXME ----- //
 
     // ----- (Last step) Convert retrieved data into suitable types for frontend components to render ----- //
 
