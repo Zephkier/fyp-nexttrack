@@ -30,7 +30,12 @@ export const moods = ["happy", "sad", "chill", "party"];
  * - You (the developer) must manually add new genres into it.
  * - It is recommended to sort and group by similar genres.
  */
-export const genreToMoodMapping: { [key: string]: { mood: string; weight: number }[] } = {
+export const genreToMoodMapping: {
+    [key: string]: {
+        mood: string;
+        weight: number;
+    }[];
+} = {
     pop: [
         { mood: moods[0], weight: 2 },
         { mood: moods[3], weight: 3 },
@@ -173,7 +178,7 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
      * - The key is the `mood` (based on `genreToMoodMapping`).
      * - The value is the sum of that `mood`'s `weight`.
      */
-    const summedMappingObject: { [key: string]: number } = {};
+    const summedMappingObject: { [mood: string]: number } = {};
     // Iterate through track's genres
     for (const genre of genres) {
         /**
@@ -229,7 +234,7 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
      */
     const inferredMoods = summedMappingArray
         .sort((a, b) => b[1] - a[1])
-        .map(([mood, weight]) => mood)
+        .map(([mood]) => mood)
         .slice(0, numberOfMoodsToGet);
     return inferredMoods;
 }

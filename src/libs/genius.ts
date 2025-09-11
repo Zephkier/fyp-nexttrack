@@ -140,22 +140,18 @@ export async function getGeniusSearch(artistName: string, trackName: string) {
         console.error("[!] ./src/libs/genius.ts::getGeniusSearch()");
         return null;
     }
-    /**
-     * Returns an object of objects. Example:
-     *
-     * ```js
-     * {
-     *     meta: { status: 200 },
-     *     response: {
-     *         hits: [
-     *             [Object],
-     *             // Repeat `[Object]` for however many search results there are
-     *         ]
-     *     }
-     * }
-     * ```
-     */
-    const data = await response.json();
+    const data: {
+        meta: { status: number };
+        response: {
+            hits: {
+                highlights: [];
+                index: string;
+                type: string;
+                // Repeat `{}` for however many search results there are
+                result: { url: string };
+            }[];
+        };
+    } = await response.json();
     const searchResults = data.response.hits;
     // // TEST Ensure that the first search result is usually correct
     // console.log(`Searched for: ${artistAndTrackName}`);
@@ -317,7 +313,7 @@ export async function getGeniusSong_deprecated(id: number) {
      * }
      * ```
      */
-    const data = await response.json();
+    // const data = await response.json();
     // // TEST
     // console.log(data.response);
     // console.log("[!] ^ from ./src/libs/genius.ts::getGeniusSong_deprecated()");
@@ -388,7 +384,7 @@ export async function webScrapeGeniusGenres(geniusUrl: string) {
 }
 
 /**
- * Genius API and web scraping Genius page returns `"https://genius.com/"` or a string. Example:
+ * Genius API and web scraping Genius page returns `null` or a string. Example:
  *
  * ```js
  *  "https://genius.com/Timmy-trumpet-and-poltergst-like-a-g6-lyrics"
@@ -460,8 +456,8 @@ export async function webScrapeGeniusGenres(geniusUrl: string) {
  * ...
  * ```
  */
-export async function getGeniusAboutLink(geniusUrl: string, trackName: string) {
-    if (!geniusUrl) return "https://genius.com/";
+export async function getGeniusAboutLink(geniusUrl: string | null, trackName: string) {
+    if (!geniusUrl) return null;
 
     // ----- Genius URLs that are correct: the URLs are already the "about" link, so just return them ----- //
 
@@ -487,7 +483,7 @@ export async function getGeniusAboutLink(geniusUrl: string, trackName: string) {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
             cache: "no-store",
         });
-        if (!response.ok) return "https://genius.com/";
+        if (!response.ok) return null;
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
@@ -516,9 +512,9 @@ export async function getGeniusAboutLink(geniusUrl: string, trackName: string) {
         console.log(`Its Genius URL this time:           ${correctGeniusUrl}`);
         console.log("[!] ^ from ./src/libs/genius.ts::getGeniusAboutLink()");
         console.log();
-        return correctGeniusUrl ?? "https://genius.com/";
+        return correctGeniusUrl ?? null;
     } catch (err) {
         console.error(`[!] ./src/libs/genius.ts::getGeniusAboutLink():\n${err}`);
-        return "https://genius.com/";
+        return null;
     }
 }

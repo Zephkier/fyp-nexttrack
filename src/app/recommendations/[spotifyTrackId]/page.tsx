@@ -5,6 +5,7 @@ import SubmittedTrackDetails from "@/ui/components/SubmittedTrackDetails";
 import CustomiseRecommendations from "@/ui/components/CustomiseRecommendations";
 import RecommendedTracks from "@/ui/components/RecommendedTracks";
 
+import { inferMoodsFromGenres } from "@/libs/mood";
 import { getSpotifyTrackDetails } from "@/libs/spotify";
 import {
     // Format
@@ -19,13 +20,11 @@ import {
 import {
     // Format
     getGeniusSearch,
-    getGeniusSong_deprecated,
     webScrapeGeniusGenres,
     getGeniusAboutLink,
 } from "@/libs/genius";
-import { inferMoodsFromGenres } from "@/libs/mood";
 
-type similarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>;
+type lastFmSimilarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>[number];
 
 export const metadata: Metadata = {
     title: "Recommendations",
@@ -35,7 +34,10 @@ export const metadata: Metadata = {
  * 1. `spotifyTrackId` is based on the directory's name (which has been named `[spotifyTrackId]`).
  * 2. `params` **must** be called `params` and not anything else due to nature of Next.js.
  */
-export default async function RecommendationsWithId({ params }: { params: Promise<{ spotifyTrackId: string }> }) {
+export default async function RecommendationsWithId(
+    // Format
+    { params }: { params: Promise<{ spotifyTrackId: string }> }
+) {
     /**
      * `spotifyTrackId` must...
      *
@@ -124,61 +126,18 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      * Priority 6. Set `["no genres found"]` - fail-safe
      */
 
-    /**
-     * **Doing "Priority 1. Spotify API"** \
-     * NIL
-     */
+    // // TEST Handle cases where there are insufficient genres (move this line anywhere)
+    // retrievedGenres = [];
 
-    /**
-     * **Doing "Priority 2. Last.fm API"** \
-     * Last.fm API returns `[]` or an array of strings.
-     * @see {@linkcode getLastFmGenres()}
-     */
     let retrievedGenres: string[] = await getLastFmGenres(artistName, trackName);
-
-    // // TEST Handle cases where there are insufficient genres
-    // retrievedGenres = [];
-
-    /**
-     * **Doing "Priority 3. Last.fm web scrape" when the above returns insufficient genres** \
-     * Last.fm API returns `[]` or an array of strings.
-     * @see {@linkcode getLastFmGenres()}
-     */
-    if (retrievedGenres.length < 2) retrievedGenres = await webScrapeLastFmGenres(artistName, trackName);
-
-    // // TEST Handle cases where there (still) are insufficient genres
-    // retrievedGenres = [];
-
-    /**
-     * **Doing "Priority 4. Genius API"** \
-     * Created `getGeniusSong_deprecated()` function only to find out \
-     * that it has no genre-related data.
-     * @see {@linkcode getGeniusSong_deprecated()}
-     */
-
-    /**
-     * **Doing "Priority 5. Genius web scrape" when the above (still) returns insufficient genres**
-     * @see {@linkcode getGeniusSearch()}
-     * @see {@linkcode webScrapeGeniusGenres()}
-     */
-    if (retrievedGenres.length < 2) {
+    const minNumberOfGenres = 2;
+    if (retrievedGenres.length < minNumberOfGenres) retrievedGenres = await webScrapeLastFmGenres(artistName, trackName);
+    if (retrievedGenres.length < minNumberOfGenres) {
         const searchResults = await getGeniusSearch(artistName, trackName);
-        const firstSearchResultGeniusUrl: string = searchResults[0]?.result?.url;
-        // // TEST Ensure that the first search result is usually correct
-        // console.log(searchResults[0].result.primary_artist.name);
-        // console.log(searchResults[0].result.title);
-        // console.log(`id: ${searchResults[0].result.id}, url: ${searchResults[0].result.url}`);
-        // console.log();
-        retrievedGenres = await webScrapeGeniusGenres(firstSearchResultGeniusUrl);
+        const firstSearchResultGeniusUrl: string | null = searchResults?.[0]?.result?.url ?? null;
+        if (firstSearchResultGeniusUrl) retrievedGenres = await webScrapeGeniusGenres(firstSearchResultGeniusUrl);
     }
-
-    // // TEST Handle cases where there (still) are insufficient genres
-    // retrievedGenres = [];
-
-    /**
-     * **Doing "Priority 6. Set..." when the above (still) returns insufficient genres**
-     */
-    if (retrievedGenres.length < 2) retrievedGenres = ["no genres found"];
+    if (retrievedGenres.length < minNumberOfGenres) retrievedGenres = ["no genres found"];
 
     // ----- Get moods that are custom-created and inferred from genres ----- //
 
@@ -191,10 +150,6 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      */
 
     const numberOfMoodsToGet = 2;
-    /**
-     * Helper function returns `[]` or an array of strings.
-     * @see {@linkcode inferMoodsFromGenres()}
-     */
     const inferredMoods = inferMoodsFromGenres(retrievedGenres, numberOfMoodsToGet);
 
     // ----- (Last step) Convert and standardise retrieved data into suitable types for frontend components to render ----- //
@@ -215,9 +170,7 @@ export default async function RecommendationsWithId({ params }: { params: Promis
     // ----- Get recommended tracks ----- //
 
     /**
-     * TODO
-     *
-     * This is not urgent, work on others (below) first.
+     * TODO This is not urgent, work on others first.
      *
      * Current recommendations are placeholders.
      *
@@ -236,16 +189,14 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      * Last.fm API returns `[]` or an array of objects.
      * @see {@linkcode getLastFmSimilarTracks()}
      */
-    let lastFmSimilarTracks1: object[] = await getLastFmSimilarTracks(artistName, trackName);
+    let lastFmSimilarTracks1 = await getLastFmSimilarTracks(artistName, trackName);
 
     /**
-     * TODO
-     *
-     * This is not urgent, work on others (below) first.
-     *
+     * TODO This is not urgent, work on others first. \
      * Allow users to adjust this value via page navigation?
+     *
+     * Limit number of results (done here for better separation of concerns).
      */
-    // Limit number of results (done here for better separation of concerns)
     const numberOfRecommendations = 10;
     lastFmSimilarTracks1 = lastFmSimilarTracks1.slice(0, numberOfRecommendations);
 
@@ -281,44 +232,34 @@ export default async function RecommendationsWithId({ params }: { params: Promis
      * @see `listenAtLinks` via {@linkcode webScrapeLastFmListenAtLinks()}
      */
     const lastFmSimilarTracks2 = await Promise.all(
-        lastFmSimilarTracks1.map(async (similarTrack: similarTrackType) => {
+        lastFmSimilarTracks1.map(async (lastFmSimilarTrack: lastFmSimilarTrackType) => {
             /**
              * **Additional detail 1: YouTube ID for video embed** \
              * Web scraping Last.fm page returns `null` or a string.
              * @see {@linkcode webScrapeLastFmYoutubeId()}
              */
-            const youtubeId = await webScrapeLastFmYoutubeId(similarTrack.url);
+            const youtubeId = await webScrapeLastFmYoutubeId(lastFmSimilarTrack.url);
 
             /**
              * **Additional detail 2: "Listen at" buttons' link** \
              * Web scraping Last.fm page returns a `listenAtLinks` object with 3 keys.
              * @see {@linkcode webScrapeLastFmListenAtLinks()}
              */
-            const listenAtLinks = await webScrapeLastFmListenAtLinks(similarTrack.url);
+            const listenAtLinks = await webScrapeLastFmListenAtLinks(lastFmSimilarTrack.url);
 
             /**
              * **Additional detail 3: "About" buttons' link** \
              * Genius API returns `null` or an array of objects.
              * @see {@linkcode getGeniusSearch()}
              */
-            const searchResults = await getGeniusSearch(similarTrack.artist.name, similarTrack.name);
-            let firstSearchResultGeniusUrl = searchResults[0]?.result?.url;
-            // // TEST Ensure that the first search result is usually correct
-            // console.log(searchResults[0].result.primary_artist.name);
-            // console.log(searchResults[0].result.title);
-            // console.log(`id: ${searchResults[0].result.id}, url: ${searchResults[0].result.url}`);
-            // console.log();
-
-            /**
-             * Genius API and web scraping Genius page returns `null` or a string.
-             * @see {@link getGeniusAboutLink}
-             */
-            const geniusAboutLink = await getGeniusAboutLink(firstSearchResultGeniusUrl, similarTrack.name);
-            const lastFmAboutLink = await getLastFmAboutLink(similarTrack.artist.name, similarTrack.name);
+            const searchResults = await getGeniusSearch(lastFmSimilarTrack.artist.name, lastFmSimilarTrack.name);
+            const firstSearchResultGeniusUrl: string | null = searchResults?.[0]?.result?.url ?? null;
+            const geniusAboutLink = await getGeniusAboutLink(firstSearchResultGeniusUrl, lastFmSimilarTrack.name);
+            const lastFmAboutLink = await getLastFmAboutLink(lastFmSimilarTrack.artist.name, lastFmSimilarTrack.name);
 
             // ----- Done ----- //
             return {
-                ...similarTrack,
+                ...lastFmSimilarTrack,
                 // Format
                 youtubeId,
                 listenAtLinks,
@@ -337,23 +278,28 @@ export default async function RecommendationsWithId({ params }: { params: Promis
     // }
     // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
-    // ----- FIXME Replace placeholders as seen below FIXME ----- //
-
     // ----- (Last step) Convert retrieved data into suitable types for frontend components to render ----- //
 
+    /**
+     * TODO This is not urgent, work on others first. \
+     * Unsure to set `... ?? ...` here or within their own "lib" functions.
+     */
     const recommendedTracks = lastFmSimilarTracks2.map((recommendedTrack) => ({
-        name: recommendedTrack?.name,
-        artists: [recommendedTrack?.artist.name],
-        video: recommendedTrack?.youtubeId,
+        // TODO Handle `null` cases such that it displays greyed italic text like for `video`
+        name: recommendedTrack?.name ?? "Unknown track name...",
+        // TODO Handle `null` cases such that it displays greyed italic text like for `video`
+        artists: [recommendedTrack?.artist.name ?? "Unknown artist name..."],
+        video: recommendedTrack?.youtubeId ?? null,
         links: {
-            spotify: recommendedTrack?.listenAtLinks.spotify,
-            appleMusic: recommendedTrack?.listenAtLinks.appleMusic,
-            youtubeMusic: recommendedTrack?.listenAtLinks.youtubeMusic,
+            spotify: recommendedTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com/",
+            appleMusic: recommendedTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
+            youtubeMusic: recommendedTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
         },
         about: {
-            genius: recommendedTrack?.aboutLinks.genius,
-            lastFm: recommendedTrack?.aboutLinks.lastFm,
+            genius: recommendedTrack?.aboutLinks.genius ?? "https://genius.com/",
+            lastFm: recommendedTrack?.aboutLinks.lastFm ?? "https://www.last.fm/",
         },
+        // ----- FIXME Continue here: Replace placeholders as seen below ----- //
         comments: {
             genius: "https://genius.com/Queen-bohemian-rhapsody-lyrics#comments",
             lastFm: "https://www.last.fm/music/Queen/_/Bohemian+Rhapsody+-+Remastered+2011#shoutbox",
@@ -363,7 +309,10 @@ export default async function RecommendationsWithId({ params }: { params: Promis
 
     return (
         /**
+         * TODO
+         *
          * L side ("Customise Recommendations"):
+         *
          * - Double-click to reset slider's value.
          * - For "Release date Range", follow the wireframe (i.e. 2 selectors on 1 slider to indicate range).
          *      - Or use a calendar?
@@ -375,6 +324,9 @@ export default async function RecommendationsWithId({ params }: { params: Promis
          * - Option 2) As slider value changes, "Recommended Tracks" is updated in real-time.
          *
          * R side ("Recommended Tracks"):
+         *
+         * TODO
+         *
          * - Make video's size responsive? 360p size? Ultimately, it must scale to video's width.
          * - Make buttons without links greyed out.
          */

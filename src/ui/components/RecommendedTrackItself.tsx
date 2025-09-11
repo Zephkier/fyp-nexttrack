@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 // "type" is more flexible (allows for more use cases) than "interface"
-type recommendedTrackProp = {
+type recommendedTrackType = {
     name: string;
     artists: string[];
     video: string | null;
@@ -11,7 +11,7 @@ type recommendedTrackProp = {
     comments: { [key: string]: string };
 };
 
-export default function RecommendedTrackItself({ recommendedTrack }: { recommendedTrack: recommendedTrackProp }) {
+export default function RecommendedTrackItself({ recommendedTrack }: { recommendedTrack: recommendedTrackType }) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (

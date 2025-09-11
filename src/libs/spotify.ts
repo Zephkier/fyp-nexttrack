@@ -106,7 +106,7 @@ export async function getSpotifyTrackDetails(trackId: string) {
         const api = await getSpotifyApiToken();
         if (!api) return null;
         const response = await api.getTrack(trackId);
-        // // TEST
+        // // TEST Check for useful keys
         // console.log(response.body);
         // console.log("[!] ^ from ./src/libs/spotify.ts::getSpotifyTrackDetails()");
         return response.body;

@@ -1,5 +1,11 @@
 import * as cheerio from "cheerio";
 
+export type lastFmSimilarTrackType = {
+    name: string;
+    url: string;
+    artist: { name: string };
+};
+
 /**
  * Helper function returns a string that has been encoded twice as per Last.fm's format. Example:
  *
@@ -108,7 +114,7 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
      * }
      * ```
      */
-    let data = await response.json();
+    const data = await response.json();
     /**
      * Returns an array of objects. Example:
      *
@@ -122,8 +128,8 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
      * ]
      * ```
      */
-    const genresAndUrls = data.track.toptags.tag;
-    const genres = genresAndUrls.map((genre: { name: string }) => genre.name);
+    const genresAndUrls: { name: string; url: string }[] = data.track.toptags.tag;
+    const genres: string[] = genresAndUrls.map((genre: { name: string }) => genre.name);
     // // TEST Ensure that genres retrieved are displayed on NextTrack
     // // console.log(data);
     // console.log(fullUrl);
@@ -204,7 +210,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
         // console.log(fullUrl);
         // console.log(genres);
         // console.log("[!] ^ from ./src/libs/lastfm.ts::webScrapeLastFmGenres()");
-        return genres;
+        return genres ?? [];
     } catch (err) {
         console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmGenres():\n${err}`);
         return [];
@@ -251,7 +257,11 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function getLastFmSimilarTracks(artistName: string, trackName: string) {
+export async function getLastFmSimilarTracks(
+    artistName: string,
+    trackName: string
+): //
+Promise<lastFmSimilarTrackType[]> {
     const baseUrl = "http://ws.audioscrobbler.com";
     const method = "track.getSimilar";
     const apiKey = process.env.LASTFM_API_KEY;
@@ -260,22 +270,13 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     const fullUrl = `${baseUrl}/2.0/?method=${method}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&api_key=${apiKey}&format=json`;
     const response = await fetch(fullUrl);
     if (!response.ok) return [];
-    /**
-     * Returns an object of an object. Example:
-     *
-     * ```js
-     * {
-     *     similartracks: {
-     *         track: [
-     *             [Object],
-     *             // Repeat `[Object]` for 99 more times until 100 elements
-     *         ],
-     *         '@attr': { artist: 'Florence + the Machine', track: 'Dog Days Are Over' }
-     *     }
-     * }
-     * ```
-     */
-    const data = await response.json();
+    const data: {
+        similartracks: {
+            "@attr": { artist: string; track: string };
+            // Repeat `{}` for 99 more times until 100 elements
+            track: lastFmSimilarTrackType[];
+        };
+    } = await response.json();
     const similarTracks = data.similartracks.track;
     // // TEST Ensure that similar tracks retrieved are displayed on NextTrack
     // // console.log(similarTracks[0]);
@@ -374,11 +375,11 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
  * }
  * ```
  *
- * If no links are found, then it will default to its respective index pages. Example:
+ * If no links are found, then string will become `null` value. Example:
  *
- * - `'https://open.spotify.com'`
- * - `'https://geo.music.apple.com'`
- * - `'https://music.youtube.com'`
+ * ```js
+ * listenAtLinks: { spotify: null, appleMusic: null, youtubeMusic: null }
+ * ```
  *
  * -----
  *
@@ -452,7 +453,7 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
  * - Check the first recommendation.
  */
 export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
-    let listenAtLinks: {
+    const listenAtLinks: {
         spotify: string | null;
         appleMusic: string | null;
         youtubeMusic: string | null;
@@ -475,12 +476,12 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
 
         // - For YouTube Music
         let htmlElement = "a.play-this-track-playlink--youtube";
-        let htmlElementAttribute = "href";
+        const htmlElementAttribute = "href";
         let selector = $(htmlElement);
         let link = selector.attr(htmlElementAttribute);
         if (link) listenAtLinks.youtubeMusic = link.replace("https://www.", "https://music.");
         // TODO If no link, then I want a window popup that informs user there's no link found
-        else listenAtLinks.youtubeMusic = "https://music.youtube.com";
+        else listenAtLinks.youtubeMusic = null;
 
         // - For Spotify
         htmlElement = "a.play-this-track-playlink--spotify";
@@ -488,7 +489,7 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
         link = selector.attr(htmlElementAttribute);
         if (link) listenAtLinks.spotify = link;
         // TODO Same as above ^
-        else listenAtLinks.spotify = "https://open.spotify.com";
+        else listenAtLinks.spotify = null;
 
         // - For Apple Music (under the "Play this track" section)
         htmlElement = "a.play-this-track-playlink--itunes";
@@ -502,7 +503,7 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
             link = selector.attr(htmlElementAttribute);
             if (link) listenAtLinks.appleMusic = link.replace("itscg=30200&amp;at=10l3Sh&amp;ls=1&amp;", "");
             // TODO Same as above ^
-            else listenAtLinks.appleMusic = "https://geo.music.apple.com";
+            else listenAtLinks.appleMusic = null;
         }
 
         // // TEST Ensure that the Last.fm page's links matches what was retrieved
@@ -520,29 +521,19 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
 }
 
 /**
- * Last.fm API returns `[]` or an array of strings. Example:
+ * Last.fm API returns `null` or ?. Example:
  *
  * ```js
- * [ 'indie', 'female vocalists', 'alternative', 'indie pop', 'british' ]
+ * ?
  * ```
- *
- * - Last.fm API may return 0 genres (i.e. `[]`) even if its Last.fm page has genres listed.
  *
  * -----
  *
  * Source: https://www.last.fm/api/show/track.getInfo
  *
- * View provided example (with `tag: [Array]` and `wiki: { Object }`):
+ * View provided example (?):
  * - Uncomment `console.log()` lines.
- * - Submit "Florence + The Machine - Dog Days Are Over" \
- *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *   as NextTrack's user-submitted track.
- *
- * View `tag: []` and non-existent `wiki` key:
- * - Uncomment `console.log()` lines.
- * - Submit "Dimitri Vegas & Like Mike - Thank You (Not So Bad)" \
- *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
- *   as NextTrack's user-submitted track.
+ * - Submit "?"
  */
 export async function getLastFmAboutLink(artistName: string, trackName: string) {
     try {
@@ -554,7 +545,7 @@ export async function getLastFmAboutLink(artistName: string, trackName: string) 
         const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
         const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&format=json`;
         const response = await fetch(fullUrl);
-        if (!response.ok) return "https://www.last.fm/";
+        if (!response.ok) return null;
         /**
          * Returns an object with many keys. Example:
          *
@@ -590,7 +581,11 @@ export async function getLastFmAboutLink(artistName: string, trackName: string) 
          * }
          * ```
          */
-        let data = await response.json();
+        const data: {
+            track: {
+                url: string;
+            };
+        } = await response.json();
         /**
          * Returns a string. Example:
          *
@@ -605,9 +600,9 @@ export async function getLastFmAboutLink(artistName: string, trackName: string) 
         // console.log(fullUrl);
         // console.log("[!] ^ from ./src/libs/lastfm.ts::getLastFmAboutLink()");
         // console.log();
-        return aboutLink ?? "https://www.last.fm/";
+        return aboutLink ?? null;
     } catch (err) {
         console.error(`[!] ./src/libs/lastfm.ts::getLastFmAboutLink():\n${err}`);
-        return "https://www.last.fm/";
+        return null;
     }
 }
