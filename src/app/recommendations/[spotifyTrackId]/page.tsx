@@ -191,12 +191,8 @@ export default async function RecommendationsWithId(
      */
     let lastFmSimilarTracks1 = await getLastFmSimilarTracks(artistName, trackName);
 
-    /**
-     * TODO This is not urgent, work on others first. \
-     * Allow users to adjust this value via page navigation?
-     *
-     * Limit number of results (done here for better separation of concerns).
-     */
+    // TODO Allow users to adjust this value (via page navigation? select value via dropdown box?)
+    // Limit number of results
     const numberOfRecommendations = 10;
     lastFmSimilarTracks1 = lastFmSimilarTracks1.slice(0, numberOfRecommendations);
 
@@ -271,41 +267,46 @@ export default async function RecommendationsWithId(
         })
     );
 
-    // // TEST
-    // // console.log(lastFmSimilarTracks2);
-    // for (const similarTrack of lastFmSimilarTracks2) {
-    //     console.log(similarTrack.aboutLinks);
-    // }
-    // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
-
     // ----- (Last step) Convert retrieved data into suitable types for frontend components to render ----- //
 
-    /**
-     * TODO This is not urgent, work on others first. \
-     * Unsure to set `... ?? ...` here or within their own "lib" functions.
-     */
-    const recommendedTracks = lastFmSimilarTracks2.map((recommendedTrack) => ({
-        // TODO Handle `null` cases such that it displays greyed italic text like for `video`
-        name: recommendedTrack?.name ?? "Unknown track name...",
-        // TODO Handle `null` cases such that it displays greyed italic text like for `video`
-        artists: [recommendedTrack?.artist.name ?? "Unknown artist name..."],
-        video: recommendedTrack?.youtubeId ?? null,
-        links: {
-            spotify: recommendedTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com/",
-            appleMusic: recommendedTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
-            youtubeMusic: recommendedTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
-        },
-        about: {
-            genius: recommendedTrack?.aboutLinks.genius ?? "https://genius.com/",
-            lastFm: recommendedTrack?.aboutLinks.lastFm ?? "https://www.last.fm/",
-        },
-        // ----- FIXME Continue here: Replace placeholders as seen below ----- //
-        comments: {
-            genius: "https://genius.com/Queen-bohemian-rhapsody-lyrics#comments",
-            lastFm: "https://www.last.fm/music/Queen/_/Bohemian+Rhapsody+-+Remastered+2011#shoutbox",
-        },
-        lyrics: "https://genius.com/Queen-bohemian-rhapsody-lyrics",
-    }));
+    // TODO Unsure to set `... ?? ...` here or within their own "lib" functions
+    const recommendedTracks = lastFmSimilarTracks2.map((recommendedTrack) => {
+        const linkToItsGeniusPage = recommendedTrack?.aboutLinks?.genius ?? "https://genius.com/";
+        const linkToItsLastFmPage = recommendedTrack?.aboutLinks?.lastFm ?? "https://www.last.fm/";
+        return {
+            // TODO Handle `null` cases such that it displays greyed italic text like for `video`
+            name: recommendedTrack?.name ?? "Unknown track name",
+            // TODO Handle `null` cases such that it displays greyed italic text like for `video`
+            artists: [recommendedTrack?.artist.name ?? "Unknown artist name"],
+            video: recommendedTrack?.youtubeId ?? null,
+            links: {
+                spotify: recommendedTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com/",
+                appleMusic: recommendedTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
+                youtubeMusic: recommendedTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
+            },
+            // TODO Display the actual text instead of having a button with its link
+            // Re-use value in its `about.genius` key
+            about: {
+                genius: linkToItsGeniusPage,
+                lastFm: linkToItsLastFmPage,
+            },
+            // TODO Display the actual text instead of having a button with its link
+            // Re-use value in its `about.genius` key
+            comments: {
+                genius: `${linkToItsGeniusPage}#comments`,
+                lastFm: `${linkToItsLastFmPage}#shoutbox`,
+            },
+            // TODO Display the actual text instead of having a button with its link
+            // Re-use value in its `about.genius` key
+            lyrics: linkToItsGeniusPage,
+        };
+    });
+
+    // // TEST
+    // for (const recommendedTrack of recommendedTracks) {
+    //     console.log(recommendedTrack);
+    // }
+    // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
     return (
         /**
@@ -324,8 +325,6 @@ export default async function RecommendationsWithId(
          * - Option 2) As slider value changes, "Recommended Tracks" is updated in real-time.
          *
          * R side ("Recommended Tracks"):
-         *
-         * TODO
          *
          * - Make video's size responsive? 360p size? Ultimately, it must scale to video's width.
          * - Make buttons without links greyed out.
