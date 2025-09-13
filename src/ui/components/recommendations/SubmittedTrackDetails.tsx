@@ -1,5 +1,8 @@
-// "type" is more flexible (allows for more use cases) than "interface"
-type submittedTrackProp = {
+/**
+ * `type` is more flexible and has more use cases than `interface`.\
+ * Better to set this in child, and have parent import it.
+ */
+export type submittedTrackType = {
     name: string;
     artists: string[];
     releaseDate: string;
@@ -8,10 +11,10 @@ type submittedTrackProp = {
     moods: string[];
 };
 
-export default function SubmittedTrackDetails({ submittedTrack }: { submittedTrack: submittedTrackProp }) {
+export default function SubmittedTrackDetails({ submittedTrack }: { submittedTrack: submittedTrackType }) {
     return (
         <div className="mb-20">
-            <h3 className="text-2xl font-bold mb-2" style={{ color: "var(--primary)" }}>
+            <h3 className="mb-2 text-2xl font-bold" style={{ color: "var(--primary)" }}>
                 Submitted Track Details
             </h3>
             <ul>

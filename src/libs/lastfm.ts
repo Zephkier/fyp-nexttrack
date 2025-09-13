@@ -1,9 +1,12 @@
 import * as cheerio from "cheerio";
 
+// `type` is more flexible and has more use cases than `interface`
 export type lastFmSimilarTrackType = {
     name: string;
     url: string;
-    artist: { name: string };
+    artist: {
+        name: string;
+    };
 };
 
 /**

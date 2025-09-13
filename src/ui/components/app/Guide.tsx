@@ -1,6 +1,6 @@
 export default function Guide() {
     return (
-        <div className="mb-40">
+        <div className="mb-15">
             <h3
                 // Format
                 className="text-2xl font-bold mb-2"

@@ -1,6 +1,4 @@
-import RecommendedTrackItself from "./RecommendedTrackItself";
-
-type recommendedTrackType = Parameters<typeof RecommendedTrackItself>[0]["recommendedTrack"];
+import RecommendedTrack, { type recommendedTrackType } from "./RecommendedTrack";
 
 export default function RecommendedTracks({ recommendedTracks }: { recommendedTracks: recommendedTrackType[] }) {
     return (
@@ -20,7 +18,7 @@ export default function RecommendedTracks({ recommendedTracks }: { recommendedTr
             ) : (
                 <div className="space-y-4">
                     {recommendedTracks.map((recommendedTrack, index) => (
-                        <RecommendedTrackItself key={index} recommendedTrack={recommendedTrack} />
+                        <RecommendedTrack key={index} recommendedTrack={recommendedTrack} />
                     ))}
                 </div>
             )}

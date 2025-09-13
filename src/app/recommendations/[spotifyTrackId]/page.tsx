@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 
-import Hero from "@/ui/components/Hero";
-import SubmittedTrackDetails from "@/ui/components/SubmittedTrackDetails";
-import CustomiseRecommendations from "@/ui/components/CustomiseRecommendations";
-import RecommendedTracks from "@/ui/components/RecommendedTracks";
+export const metadata: Metadata = {
+    title: "Recommendations",
+};
+
+import SubmittedTrackDetails from "@/ui/components/recommendations/SubmittedTrackDetails";
+// This directory's `index.tsx` acts as the entry point, so no need to specify its `page.tsx` file
+import CustomiseRecommendations from "@/ui/components/recommendations/CustomiseRecommendations";
+import RecommendedTracks from "@/ui/components/recommendations/RecommendedTracks";
 
 import { inferMoodsFromGenres } from "@/libs/mood";
 import { getSpotifyTrackDetails } from "@/libs/spotify";
+import type { lastFmSimilarTrackType } from "@/libs/lastfm";
 import {
     // Format
     getLastFmGenres,
@@ -24,20 +29,11 @@ import {
     getGeniusAboutLink,
 } from "@/libs/genius";
 
-type lastFmSimilarTrackType = Awaited<ReturnType<typeof getLastFmSimilarTracks>>[number];
-
-export const metadata: Metadata = {
-    title: "Recommendations",
-};
-
 /**
  * 1. `spotifyTrackId` is based on the directory's name (which has been named `[spotifyTrackId]`).
  * 2. `params` **must** be called `params` and not anything else due to nature of Next.js.
  */
-export default async function RecommendationsWithId(
-    // Format
-    { params }: { params: Promise<{ spotifyTrackId: string }> }
-) {
+export default async function RecommendationsWithId({ params }: { params: Promise<{ spotifyTrackId: string }> }) {
     /**
      * `spotifyTrackId` must...
      *
@@ -89,9 +85,8 @@ export default async function RecommendationsWithId(
     if (!spotifyTrackDetails) {
         return (
             <main className="container mx-auto">
-                <Hero customMarginBottom="mb-20" />
                 <p className="h-[calc(100vh-24rem)] flex items-center justify-center text-gray-400 italic">
-                    {/* Height is meticulously calculated to ensure <footer> is out of vh (i.e. requires scrolling to be seen) */}
+                    {/* Height is meticulously calculated to ensure `<footer>` is out of vh so that the scrollbar appears */}
                     Cannot retrieve track data from Spotify.
                 </p>
             </main>
@@ -330,7 +325,6 @@ export default async function RecommendationsWithId(
          * - Make buttons without links greyed out.
          */
         <main className="container mx-auto">
-            <Hero customMarginBottom="mb-20" />
             <SubmittedTrackDetails submittedTrack={submittedTrack} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <CustomiseRecommendations submittedTrack={submittedTrack} />

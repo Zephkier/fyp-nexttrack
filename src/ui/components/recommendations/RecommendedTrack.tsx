@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 
-// "type" is more flexible (allows for more use cases) than "interface"
-type recommendedTrackType = {
+// `type` is more flexible and has more use cases than `interface`
+export type recommendedTrackType = {
     name: string;
     artists: string[];
     video: string | null;
@@ -11,7 +11,7 @@ type recommendedTrackType = {
     comments: { [key: string]: string };
 };
 
-export default function RecommendedTrackItself({ recommendedTrack }: { recommendedTrack: recommendedTrackType }) {
+export default function RecommendedTrack({ recommendedTrack }: { recommendedTrack: recommendedTrackType }) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (

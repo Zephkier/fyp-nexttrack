@@ -1,19 +1,14 @@
 "use client";
 import { useState } from "react";
 
+import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
 import { moods } from "@/libs/mood";
 
-// "type" is more flexible (allows for more use cases) than "interface"
-type submittedTrackProp = {
-    name: string;
-    artists: string[];
-    releaseDate: string;
-    popularity: number;
-    genres: string[];
-    moods: string[];
-};
+// FIXME
+// TODO  split this page into components
+// FIXME
 
-export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackProp }) {
+export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackType }) {
     const [similarity, setSimilarity] = useState(100);
     const [popularity, setPopularity] = useState(submittedTrack.popularity);
     const [dateRange, setDateRange] = useState(2000);

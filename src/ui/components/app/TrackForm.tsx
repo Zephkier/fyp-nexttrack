@@ -9,19 +9,24 @@ export default function TrackForm() {
 
     return (
         <form
+            className="mb-15"
             method="POST"
-            action="/api/recommendations" // This is located at "./src/app/api/recommendations/route.ts"
-            className="mb-40"
+            // Located at "./src/app/api/recommendations/route.ts"
+            action="/api/recommendations"
         >
             <label
-                htmlFor="spotifyTrackLink" // Connected to <input>'s "id" attribute below
                 className="mb-2 block text-xl"
+                // Connected to `<input id=...>` attribute below
+                htmlFor="spotifyTrackLink"
             >
                 Submit your <strong>Spotify</strong> track link:
             </label>
             <input
-                id="spotifyTrackLink" // Connected to <label>'s "htmlFor" attribute above
-                name="spotifyTrackLink" // Connected to "./src/app/api/recommendations/route.ts::POST()::link"
+                className="w-full px-3 py-2 mb-4 bg-white text-black placeholder-gray-400 focus:outline-none"
+                // Connected to `<label htmlFor...>` attribute above
+                id="spotifyTrackLink"
+                // Connected to "./src/app/api/recommendations/route.ts::POST()::link"
+                name="spotifyTrackLink"
                 type="text"
                 placeholder="https://open.spotify.com/track/..."
                 autoComplete="off"
@@ -30,20 +35,19 @@ export default function TrackForm() {
                 onChange={(event) => {
                     setInputValue(event.target.value);
                 }}
-                className="w-full px-3 py-2 mb-4 bg-white text-black placeholder-gray-400 focus:outline-none"
             />
             <button
                 // Format
-                type="submit"
                 className="px-4 py-2 mr-4 text-white bg-green-800 hover:bg-green-600 cursor-pointer"
+                type="submit"
             >
                 Submit
             </button>
             <button
                 // Format
+                className="px-4 py-2 text-white bg-red-800 hover:bg-red-600 cursor-pointer"
                 type="button"
                 onClick={handleClear}
-                className="px-4 py-2 text-white bg-red-800 hover:bg-red-600 cursor-pointer"
             >
                 Clear
             </button>
