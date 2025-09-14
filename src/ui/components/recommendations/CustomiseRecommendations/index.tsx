@@ -2,31 +2,36 @@
 import { useState } from "react";
 
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
-import { moods } from "@/libs/mood";
+import GenresSection from "./GenresSection";
+import PopularitySection from "./PopularitySection";
+import ReleaseDateRangeSection from "./ReleaseDateRangeSection";
+import MoodsSection from "./MoodsSection";
 
-// FIXME
-// TODO  split this page into components
-// FIXME
+import { moods } from "@/libs/mood";
 
 export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackType }) {
     const [similarity, setSimilarity] = useState(100);
     const [popularity, setPopularity] = useState(submittedTrack.popularity);
-    const [dateRange, setDateRange] = useState(2000);
+    const [releaseDateRange, setReleaseDateRange] = useState(2000);
     const [selectedMoods, setSelectedMoods] = useState<string[]>(submittedTrack.moods);
 
+    /**
+     * Returns an array of strings where the clicked mood is either added or removed from it.
+     *
+     * -----
+     *
+     * `clickedMood` refers to the mood that the user has clicked on. Thus, upon clicking a mood...
+     *
+     * - If it was already checked (i.e. **in** the array), then uncheck it (i.e. remove from array).
+     * - If it was unchecked (i.e. **not in** the array), then check it (i.e. add to array).
+     */
     function toggleMood(clickedMood: string) {
         setSelectedMoods((currentSelectedMoods) => {
-            // If "clickedMood" is already checked (i.e. in array), then uncheck it (i.e. remove from array)
+            // If `clickedMood` is, well, already checked (i.e. in array), then uncheck it (i.e. remove from array)
             if (currentSelectedMoods.includes(clickedMood)) return currentSelectedMoods.filter((mood) => mood != clickedMood);
-            // Opposite of above ^
+            // Opposite from ^: If `clickedMood` is unchecked (i.e. not in array), then check it (i.e. add to array)
             else return [...currentSelectedMoods, clickedMood];
         });
-    }
-
-    function titleCase(s: string) {
-        const firstLetter = s.charAt(0).toUpperCase();
-        const restOfTheLetters = s.slice(1);
-        return `${firstLetter}${restOfTheLetters}`;
     }
 
     return (
@@ -39,104 +44,34 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 Customise Recommendations
             </h3>
 
-            {/* Genres */}
-            <div
+            <GenresSection
                 // Format
-                className="mb-4 p-4"
-                style={{ background: "var(--secondary)" }}
-            >
-                <h4 className="mb-1 text-xl font-bold">Genres</h4>
-                <p className="mb-2">
-                    <b>Current:</b> {submittedTrack.genres.join(", ")}
-                    <br />
-                    <b>Recommended track&apos;s similarity:</b> {similarity}%
-                </p>
-                <input
-                    // Format
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={similarity}
-                    onChange={(e) => setSimilarity(Number(e.target.value))}
-                    className="w-full"
-                />
-            </div>
+                incomingGenres={submittedTrack.genres}
+                selectedGenresSimilarityValue={similarity}
+                onChange={setSimilarity}
+            />
 
-            {/* Popularity */}
-            <div
+            <PopularitySection
                 // Format
-                className="mb-4 p-4"
-                style={{ background: "var(--secondary)" }}
-            >
-                <h4 className="mb-1 text-xl font-bold">Popularity</h4>
-                <p className="mb-2">
-                    <b>Current:</b> {submittedTrack.popularity}%
-                    <br />
-                    <b>Recommended track&apos;s popularity:</b> {popularity}%
-                </p>
-                <input
-                    // Format
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={popularity}
-                    onChange={(e) => setPopularity(Number(e.target.value))}
-                    className="w-full"
-                />
-            </div>
+                incomingPopularity={submittedTrack.popularity}
+                selectedPopularityValue={popularity}
+                onChange={setPopularity}
+            />
 
-            {/* Release date range */}
-            <div
+            <ReleaseDateRangeSection
                 // Format
-                className="mb-4 p-4"
-                style={{ background: "var(--secondary)" }}
-            >
-                <h4 className="mb-1 text-xl font-bold">Release Date Range (Y-M-D)</h4>
-                <p className="mb-2">
-                    <b>Current:</b> {submittedTrack.releaseDate}
-                    <br />
-                    <b>Recommended track&apos;s release date:</b> {dateRange}
-                </p>
-                <input
-                    // Format
-                    type="range"
-                    min="1800"
-                    max="2025"
-                    step="1"
-                    value={dateRange}
-                    onChange={(e) => setDateRange(Number(e.target.value))}
-                    className="w-full"
-                />
-            </div>
+                incomingReleaseDate={submittedTrack.releaseDate}
+                selectedReleaseDateRange={releaseDateRange}
+                onChange={setReleaseDateRange}
+            />
 
-            {/* Moods */}
-            <div
+            <MoodsSection
                 // Format
-                className="mb-4 p-4"
-                style={{ background: "var(--secondary)" }}
-            >
-                <h4 className="mb-1 text-xl font-bold">Mood(s)</h4>
-                <p className="mb-2">
-                    <b>Current:</b> {submittedTrack.moods.join(", ")}
-                    <br />
-                    <b>Recommended track&apos;s mood(s):</b>
-                </p>
-                {/* Checkbox and mood */}
-                {moods.map((mood) => (
-                    <label key={mood} className="flex w-fit space-x-2">
-                        <input
-                            type="checkbox"
-                            checked={selectedMoods.includes(mood)}
-                            // Not using "setSelectedMoods(mood)" as we are dealing with checkboxes (i.e. array of selected moods)
-                            // If it was radio buttons (i.e. only 1 selection allowed), then can use "setSelectedMood(mood)"
-                            onChange={() => toggleMood(mood)}
-                        />
-                        <span>{titleCase(mood)}</span>
-                    </label>
-                ))}
-            </div>
+                moods={moods}
+                incomingMoods={submittedTrack.moods}
+                selectedMoods={selectedMoods}
+                onChange={toggleMood}
+            />
         </section>
     );
 }

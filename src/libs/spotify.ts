@@ -43,10 +43,12 @@ export async function getSpotifyApiToken() {
  *         id: '1rLLyY5p6HXNl2lKzINWp5',
  *         images: [ [Object], [Object], [Object] ],
  *         name: 'Lungs (Deluxe Version)',
- *         // Ensure this is YYYY-MM-DD
+ *         // When it is YYYY only (from this provided example)
  *         release_date: '2009',
- *         // Could be 'year', 'month', or 'day'
  *         release_date_precision: 'year',
+ *         // When it is YYYY-MM-DD (from "AC/DC - Thunderstruck")
+ *         release_date: '1990-09-24',
+ *         release_date_precision: 'day',
  *         total_tracks: 20,
  *         type: 'album',
  *         uri: 'spotify:album:1rLLyY5p6HXNl2lKzINWp5'
