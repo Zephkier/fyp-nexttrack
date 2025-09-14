@@ -11,7 +11,7 @@ export default function RecommendedTracks({ recommendedTracks }: { recommendedTr
                 Recommended Tracks
             </h3>
             {recommendedTracks.length == 0 ? (
-                <p className="items-center  text-gray-400 italic">
+                <p className="items-center text-gray-400 italic">
                     {/* Handle cases where there are no recommended tracks */}
                     No recommended tracks found...
                 </p>

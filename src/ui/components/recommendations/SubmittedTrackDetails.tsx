@@ -25,7 +25,7 @@ export default function SubmittedTrackDetails({ submittedTrack }: { submittedTra
                     <b>Artist(s):</b> {submittedTrack.artists.join(", ")}
                 </li>
                 <li>
-                    <b>Release Date (Y-M-D):</b> {submittedTrack.releaseDate}
+                    <b>Release Date (yyyy-mm-dd):</b> {submittedTrack.releaseDate}
                 </li>
             </ul>
         </div>

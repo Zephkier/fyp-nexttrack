@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
 import GenresSection from "./GenresSection";
 import PopularitySection from "./PopularitySection";
-import ReleaseDateRangeSection from "./ReleaseDateRangeSection";
+import ReleaseDateRangeSection, { currentDate } from "./ReleaseDateRangeSection";
 import MoodsSection from "./MoodsSection";
 
 import { moods } from "@/libs/mood";
@@ -12,8 +12,9 @@ import { moods } from "@/libs/mood";
 export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackType }) {
     const [similarity, setSimilarity] = useState(100);
     const [popularity, setPopularity] = useState(submittedTrack.popularity);
-    const [releaseDateRange, setReleaseDateRange] = useState(2000);
-    const [selectedMoods, setSelectedMoods] = useState<string[]>(submittedTrack.moods);
+    const [releaseDateFrom, setReleaseDateFrom] = useState("");
+    const [releaseDateTo, setReleaseDateTo] = useState(currentDate);
+    const [selectedMoods, setSelectedMoods] = useState(submittedTrack.moods);
 
     /**
      * Returns an array of strings where the clicked mood is either added or removed from it.
@@ -34,6 +35,18 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
         });
     }
 
+    function handleSubmit(event: React.FormEvent) {
+        event.preventDefault();
+        // // TODO Just `console.log()` for now, but shall pass these values to iterate through default list of recommended (i.e. similar) tracks
+        // // TEST
+        // console.log("[!] ./src/ui/components/recommendations/CustomiseRecommendations/index.tsx::CustomiseRecommendations()::handleSubmit():");
+        // console.log(`similarity: ${similarity}`);
+        // console.log(`popularity: ${popularity}`);
+        // console.log(`releaseDateFrom: ${releaseDateFrom}`);
+        // console.log(`releaseDateTo: ${releaseDateTo}`);
+        // console.log(`moods: ${moods}`);
+    }
+
     return (
         <section>
             <h3
@@ -44,34 +57,64 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
                 Customise Recommendations
             </h3>
 
-            <GenresSection
+            <form
                 // Format
-                incomingGenres={submittedTrack.genres}
-                selectedGenresSimilarityValue={similarity}
-                onChange={setSimilarity}
-            />
+                className="mb-15"
+                onSubmit={handleSubmit}
+            >
+                {/* There is a duplicate button at the bottom of this form */}
+                <div className="flex justify-end">
+                    <button
+                        // Format
+                        className="mb-4 px-4 py-2 text-white bg-[var(--secondary)] hover:bg-green-600 cursor-pointer"
+                        type="submit"
+                    >
+                        Submit Customisations
+                    </button>
+                </div>
 
-            <PopularitySection
-                // Format
-                incomingPopularity={submittedTrack.popularity}
-                selectedPopularityValue={popularity}
-                onChange={setPopularity}
-            />
+                <GenresSection
+                    // Format
+                    incomingGenres={submittedTrack.genres}
+                    selectedGenresSimilarityValue={similarity}
+                    onChange={setSimilarity}
+                />
 
-            <ReleaseDateRangeSection
-                // Format
-                incomingReleaseDate={submittedTrack.releaseDate}
-                selectedReleaseDateRange={releaseDateRange}
-                onChange={setReleaseDateRange}
-            />
+                <PopularitySection
+                    // Format
+                    incomingPopularity={submittedTrack.popularity}
+                    selectedPopularityValue={popularity}
+                    onChange={setPopularity}
+                />
 
-            <MoodsSection
-                // Format
-                moods={moods}
-                incomingMoods={submittedTrack.moods}
-                selectedMoods={selectedMoods}
-                onChange={toggleMood}
-            />
+                <ReleaseDateRangeSection
+                    // Format
+                    incomingReleaseDate={submittedTrack.releaseDate}
+                    releaseDateFrom={releaseDateFrom}
+                    releaseDateTo={releaseDateTo}
+                    onChangeFrom={setReleaseDateFrom}
+                    onChangeTo={setReleaseDateTo}
+                />
+
+                <MoodsSection
+                    // Format
+                    moods={moods}
+                    incomingMoods={submittedTrack.moods}
+                    selectedMoods={selectedMoods}
+                    onChange={toggleMood}
+                />
+
+                {/* There is a duplicate button at the top of this form */}
+                <div className="flex justify-end">
+                    <button
+                        // Format
+                        className="px-4 py-2 text-white bg-[var(--secondary)] hover:bg-green-600 cursor-pointer"
+                        type="submit"
+                    >
+                        Submit Customisations
+                    </button>
+                </div>
+            </form>
         </section>
     );
 }

@@ -26,7 +26,7 @@ export default function MoodsSection({
         >
             <h4 className="mb-1 text-xl font-bold">Mood(s)</h4>
             <p className="mb-2">
-                <b>Current:</b> {incomingMoods.join(", ")}%
+                <b>Current:</b> {incomingMoods.join(", ")}
                 <br />
                 <b>Recommended track&apos;s mood(s):</b>
             </p>
