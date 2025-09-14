@@ -5,7 +5,7 @@ export const metadata: Metadata = {
     title: `Recommendations`,
 };
 
-export default function Recommendations() {
+export default function RecommendationsPage() {
     return (
         /**
          * This page is loaded when users manually enter "/recommendations" in URL.

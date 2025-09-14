@@ -1,4 +1,5 @@
-import Example, { type exampleTrackType } from "./Example";
+import { type exampleTrackType } from "./Example";
+import Example from "./Example";
 
 const exampleTracks: exampleTrackType[] = [
     {

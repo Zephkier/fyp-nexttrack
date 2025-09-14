@@ -1,4 +1,5 @@
-import RecommendedTrack, { type recommendedTrackType } from "./RecommendedTrack";
+import { type recommendedTrackType } from "./RecommendedTrack";
+import RecommendedTrack from "./RecommendedTrack";
 
 export default function RecommendedTracks({ recommendedTracks }: { recommendedTracks: recommendedTrackType[] }) {
     return (

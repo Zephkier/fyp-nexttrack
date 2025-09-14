@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
+import type { lastFmSimilarTrackType } from "@/libs/lastfm";
 
-export const metadata: Metadata = {
-    title: "Recommendations",
-};
-
-import RecommendationsWithIdClient from "./pageClient";
+import RecommendationsWithIdClient from "./page.client";
 
 import { inferMoodsFromGenres } from "@/libs/mood";
 import { getSpotifyTrackDetails } from "@/libs/spotify";
-import type { lastFmSimilarTrackType } from "@/libs/lastfm";
 import {
     // Format
     getLastFmGenres,
@@ -26,11 +22,15 @@ import {
     getGeniusAboutLink,
 } from "@/libs/genius";
 
+export const metadata: Metadata = {
+    title: "Recommendations",
+};
+
 /**
  * 1. `spotifyTrackId` is based on the directory's name (which has been named `[spotifyTrackId]`).
  * 2. `params` **must** be called `params` and not anything else due to nature of Next.js.
  */
-export default async function RecommendationsWithId({ params }: { params: Promise<{ spotifyTrackId: string }> }) {
+export default async function TrackRecommendationsPage({ params }: { params: Promise<{ spotifyTrackId: string }> }) {
     /**
      * `spotifyTrackId` must...
      *

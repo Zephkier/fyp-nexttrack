@@ -2,15 +2,15 @@
 import { useState } from "react";
 
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
-import type { recommendedTrackType } from "@/ui/components/recommendations/RecommendedTrack";
 import type { customiseRecommendationsParamsType } from "@/ui/components/recommendations/CustomiseRecommendations";
+import type { recommendedTrackType } from "@/ui/components/recommendations/RecommendedTrack";
 
 import SubmittedTrackDetails from "@/ui/components/recommendations/SubmittedTrackDetails";
 // This directory's `index.tsx` acts as the entry point, so no need to specify its `page.tsx` file
 import CustomiseRecommendations from "@/ui/components/recommendations/CustomiseRecommendations";
 import RecommendedTracks from "@/ui/components/recommendations/RecommendedTracks";
 
-export default function RecommendationsWithIdClient({
+export default function TrackRecommendationsClient({
     // Format
     submittedTrack,
     initialRecommendedTracks,
@@ -22,9 +22,9 @@ export default function RecommendationsWithIdClient({
 
     // Receive params from "Customise Recommendations" section
     function handleSubmit(customiseRecommendationsParams: customiseRecommendationsParamsType) {
-        // TEST For now, just prove the flow
+        // TEST Printed in browser's console
         console.log("./src/app/recommendations/[spotifyTrackID]/pageClient.tsx::RecommendationsWithIdClient()::customiseRecommendationsParams:", customiseRecommendationsParams);
-        // Later can filter here and then:
+        // // Later can filter here and then:
         // setRecommendedTracks(filtered);
     }
 

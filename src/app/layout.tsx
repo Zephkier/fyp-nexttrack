@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 
+import { Geist, Geist_Mono } from "next/font/google";
+
+import "./globals.css";
+import Header from "@/ui/components/common/Header";
+import Footer from "@/ui/components/common/Footer";
+
 // Better to set `title` key in this manner for scalability
 export const metadata: Metadata = {
     title: {
@@ -8,8 +14,6 @@ export const metadata: Metadata = {
         template: `%s | ${siteConfig.name}`,
     },
 };
-
-import { Geist, Geist_Mono } from "next/font/google";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -20,10 +24,6 @@ const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
     subsets: ["latin"],
 });
-
-import "./globals.css";
-import Header from "@/ui/components/common/Header";
-import Footer from "@/ui/components/common/Footer";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
