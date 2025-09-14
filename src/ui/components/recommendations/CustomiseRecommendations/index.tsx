@@ -9,7 +9,27 @@ import MoodsSection from "./MoodsSection";
 
 import { moods } from "@/libs/mood";
 
-export default function CustomiseRecommendations({ submittedTrack }: { submittedTrack: submittedTrackType }) {
+/**
+ * `type` is more flexible and has more use cases than `interface`.\
+ * Better to set this in child, and have parent import it.
+ */
+export type customiseRecommendationsParamsType = {
+    similarity: number;
+    popularity: number;
+    releaseDateFrom: string | null;
+    releaseDateTo: string | null;
+    moods: string[];
+};
+
+export default function CustomiseRecommendations({
+    // Format
+    submittedTrack,
+    onSubmit,
+}: {
+    submittedTrack: submittedTrackType;
+    // Need `?` because Customise Recommendation's params are not submitted (i.e. undefined) on the first EVER page load
+    onSubmit?: (customiseRecommendationsParams: customiseRecommendationsParamsType) => void;
+}) {
     const [similarity, setSimilarity] = useState(100);
     const [popularity, setPopularity] = useState(submittedTrack.popularity);
     const [releaseDateFrom, setReleaseDateFrom] = useState("");
@@ -37,7 +57,14 @@ export default function CustomiseRecommendations({ submittedTrack }: { submitted
 
     function handleSubmit(event: React.FormEvent) {
         event.preventDefault();
-        // // TODO Just `console.log()` for now, but shall pass these values to iterate through default list of recommended (i.e. similar) tracks
+        // Need `?` because Customise Recommendation's params are not submitted (i.e. undefined) on the first EVER page load
+        onSubmit?.({
+            similarity,
+            popularity,
+            releaseDateFrom: releaseDateFrom || null,
+            releaseDateTo: releaseDateTo || null,
+            moods: selectedMoods,
+        });
         // // TEST
         // console.log("[!] ./src/ui/components/recommendations/CustomiseRecommendations/index.tsx::CustomiseRecommendations()::handleSubmit():");
         // console.log(`similarity: ${similarity}`);
