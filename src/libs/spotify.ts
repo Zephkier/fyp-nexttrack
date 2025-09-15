@@ -117,3 +117,18 @@ export async function getSpotifyTrackDetails(trackId: string) {
         return null;
     }
 }
+
+/**
+ * Helper function returns a string in "`YYYY-MM-DD`" format. Example:
+ *
+ * - Input: `"2025"` - Output: `"2025-01-01"`
+ * - Input: `"2025-01"` - Output: `"2025-01-01"`
+ */
+export function setSpotifyReleaseDate(releaseDate: string) {
+    // When it is YYYY
+    if (releaseDate.length == 4) releaseDate = `${releaseDate}-01-01`;
+    // When it is YYYY-MM
+    if (releaseDate.length == 7) releaseDate = `${releaseDate}-01`;
+    // Once it is YYYY-MM-DD
+    return releaseDate;
+}

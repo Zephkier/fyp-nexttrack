@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import type { lastFmSimilarTrackType } from "@/libs/lastfm";
 
-import RecommendationsWithIdClient from "./page.client";
+import TrackRecommendationsClient from "./page.client";
 
 import { inferMoodsFromGenres } from "@/libs/mood";
-import { getSpotifyTrackDetails } from "@/libs/spotify";
+import {
+    // Format
+    getSpotifyTrackDetails,
+    setSpotifyReleaseDate,
+} from "@/libs/spotify";
 import {
     // Format
     getLastFmGenres,
@@ -91,11 +95,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     }
 
     // Ensure user-submitted track's `album.release_date` is YYYY-MM-DD
-    const releaseDate = spotifyTrackDetails.album.release_date;
-    // When it is only YYYY
-    if (releaseDate.length == 4) spotifyTrackDetails.album.release_date = `${releaseDate}-01-01`;
-    // When it is only YYYY-MM
-    if (releaseDate.length == 7) spotifyTrackDetails.album.release_date = `${releaseDate}-01`;
+    spotifyTrackDetails.album.release_date = setSpotifyReleaseDate(spotifyTrackDetails.album.release_date);
 
     // Set artist (must get main artist at `[0]`) and track names for future use
     const artistName = spotifyTrackDetails.artists[0].name;
@@ -301,7 +301,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
     return (
-        <RecommendationsWithIdClient
+        <TrackRecommendationsClient
             // Format
             submittedTrack={submittedTrack}
             initialRecommendedTracks={recommendedTracks}

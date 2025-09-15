@@ -9,6 +9,11 @@ export type recommendedTrackType = {
     links: { [key: string]: string };
     about: { [key: string]: string };
     comments: { [key: string]: string };
+    // These are `submittedCustomisations` params
+    genreSimilarity?: number;
+    popularity?: number;
+    releaseDate?: string | null;
+    moods?: string[];
 };
 
 export default function RecommendedTrack({ recommendedTrack }: { recommendedTrack: recommendedTrackType }) {

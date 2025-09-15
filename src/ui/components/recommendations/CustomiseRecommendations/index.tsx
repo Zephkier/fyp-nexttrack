@@ -2,19 +2,19 @@
 import { useState } from "react";
 
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
+
 import GenresSection from "./GenresSection";
 import PopularitySection from "./PopularitySection";
 import ReleaseDateRangeSection, { currentDate } from "./ReleaseDateRangeSection";
 import MoodsSection from "./MoodsSection";
-
 import { moods } from "@/libs/mood";
 
 /**
  * `type` is more flexible and has more use cases than `interface`.\
  * Better to set this in child, and have parent import it.
  */
-export type customiseRecommendationsParamsType = {
-    similarity: number;
+export type submittedCustomisationsType = {
+    genreSimilarity: number;
     popularity: number;
     releaseDateFrom: string | null;
     releaseDateTo: string | null;
@@ -28,9 +28,9 @@ export default function CustomiseRecommendations({
 }: {
     submittedTrack: submittedTrackType;
     // Need `?` because Customise Recommendation's params are not submitted (i.e. undefined) on the first EVER page load
-    onSubmit?: (customiseRecommendationsParams: customiseRecommendationsParamsType) => void;
+    onSubmit?: (submittedCustomisations: submittedCustomisationsType) => void;
 }) {
-    const [similarity, setSimilarity] = useState(100);
+    const [genreSimilarity, setGenreSimilarity] = useState(100);
     const [popularity, setPopularity] = useState(submittedTrack.popularity);
     const [releaseDateFrom, setReleaseDateFrom] = useState("");
     const [releaseDateTo, setReleaseDateTo] = useState(currentDate);
@@ -55,23 +55,35 @@ export default function CustomiseRecommendations({
         });
     }
 
+    /**
+     * Submit/Send params to this component's parent at `./src/app/recommendations/[spotifyTrackId]/page.client.tsx`.
+     */
     function handleSubmit(event: React.FormEvent) {
         event.preventDefault();
-        // Need `?` because Customise Recommendation's params are not submitted (i.e. undefined) on the first EVER page load
+        // TEST Printed in browser's console
+        console.log(
+            [
+                // Format
+                "Child component sending params to parent component!",
+                "",
+                "./src/ui/components/recommendations/CustomiseRecommendations/index.tsx",
+                "::CustomiseRecommendations()",
+                "::handleSubmit():",
+                "",
+                `genreSimilarity: ${genreSimilarity}`,
+                `popularity:      ${popularity}`,
+                `releaseDateFrom: ${releaseDateFrom || null}`,
+                `releaseDateTo:   ${releaseDateTo || null}`,
+                `selectedMoods:   ${selectedMoods}`,
+            ].join("\n")
+        );
         onSubmit?.({
-            similarity,
+            genreSimilarity,
             popularity,
             releaseDateFrom: releaseDateFrom || null,
             releaseDateTo: releaseDateTo || null,
             moods: selectedMoods,
         });
-        // // TEST
-        // console.log("[!] ./src/ui/components/recommendations/CustomiseRecommendations/index.tsx::CustomiseRecommendations()::handleSubmit():");
-        // console.log(`similarity: ${similarity}`);
-        // console.log(`popularity: ${popularity}`);
-        // console.log(`releaseDateFrom: ${releaseDateFrom}`);
-        // console.log(`releaseDateTo: ${releaseDateTo}`);
-        // console.log(`moods: ${moods}`);
     }
 
     return (
@@ -103,8 +115,8 @@ export default function CustomiseRecommendations({
                 <GenresSection
                     // Format
                     incomingGenres={submittedTrack.genres}
-                    selectedGenresSimilarityValue={similarity}
-                    onChange={setSimilarity}
+                    selectedGenresSimilarityValue={genreSimilarity}
+                    onChange={setGenreSimilarity}
                 />
 
                 <PopularitySection

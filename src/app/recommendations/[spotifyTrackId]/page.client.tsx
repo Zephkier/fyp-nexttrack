@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
-import type { customiseRecommendationsParamsType } from "@/ui/components/recommendations/CustomiseRecommendations";
+import type { submittedCustomisationsType } from "@/ui/components/recommendations/CustomiseRecommendations";
 import type { recommendedTrackType } from "@/ui/components/recommendations/RecommendedTrack";
 
 import SubmittedTrackDetails from "@/ui/components/recommendations/SubmittedTrackDetails";
@@ -20,12 +20,56 @@ export default function TrackRecommendationsClient({
 }) {
     const [recommendedTracks, setRecommendedTracks] = useState(initialRecommendedTracks);
 
-    // Receive params from "Customise Recommendations" section
-    function handleSubmit(customiseRecommendationsParams: customiseRecommendationsParamsType) {
+    // IDEA Does this mean that this component's parent (page.tsx) needs an `onSubmit` too? To know when to refresh recommendations.
+    /**
+     * Receive params from this component's child at:
+     *
+     * - `./ui/components/recommendations/CustomiseRecommendations/index.tsx`
+     * - aka. `<CustomiseRecommendations />`
+     * - aka. the "Customise Recommendations" section
+     */
+    function handleSubmit(submittedCustomisations: submittedCustomisationsType) {
         // TEST Printed in browser's console
-        console.log("./src/app/recommendations/[spotifyTrackID]/pageClient.tsx::RecommendationsWithIdClient()::customiseRecommendationsParams:", customiseRecommendationsParams);
-        // // Later can filter here and then:
-        // setRecommendedTracks(filtered);
+        console.log(
+            [
+                // Format
+                "Parent component received params from child component!",
+                "",
+                "./src/app/recommendations/[spotifyTrackId]/page.client.tsx",
+                "::TrackRecommendationsClient()",
+                "::handleSubmit():",
+                "",
+                `submittedCustomisations:`,
+                JSON.stringify(submittedCustomisations, null, 2),
+            ].join("\n")
+        );
+
+        // If track does not have a given param, then ignore and treat as valid
+        const filteredRecommendedTracks = initialRecommendedTracks.filter((initialRecommendedTrack) => {
+            // // TODO Implement this LATER because it is harder (must be converted from words to normalised numbers)
+            // const filteredGenreSimilarity = initialRecommendedTrack.genreSimilarity && initialRecommendedTrack.genreSimilarity >= submittedCustomisations.genreSimilarity;
+
+            // TODO Implement this NOW because it is easier
+            // Must ensure it exists (i.e. the `&&` part) because TS will complain that it is possibly `undefined`
+            const validPopularity = initialRecommendedTrack.popularity && initialRecommendedTrack.popularity >= submittedCustomisations.popularity;
+
+            // TODO Implement this NOW because it is easier
+            // Must ensure it exists (i.e. the `&&` part) because TS will complain that it is possibly `undefined` or `null`
+            const releaseDate = initialRecommendedTrack.releaseDate;
+            const validReleaseDateFrom = !submittedCustomisations.releaseDateFrom || (releaseDate && releaseDate >= submittedCustomisations.releaseDateFrom);
+            const validReleaseDateTo = !submittedCustomisations.releaseDateTo || (releaseDate && releaseDate <= submittedCustomisations.releaseDateTo);
+            const validReleaseDate = validReleaseDateFrom && validReleaseDateTo;
+
+            // // TODO Implement this LATER because it relies on `genreSimilarity`
+            // const wantMoods = submittedCustomisations.moods ?? [];
+            // const hasMoods = Array.isArray(initialRecommendedTrack.moods) ? initialRecommendedTrack.moods : null;
+            // const validMoods = wantMoods.length == 0 || !hasMoods ? true : hasMoods.some((mood) => wantMoods.includes(mood));
+
+            // Done
+            // return filteredGenreSimilarity && validPopularity && validReleaseDate && validMoods;
+            return validPopularity && validReleaseDate;
+        });
+        setRecommendedTracks(filteredRecommendedTracks);
     }
 
     /**
