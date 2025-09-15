@@ -1,6 +1,23 @@
 import SpotifyWebApi from "spotify-web-api-node";
 
 /**
+ * Helper function returns a string. Example:
+ *
+ * ```text
+ * From: "https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe"`
+ * to  :                                "456WNXWhDwYOSf5SpTuqxd"
+ * ```
+ */
+export function getSpotifyTrackId(spotifyTrackLink: string) {
+    const id = spotifyTrackLink
+        // Format
+        .trim()
+        .split("track/")[1]
+        .split("?si=")[0];
+    return id;
+}
+
+/**
  * Spotify API returns `null` or the `SpotifyWebApi()` instance with an access token.
  *
  * -----

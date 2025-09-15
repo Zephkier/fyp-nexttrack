@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { getSpotifyTrackId } from "@/libs/spotify";
+
 export async function POST(request: Request) {
     try {
         const formDataObject = await request.formData();
@@ -16,12 +18,7 @@ export async function POST(request: Request) {
          * `formDataObject.get("spotifyTrackLink") || ""`
          */
         const link = String(formDataObject.get("spotifyTrackLink") || "");
-
-        const id = link
-            .trim() //             e.g. "https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe"
-            .split("track/")[1] // e.g.                                "456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe"
-            .split("?si=")[0]; //  e.g.                                "456WNXWhDwYOSf5SpTuqxd"
-
+        const id = getSpotifyTrackId(link);
         // Connected to "./src/app/recommendations/[spotifyTrackId]/page.tsx"
         return NextResponse.redirect(new URL(`/recommendations/${id}`, request.url));
     } catch {

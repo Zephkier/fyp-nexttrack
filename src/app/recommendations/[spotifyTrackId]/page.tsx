@@ -82,6 +82,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
      * @see {@linkcode getSpotifyTrackDetails()}
      */
     const spotifyTrackDetails = await getSpotifyTrackDetails(spotifyTrackId);
+
     // Return a page because, if this step fails, then nothing can happen anyway
     if (!spotifyTrackDetails) {
         return (
@@ -194,12 +195,6 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     // ----- Get recommended tracks' additional details ----- //
 
     /**
-     * From this point onwards, the Spotify/Last.fm/Genius APIs are unable to retrieve anything useful.
-     *
-     * Thus, web scraping is used more often to get data.
-     */
-
-    /**
      * Last.fm API returns `[]` or an array of objects, where each object has additional keys like:
      *
      * ```js
@@ -261,42 +256,45 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
 
     // ----- (Last step) Convert retrieved data into suitable types for frontend components to render ----- //
 
-    // TODO Unsure to set `... ?? ...` here or within their own "lib" functions
-    const recommendedTracks = lastFmSimilarTracks2.map((recommendedTrack) => {
-        const linkToItsGeniusPage = recommendedTrack?.aboutLinks?.genius ?? "https://genius.com/";
-        const linkToItsLastFmPage = recommendedTrack?.aboutLinks?.lastFm ?? "https://www.last.fm/";
+    /**
+     * Convert from Last.fm similar tracks to NextTrack recommended tracks.
+     *
+     * Bunch of TODOs:
+     *
+     * - Unsure to set `??` here or within their own functions over at `./src/libs`.
+     *
+     * - Handle `null` cases such that it displays greyed italic text like for `video`.
+     *   - This means handling things like `"Unknown track name"` etc.
+     *
+     * - Display the actual (about and lyrics) text instead of having a button with its link.
+     */
+    const initialRecommendedTracks = lastFmSimilarTracks2.map((lastFmSimilarTrack) => {
+        const linkToItsGeniusPage = lastFmSimilarTrack?.aboutLinks?.genius ?? "https://genius.com/";
+        const linkToItsLastFmPage = lastFmSimilarTrack?.aboutLinks?.lastFm ?? "https://www.last.fm/";
         return {
-            // TODO Handle `null` cases such that it displays greyed italic text like for `video`
-            name: recommendedTrack?.name ?? "Unknown track name",
-            // TODO Handle `null` cases such that it displays greyed italic text like for `video`
-            artists: [recommendedTrack?.artist.name ?? "Unknown artist name"],
-            video: recommendedTrack?.youtubeId ?? null,
+            name: lastFmSimilarTrack?.name ?? "Unknown track name",
+            artists: [lastFmSimilarTrack?.artist.name ?? "Unknown artist name"],
+            video: lastFmSimilarTrack?.youtubeId ?? null,
             links: {
-                spotify: recommendedTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com/",
-                appleMusic: recommendedTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
-                youtubeMusic: recommendedTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
+                spotify: lastFmSimilarTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com/",
+                appleMusic: lastFmSimilarTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
+                youtubeMusic: lastFmSimilarTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
             },
-            // TODO Display the actual text instead of having a button with its link
-            // Re-use value in its `about.genius` key
             about: {
                 genius: linkToItsGeniusPage,
                 lastFm: linkToItsLastFmPage,
             },
-            // TODO Display the actual text instead of having a button with its link
-            // Re-use value in its `about.genius` key
             comments: {
                 genius: `${linkToItsGeniusPage}#comments`,
                 lastFm: `${linkToItsLastFmPage}#shoutbox`,
             },
-            // TODO Display the actual text instead of having a button with its link
-            // Re-use value in its `about.genius` key
             lyrics: linkToItsGeniusPage,
         };
     });
 
     // // TEST
-    // for (const recommendedTrack of recommendedTracks) {
-    //     console.log(recommendedTrack);
+    // for (const lastFmSimilarTrack of lastFmSimilarTracks) {
+    //     console.log(lastFmSimilarTrack);
     // }
     // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
@@ -304,7 +302,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
         <TrackRecommendationsClient
             // Format
             submittedTrack={submittedTrack}
-            initialRecommendedTracks={recommendedTracks}
+            initialRecommendedTracks={initialRecommendedTracks}
         />
     );
 }
