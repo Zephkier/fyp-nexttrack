@@ -60,23 +60,23 @@ export default function CustomiseRecommendations({
      */
     function handleSubmit(event: React.FormEvent) {
         event.preventDefault();
-        // TEST Printed in browser's console
-        console.log(
-            [
-                // Format
-                "Child component sending params to parent component!",
-                "",
-                "./src/ui/components/recommendations/CustomiseRecommendations/index.tsx",
-                "::CustomiseRecommendations()",
-                "::handleSubmit():",
-                "",
-                `genreSimilarity: ${genreSimilarity}`,
-                `popularity:      ${popularity}`,
-                `releaseDateFrom: ${releaseDateFrom || null}`,
-                `releaseDateTo:   ${releaseDateTo || null}`,
-                `selectedMoods:   ${selectedMoods}`,
-            ].join("\n")
-        );
+        // // TEST Printed in browser's console
+        // console.log(
+        //     [
+        //         // Format
+        //         "Child component sending params to parent component!",
+        //         "",
+        //         "./src/ui/components/recommendations/CustomiseRecommendations/index.tsx",
+        //         "::CustomiseRecommendations()",
+        //         "::handleSubmit():",
+        //         "",
+        //         `genreSimilarity: ${genreSimilarity}`,
+        //         `popularity:      ${popularity}`,
+        //         `releaseDateFrom: ${releaseDateFrom || null}`,
+        //         `releaseDateTo:   ${releaseDateTo || null}`,
+        //         `selectedMoods:   ${selectedMoods}`,
+        //     ].join("\n")
+        // );
         onSubmit?.({
             genreSimilarity,
             popularity,

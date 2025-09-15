@@ -222,14 +222,12 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
              * @see {@linkcode webScrapeLastFmYoutubeId()}
              */
             const youtubeId = await webScrapeLastFmYoutubeId(lastFmSimilarTrack.url);
-
             /**
              * **Additional detail 2: "Listen at" buttons' link** \
              * Web scraping Last.fm page returns a `listenAtLinks` object with 3 keys.
              * @see {@linkcode webScrapeLastFmListenAtLinks()}
              */
             const listenAtLinks = await webScrapeLastFmListenAtLinks(lastFmSimilarTrack.url);
-
             /**
              * **Additional detail 3: "About" buttons' link** \
              * Genius API returns `null` or an array of objects.
@@ -239,8 +237,9 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
             const firstSearchResultGeniusUrl: string | null = searchResults?.[0]?.result?.url ?? null;
             const geniusAboutLink = await getGeniusAboutLink(firstSearchResultGeniusUrl, lastFmSimilarTrack.name);
             const lastFmAboutLink = await getLastFmAboutLink(lastFmSimilarTrack.artist.name, lastFmSimilarTrack.name);
-
-            // ----- Done ----- //
+            /**
+             * Done
+             */
             return {
                 ...lastFmSimilarTrack,
                 // Format

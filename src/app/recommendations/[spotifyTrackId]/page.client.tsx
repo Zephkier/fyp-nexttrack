@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
 import type { submittedCustomisationsType } from "@/ui/components/recommendations/CustomiseRecommendations";
@@ -18,9 +19,9 @@ export default function TrackRecommendationsClient({
     submittedTrack: submittedTrackType;
     initialRecommendedTracks: recommendedTrackType[];
 }) {
+    const router = useRouter();
     const [recommendedTracks, setRecommendedTracks] = useState(initialRecommendedTracks);
 
-    // IDEA Does this mean that this component's parent (page.tsx) needs an `onSubmit` too? To know when to refresh recommendations.
     /**
      * Receive params from this component's child at:
      *
@@ -43,33 +44,26 @@ export default function TrackRecommendationsClient({
                 JSON.stringify(submittedCustomisations, null, 2),
             ].join("\n")
         );
+        // Write `submittedCustomisations` params into the current URL for easy sharing
+        const url = new URL(window.location.href);
+        submittedCustomisations.genreSimilarity // Format
+            ? url.searchParams.set("genreSimilarity", String(submittedCustomisations.genreSimilarity))
+            : null;
+        submittedCustomisations.popularity // Format
+            ? url.searchParams.set("popularity", String(submittedCustomisations.popularity))
+            : null;
+        submittedCustomisations.releaseDateFrom // Format
+            ? url.searchParams.set("from", submittedCustomisations.releaseDateFrom)
+            : url.searchParams.set("from", "null");
+        submittedCustomisations.releaseDateTo // Format
+            ? url.searchParams.set("to", submittedCustomisations.releaseDateTo)
+            : null;
+        submittedCustomisations.moods // Format
+            ? url.searchParams.set("moods", submittedCustomisations.moods.join(","))
+            : null;
 
-        // If track does not have a given param, then ignore and treat as valid
-        const filteredRecommendedTracks = initialRecommendedTracks.filter((initialRecommendedTrack) => {
-            // // TODO Implement this LATER because it is harder (must be converted from words to normalised numbers)
-            // const filteredGenreSimilarity = initialRecommendedTrack.genreSimilarity && initialRecommendedTrack.genreSimilarity >= submittedCustomisations.genreSimilarity;
-
-            // TODO Implement this NOW because it is easier
-            // Must ensure it exists (i.e. the `&&` part) because TS will complain that it is possibly `undefined`
-            const validPopularity = initialRecommendedTrack.popularity && initialRecommendedTrack.popularity >= submittedCustomisations.popularity;
-
-            // TODO Implement this NOW because it is easier
-            // Must ensure it exists (i.e. the `&&` part) because TS will complain that it is possibly `undefined` or `null`
-            const releaseDate = initialRecommendedTrack.releaseDate;
-            const validReleaseDateFrom = !submittedCustomisations.releaseDateFrom || (releaseDate && releaseDate >= submittedCustomisations.releaseDateFrom);
-            const validReleaseDateTo = !submittedCustomisations.releaseDateTo || (releaseDate && releaseDate <= submittedCustomisations.releaseDateTo);
-            const validReleaseDate = validReleaseDateFrom && validReleaseDateTo;
-
-            // // TODO Implement this LATER because it relies on `genreSimilarity`
-            // const wantMoods = submittedCustomisations.moods ?? [];
-            // const hasMoods = Array.isArray(initialRecommendedTrack.moods) ? initialRecommendedTrack.moods : null;
-            // const validMoods = wantMoods.length == 0 || !hasMoods ? true : hasMoods.some((mood) => wantMoods.includes(mood));
-
-            // Done
-            // return filteredGenreSimilarity && validPopularity && validReleaseDate && validMoods;
-            return validPopularity && validReleaseDate;
-        });
-        setRecommendedTracks(filteredRecommendedTracks);
+        // Refresh URL with new params
+        router.replace(url.toString());
     }
 
     /**
@@ -78,14 +72,9 @@ export default function TrackRecommendationsClient({
      * L side ("Customise Recommendations"):
      *
      * - Double-click to reset slider's value.
-     * - For "Release date Range", follow the wireframe (i.e. 2 selectors on 1 slider to indicate range).
-     *      - Or use a calendar?
-     *      - But calendar that dives into individual days is unnecessary...
-     *
-     * - Option 1) Upon form submission, put slider's value in URL via something like `?=` maybe?
+     * - Upon form submission, put slider's value in URL via something like `?=` maybe?
      *      - So URL will have additional "?=genre-similarity=50&?=popularity=72&..." something like that.
      *      - So page refreshing stores those values.
-     * - Option 2) As slider value changes, "Recommended Tracks" is updated in real-time.
      *
      * R side ("Recommended Tracks"):
      *
