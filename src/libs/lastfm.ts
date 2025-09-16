@@ -131,8 +131,8 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
      * ]
      * ```
      */
-    const genresAndUrls: { name: string; url: string }[] = data.track.toptags.tag;
-    const genres: string[] = genresAndUrls.map((genre: { name: string }) => genre.name);
+    const genresAndUrls: { name: string; url: string }[] = data?.track?.toptags?.tag;
+    const genres: string[] = genresAndUrls?.map((genre: { name: string }) => genre.name) ?? [];
     // // TEST Ensure that genres retrieved are displayed on NextTrack
     // // console.log(data);
     // console.log(fullUrl);

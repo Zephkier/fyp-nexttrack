@@ -9,12 +9,16 @@ import SpotifyWebApi from "spotify-web-api-node";
  * ```
  */
 export function getSpotifyTrackId(spotifyTrackLink: string) {
-    const id = spotifyTrackLink
-        // Format
-        .trim()
-        .split("track/")[1]
-        .split("?si=")[0];
-    return id;
+    try {
+        const id = spotifyTrackLink
+            // Format
+            .trim()
+            .split("track/")[1]
+            .split("?si=")[0];
+        return id;
+    } catch {
+        return null;
+    }
 }
 
 /**

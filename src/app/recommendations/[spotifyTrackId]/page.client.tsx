@@ -21,8 +21,48 @@ export default function TrackRecommendationsClient({
 }) {
     const router = useRouter();
     const searchParams = useSearchParams();
-
     const [recommendedTracks, setRecommendedTracks] = useState(initialRecommendedTracks);
+
+    // ----- Process URL params ----- //
+
+    function processValue(urlValue: string | null) {
+        if (urlValue == "" || urlValue == "null" || urlValue == null) return null;
+        const value = Number(urlValue);
+        // Ensure the value `0` is also valid
+        if (Number.isFinite(value)) return value;
+        else return null;
+    }
+
+    function processReleaseDate(urlDate: string | null) {
+        if (urlDate == "" || urlDate == "null" || urlDate == null) return null;
+        return urlDate;
+    }
+
+    const popularity = processValue(searchParams.get("popularity"));
+    const releaseDateFrom = processReleaseDate(searchParams.get("releaseDateFrom"));
+    const releaseDateTo = processReleaseDate(searchParams.get("releaseDateTo"));
+    // // TODO Implement later
+    // const genreSimilarity = processValue(searchParams.get("genreSimilarity"));
+    // const moods = parseCommaList(searchParams.get("moods"));
+
+    // // TEST Printed in browser's console
+    // console.log(
+    //     [
+    //         // Format
+    //         "Filtering recommended tracks by retrieving params from URL!",
+    //         "",
+    //         "./src/app/recommendations/[spotifyTrackId]/page.client.tsx",
+    //         "::TrackRecommendationsClient()",
+    //         "::filteredRecommendedTracks",
+    //         "::useMemo():",
+    //         "",
+    //         `popularity     : {${typeof popularity}} ${popularity}`,
+    //         `releaseDateFrom: {${typeof releaseDateFrom}} ${releaseDateFrom}`,
+    //         `releaseDateTo  : {${typeof releaseDateTo}} ${releaseDateTo}`,
+    //     ].join("\n")
+    // );
+
+    // ----- Filter implementation ----- //
 
     /**
      * Filter recommended tracks via params in URL. URL Example:
@@ -35,46 +75,6 @@ export default function TrackRecommendationsClient({
      *   those checks will be skipped (no errors).
      */
     const filteredRecommendedTracks = useMemo(() => {
-        // ----- Process URL params ----- //
-
-        // Helpers
-        function processValue(urlValue: string | null) {
-            if (urlValue == "" || urlValue == "null" || urlValue == null) return null;
-            const value = Number(urlValue);
-            // Ensure the value `0` is also valid
-            if (Number.isFinite(value)) return value;
-            else return null;
-        }
-        function processReleaseDate(urlDate: string | null) {
-            if (urlDate == "" || urlDate == "null" || urlDate == null) return null;
-            return urlDate;
-        }
-        // Actual
-        const popularity = processValue(searchParams.get("popularity"));
-        const releaseDateFrom = processReleaseDate(searchParams.get("releaseDateFrom"));
-        const releaseDateTo = processReleaseDate(searchParams.get("releaseDateTo"));
-        // // TODO Implement later
-        // const genreSimilarity = processValue(searchParams.get("genreSimilarity"));
-        // const moods = parseCommaList(searchParams.get("moods"));
-        // // TEST Printed in browser's console
-        // console.log(
-        //     [
-        //         // Format
-        //         "Filtering recommended tracks by retrieving params from URL!",
-        //         "",
-        //         "./src/app/recommendations/[spotifyTrackId]/page.client.tsx",
-        //         "::TrackRecommendationsClient()",
-        //         "::filteredRecommendedTracks",
-        //         "::useMemo():",
-        //         "",
-        //         `popularity     : {${typeof popularity}} ${popularity}`,
-        //         `releaseDateFrom: {${typeof releaseDateFrom}} ${releaseDateFrom}`,
-        //         `releaseDateTo  : {${typeof releaseDateTo}} ${releaseDateTo}`,
-        //     ].join("\n")
-        // );
-
-        // ----- Filter recommended tracks ----- //
-
         return recommendedTracks.filter((recommendedTrack) => {
             /**
              * Popularity: If recommended track's popularity <= URL param's popularity, then return it
@@ -95,7 +95,7 @@ export default function TrackRecommendationsClient({
             }
             return true;
         });
-    }, [recommendedTracks, searchParams]);
+    }, [recommendedTracks, popularity, releaseDateFrom, releaseDateTo]);
 
     /**
      * Receive params from child component and insert into the URL. Example:

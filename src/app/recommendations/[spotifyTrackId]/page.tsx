@@ -110,9 +110,9 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     const submittedTrack = {
         name: spotifyTrackDetails.name,
         artists: spotifyTrackDetails.artists.map((artist) => artist.name),
-        releaseDate: spotifyTrackDetails.album.release_date,
         genres: retrievedGenres,
         popularity: spotifyTrackDetails.popularity,
+        releaseDate: spotifyTrackDetails.album.release_date,
         moods: inferredMoods,
     };
 
@@ -130,7 +130,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
 
     // TODO Allow users to adjust this value (via page navigation? select value via dropdown box?)
     // Limit number of results
-    const numberOfRecommendations = 10;
+    const numberOfRecommendations = 100;
     lastFmSimilarTracks1 = lastFmSimilarTracks1.slice(0, numberOfRecommendations);
 
     // // TEST Handle cases where there are no recommended tracks.
@@ -223,7 +223,8 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
             const linkToItsLastFmPage = lastFmSimilarTrack?.aboutLinks?.lastFm ?? "https://www.last.fm";
             // Use the same methods (that were used above) to get params
             const genres = await getGenres(name, artist);
-            const spotifyDetails = await getSpotifyTrackDetails(getSpotifyTrackId(spotifyLink));
+            const spotifyTrackId = getSpotifyTrackId(spotifyLink);
+            const spotifyDetails = spotifyTrackId ? await getSpotifyTrackDetails(spotifyTrackId) : null;
             if (spotifyDetails && spotifyDetails.album.release_date) spotifyDetails.album.release_date = setSpotifyReleaseDate(spotifyDetails.album.release_date);
             const numberOfMoodsToGet = 2;
             const inferredMoods = inferMoodsFromGenres(genres, numberOfMoodsToGet);
