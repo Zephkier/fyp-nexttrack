@@ -28,7 +28,7 @@ export default function MoodsSection({
             <p className="mb-2">
                 <b>Current:</b> {incomingMoods.join(", ")}
                 <br />
-                <b>Recommended track&apos;s mood(s):</b>
+                <b>Recommendation&apos;s mood(s):</b>
             </p>
             {moods.map((mood) => (
                 <label key={mood} className="flex w-fit space-x-2">

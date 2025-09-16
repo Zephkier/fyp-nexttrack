@@ -20,7 +20,7 @@ export default function GenresSection({
             <p className="mb-2">
                 <b>Current:</b> {incomingGenres.join(", ")}
                 <br />
-                <b>Recommended track&apos;s similarity:</b> {selectedGenresSimilarityValue}%
+                <b>Recommendation&apos;s similarity:</b> {selectedGenresSimilarityValue}%
             </p>
             <input
                 // Format

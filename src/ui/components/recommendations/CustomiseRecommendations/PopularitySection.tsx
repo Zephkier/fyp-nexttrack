@@ -16,11 +16,11 @@ export default function PopularitySection({
             className="mb-4 p-4"
             style={{ background: "var(--secondary)" }}
         >
-            <h4 className="mb-1 text-xl font-bold">Peak Popularity</h4>
+            <h4 className="mb-1 text-xl font-bold">Max Popularity</h4>
             <p className="mb-2">
                 <b>Current:</b> {incomingPopularity}%
                 <br />
-                <b>Recommended track&apos;s peak popularity:</b> {selectedPopularityValue}%
+                <b>Recommendation&apos;s max popularity:</b> {selectedPopularityValue}%
             </p>
             <input
                 // Format

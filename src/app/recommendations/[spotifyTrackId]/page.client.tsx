@@ -35,47 +35,58 @@ export default function TrackRecommendationsClient({
      *   those checks will be skipped (no errors).
      */
     const filteredRecommendedTracks = useMemo(() => {
+        // Helpers
+        function processValue(urlValue: string | null) {
+            if (urlValue == "" || urlValue == "null" || urlValue == null) return null;
+            const value = Number(urlValue);
+            // Ensure the value `0` is also valid
+            if (Number.isFinite(value)) return value;
+            else return null;
+        }
+        function processReleaseDate(urlDate: string | null) {
+            if (urlDate == "" || urlDate == "null" || urlDate == null) return null;
+            return urlDate;
+        }
+        // Process URL params
+        const popularity = processValue(searchParams.get("popularity"));
+        const releaseDateFrom = processReleaseDate(searchParams.get("releaseDateFrom"));
+        const releaseDateTo = processReleaseDate(searchParams.get("releaseDateTo"));
         // // TODO Implement later
-        // const genreSimilarity = parseMaybeNumber(searchParams.get("genreSimilarity"));
-        const popularity = Number(searchParams.get("popularity"));
-        const releaseDateFrom = searchParams.get("releaseDateFrom") ?? null;
-        const releaseDateTo = searchParams.get("releaseDateTo") ?? null;
-        // // TODO Implement later
+        // const genreSimilarity = processValue(searchParams.get("genreSimilarity"));
         // const moods = parseCommaList(searchParams.get("moods"));
         // TEST Printed in browser's console
         console.log(
             [
                 // Format
-                "Retrieving params from URL!",
+                "Filtering recommended tracks by retrieving params from URL!",
                 "",
                 "./src/app/recommendations/[spotifyTrackId]/page.client.tsx",
                 "::TrackRecommendationsClient()",
                 "::filteredRecommendedTracks",
                 "::useMemo():",
                 "",
-                `popularity: ${popularity}`,
-                `releaseDateFrom: ${releaseDateFrom}`,
-                `releaseDateTo  : ${releaseDateTo}`,
+                `popularity     : {${typeof popularity}} ${popularity}`,
+                `releaseDateFrom: {${typeof releaseDateFrom}} ${releaseDateFrom}`,
+                `releaseDateTo  : {${typeof releaseDateTo}} ${releaseDateTo}`,
             ].join("\n")
         );
         return recommendedTracks.filter((recommendedTrack) => {
             /**
-             * Popularity: If recommended track's popularity <= URL param's popularity, then return it
+             * Popularity: If recommended track's popularity <= URL param's popularity, then return it. \
+             * (must include `typeof` so that value `0` is valid)
              *
              * Rationale:
              *
-             * When I submit a track and see that its peak popularity is 80%, this means that \
-             * I would want to see recommended tracks with peak popularity that is <= whatever value I adjust it to.
+             * When I submit a track and it has a popularity of e.g. 80%, this means that \
+             * I would want to see recommended tracks with max popularities that are <= whatever value I adjust it to.
              */
-            if (recommendedTrack.popularity) {
+            if (typeof recommendedTrack.popularity == "number") {
                 if (popularity && recommendedTrack.popularity > popularity) return false;
             }
-            // FIXME This param is broken. Must manually set dates to work. "All time" button doesn't work.
             // Release date: If recommended track's release date is within URL param's date range, then return it
-            if (recommendedTrack.releaseDate) {
-                const date = String(recommendedTrack.releaseDate);
-                if (releaseDateFrom && date < releaseDateFrom) return false;
-                if (releaseDateTo && date > releaseDateTo) return false;
+            if (typeof recommendedTrack.releaseDate == "string") {
+                if (releaseDateFrom && recommendedTrack.releaseDate < releaseDateFrom) return false;
+                if (releaseDateTo && recommendedTrack.releaseDate > releaseDateTo) return false;
             }
             return true;
         });
@@ -109,23 +120,25 @@ export default function TrackRecommendationsClient({
         // );
         // Write `submittedCustomisations` params into URL for easy sharing
         const url = new URL(window.location.href);
-        // Ensure to remove any existing params from URL
-        submittedCustomisations.genreSimilarity // Format
-            ? url.searchParams.set("genreSimilarity", String(submittedCustomisations.genreSimilarity))
-            : url.searchParams.delete("genreSimilarity");
-        submittedCustomisations.popularity // Format
-            ? url.searchParams.set("popularity", String(submittedCustomisations.popularity))
-            : url.searchParams.delete("popularity");
+        // Set query string at one go, while also ensuring the order of params
+        const params = new URLSearchParams();
+        typeof submittedCustomisations.genreSimilarity == "number" // Format
+            ? params.append("genreSimilarity", String(submittedCustomisations.genreSimilarity))
+            : null;
+        typeof submittedCustomisations.popularity == "number" // Format
+            ? params.append("popularity", String(submittedCustomisations.popularity))
+            : null;
         submittedCustomisations.releaseDateFrom // Format
-            ? url.searchParams.set("releaseDateFrom", submittedCustomisations.releaseDateFrom)
-            : url.searchParams.set("releaseDateFrom", "null");
+            ? params.append("releaseDateFrom", submittedCustomisations.releaseDateFrom)
+            : null;
         submittedCustomisations.releaseDateTo // Format
-            ? url.searchParams.set("releaseDateTo", submittedCustomisations.releaseDateTo)
-            : url.searchParams.set("releaseDateTo", "null");
-        submittedCustomisations.moods // Format
-            ? url.searchParams.set("moods", submittedCustomisations.moods.join(","))
-            : url.searchParams.delete("moods");
-        // Refresh URL with new params
+            ? params.append("releaseDateTo", submittedCustomisations.releaseDateTo)
+            : null;
+        submittedCustomisations.moods?.length // Format
+            ? params.append("moods", submittedCustomisations.moods.join(","))
+            : null;
+        url.search = params.toString();
+        // Refresh URL with new query string
         router.replace(url.toString());
     }
 

@@ -35,7 +35,7 @@ export default function ReleaseDateRangeSection({
             <p className="mb-4">
                 <b>Current (yyyy-mm-dd):</b> {incomingReleaseDate}
                 <br />
-                <b>Recommended track&apos;s release date range:</b>
+                <b>Recommendation&apos;s release date range:</b>
             </p>
 
             {/* Preset buttons */}
