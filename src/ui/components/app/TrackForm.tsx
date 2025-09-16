@@ -9,7 +9,7 @@ export default function TrackForm() {
 
     return (
         <form
-            className="mb-15"
+            className="mb-20"
             method="POST"
             // Located at "./src/app/api/recommendations/route.ts"
             action="/api/recommendations"

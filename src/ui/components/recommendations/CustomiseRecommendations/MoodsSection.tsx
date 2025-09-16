@@ -24,11 +24,11 @@ export default function MoodsSection({
             className="mb-4 p-4"
             style={{ background: "var(--secondary)" }}
         >
-            <h4 className="mb-1 text-xl font-bold">Mood(s)</h4>
+            <h4 className="mb-1 text-xl font-bold">Moods</h4>
             <p className="mb-2">
                 <b>Current:</b> {incomingMoods.join(", ")}
                 <br />
-                <b>Recommendation&apos;s mood(s):</b>
+                <b>Recommendation&apos;s moods:</b>
             </p>
             {moods.map((mood) => (
                 <label key={mood} className="flex w-fit space-x-2">
