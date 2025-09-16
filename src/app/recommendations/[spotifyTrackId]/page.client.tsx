@@ -21,7 +21,7 @@ export default function TrackRecommendationsClient({
 }) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [recommendedTracks, setRecommendedTracks] = useState(initialRecommendedTracks);
+    const [recommendedTracks] = useState(initialRecommendedTracks);
 
     // ----- Process URL params ----- //
 
@@ -123,25 +123,26 @@ export default function TrackRecommendationsClient({
         //         JSON.stringify(submittedCustomisations, null, 2),
         //     ].join("\n")
         // );
+
         // Write `submittedCustomisations` params into URL for easy sharing
         const url = new URL(window.location.href);
         // Set query string at one go, while also ensuring the order of params
         const params = new URLSearchParams();
-        typeof submittedCustomisations.genreSimilarity == "number" // Format
-            ? params.append("genreSimilarity", String(submittedCustomisations.genreSimilarity))
-            : null;
-        typeof submittedCustomisations.popularity == "number" // Format
-            ? params.append("popularity", String(submittedCustomisations.popularity))
-            : null;
-        submittedCustomisations.releaseDateFrom // Format
-            ? params.append("releaseDateFrom", submittedCustomisations.releaseDateFrom)
-            : null;
-        submittedCustomisations.releaseDateTo // Format
-            ? params.append("releaseDateTo", submittedCustomisations.releaseDateTo)
-            : null;
-        submittedCustomisations.moods?.length // Format
-            ? params.append("moods", submittedCustomisations.moods.join(","))
-            : null;
+        if (typeof submittedCustomisations.genreSimilarity == "number") {
+            params.append("genreSimilarity", String(submittedCustomisations.genreSimilarity));
+        }
+        if (typeof submittedCustomisations.popularity == "number") {
+            params.append("popularity", String(submittedCustomisations.popularity));
+        }
+        if (submittedCustomisations.releaseDateFrom) {
+            params.append("releaseDateFrom", submittedCustomisations.releaseDateFrom);
+        }
+        if (submittedCustomisations.releaseDateTo) {
+            params.append("releaseDateTo", submittedCustomisations.releaseDateTo);
+        }
+        if (submittedCustomisations.moods?.length) {
+            params.append("moods", submittedCustomisations.moods.join(","));
+        }
         url.search = params.toString();
         // Refresh URL with new query string
         router.replace(url.toString());
