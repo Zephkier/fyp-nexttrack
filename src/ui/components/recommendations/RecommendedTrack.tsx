@@ -4,16 +4,27 @@ import { useState } from "react";
 // `type` is more flexible and has more use cases than `interface`
 export type recommendedTrackType = {
     name: string;
-    artists: string[];
+    artist: string;
     video: string | null;
-    links: { [key: string]: string };
-    about: { [key: string]: string };
-    comments: { [key: string]: string };
-    // These are `submittedCustomisations` params
-    genreSimilarity?: number;
-    popularity?: number;
+    links: {
+        spotify: string;
+        appleMusic: string;
+        youtubeMusic: string;
+    };
+    about: {
+        genius: string;
+        lastFm: string;
+    };
+    comments: {
+        genius: string;
+        lastFm: string;
+    };
+    // These are `submittedCustomisations` params,
+    // and need `?` because they are not submitted (i.e. undefined) on the first EVER page load
+    genreSimilarity?: number | null;
+    popularity?: number | null;
     releaseDate?: string | null;
-    moods?: string[];
+    moods?: string[] | null;
 };
 
 export default function RecommendedTrack({ recommendedTrack }: { recommendedTrack: recommendedTrackType }) {
@@ -33,7 +44,7 @@ export default function RecommendedTrack({ recommendedTrack }: { recommendedTrac
             >
                 <div>
                     <h4 className="text-xl font-bold">{recommendedTrack.name}</h4>
-                    <p>by {recommendedTrack.artists.join(", ")}</p>
+                    <p>by {recommendedTrack.artist}</p>
                 </div>
                 <span style={{ color: "var(--primary)" }}>{isExpanded ? "▲" : "▼"}</span>
             </summary>

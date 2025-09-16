@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import type { lastFmSimilarTrackType } from "@/libs/lastfm";
+import type { recommendedTrackType } from "@/ui/components/recommendations/RecommendedTrack";
 
 import TrackRecommendationsClient from "./page.client";
 
 import { inferMoodsFromGenres } from "@/libs/mood";
 import {
     // Format
+    getSpotifyTrackId,
     getSpotifyTrackDetails,
     setSpotifyReleaseDate,
 } from "@/libs/spotify";
@@ -16,8 +18,6 @@ import {
     getLastFmSimilarTracks,
     webScrapeLastFmYoutubeId,
     webScrapeLastFmListenAtLinks,
-    // TODO This is very similar to previous `get...()` functions, could further modularise
-    getLastFmAboutLink,
 } from "@/libs/lastfm";
 import {
     // Format
@@ -163,7 +163,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     // ----- Get recommended tracks ----- //
 
     /**
-     * TODO This is not urgent, work on others first.
+     * TODO
      *
      * Current recommendations are placeholders.
      *
@@ -236,7 +236,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
             const searchResults = await getGeniusSearch(lastFmSimilarTrack.artist.name, lastFmSimilarTrack.name);
             const firstSearchResultGeniusUrl: string | null = searchResults?.[0]?.result?.url ?? null;
             const geniusAboutLink = await getGeniusAboutLink(firstSearchResultGeniusUrl, lastFmSimilarTrack.name);
-            const lastFmAboutLink = await getLastFmAboutLink(lastFmSimilarTrack.artist.name, lastFmSimilarTrack.name);
+            const lastFmAboutLink = lastFmSimilarTrack.url;
             /**
              * Done
              */
@@ -267,35 +267,50 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
      *
      * - Display the actual (about and lyrics) text instead of having a button with its link.
      */
-    const initialRecommendedTracks = lastFmSimilarTracks2.map((lastFmSimilarTrack) => {
-        const linkToItsGeniusPage = lastFmSimilarTrack?.aboutLinks?.genius ?? "https://genius.com/";
-        const linkToItsLastFmPage = lastFmSimilarTrack?.aboutLinks?.lastFm ?? "https://www.last.fm/";
-        return {
-            name: lastFmSimilarTrack?.name ?? "Unknown track name",
-            artists: [lastFmSimilarTrack?.artist.name ?? "Unknown artist name"],
-            video: lastFmSimilarTrack?.youtubeId ?? null,
-            links: {
-                spotify: lastFmSimilarTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com/",
-                appleMusic: lastFmSimilarTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
-                youtubeMusic: lastFmSimilarTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
-            },
-            about: {
-                genius: linkToItsGeniusPage,
-                lastFm: linkToItsLastFmPage,
-            },
-            comments: {
-                genius: `${linkToItsGeniusPage}#comments`,
-                lastFm: `${linkToItsLastFmPage}#shoutbox`,
-            },
-            lyrics: linkToItsGeniusPage,
-        };
-    });
+    const initialRecommendedTracks: recommendedTrackType[] = await Promise.all(
+        lastFmSimilarTracks2.map(async (lastFmSimilarTrack) => {
+            const linkToItsGeniusPage = lastFmSimilarTrack?.aboutLinks?.genius ?? "https://genius.com/";
+            const linkToItsLastFmPage = lastFmSimilarTrack?.aboutLinks?.lastFm ?? "https://www.last.fm/";
 
-    // // TEST
-    // for (const lastFmSimilarTrack of lastFmSimilarTracks) {
-    //     console.log(lastFmSimilarTrack);
-    // }
-    // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
+            // Use the same methods (that were used above) to get customisation params
+            const spotifyLink = lastFmSimilarTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com/";
+            const spotifyId = getSpotifyTrackId(spotifyLink);
+            const spotifyDetails = await getSpotifyTrackDetails(spotifyId);
+            if (spotifyDetails && spotifyDetails.album.release_date) spotifyDetails.album.release_date = setSpotifyReleaseDate(spotifyDetails.album.release_date);
+
+            return {
+                name: lastFmSimilarTrack?.name ?? "Unknown track name",
+                artist: lastFmSimilarTrack?.artist.name ?? "Unknown artist name",
+                video: lastFmSimilarTrack?.youtubeId ?? null,
+                links: {
+                    spotify: spotifyLink,
+                    appleMusic: lastFmSimilarTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
+                    youtubeMusic: lastFmSimilarTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
+                },
+                about: {
+                    genius: linkToItsGeniusPage,
+                    lastFm: linkToItsLastFmPage,
+                },
+                comments: {
+                    genius: `${linkToItsGeniusPage}#comments`,
+                    lastFm: `${linkToItsLastFmPage}#shoutbox`,
+                },
+                lyrics: linkToItsGeniusPage,
+                // TODO Implement later, see "./src/app/recommendations/[spotifyTrackId]/page.client.tsx"
+                // genreSimilarity: null,
+                popularity: spotifyDetails?.popularity ?? null,
+                releaseDate: spotifyDetails?.album.release_date ?? null,
+                // TODO Implement later, see "./src/app/recommendations/[spotifyTrackId]/page.client.tsx"
+                // moods: [],
+            };
+        })
+    );
+
+    // TEST
+    for (const initialRecommendedTrack of initialRecommendedTracks) {
+        console.log(`${initialRecommendedTrack.name}\n${initialRecommendedTrack.popularity}\n${initialRecommendedTrack.releaseDate}\n`);
+    }
+    console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
     return (
         <TrackRecommendationsClient

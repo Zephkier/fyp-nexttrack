@@ -3,10 +3,10 @@ import * as cheerio from "cheerio";
 // `type` is more flexible and has more use cases than `interface`
 export type lastFmSimilarTrackType = {
     name: string;
-    url: string;
     artist: {
         name: string;
     };
+    url: string;
 };
 
 /**
@@ -519,93 +519,6 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
         return listenAtLinks;
     } catch (err) {
         console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmListenAtLinks():\n${err}`);
-        return null;
-    }
-}
-
-/**
- * Last.fm API returns `null` or ?. Example:
- *
- * ```js
- * ?
- * ```
- *
- * -----
- *
- * Source: https://www.last.fm/api/show/track.getInfo
- *
- * View provided example (?):
- * - Uncomment `console.log()` lines.
- * - Submit "?"
- */
-export async function getLastFmAboutLink(artistName: string, trackName: string) {
-    try {
-        const baseUrl = "http://ws.audioscrobbler.com";
-        // Using ".getInfo" method to get more info than the ".getTopTags" method
-        const method = "track.getInfo";
-        const apiKey = process.env.LASTFM_API_KEY;
-        const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
-        const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
-        const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&format=json`;
-        const response = await fetch(fullUrl);
-        if (!response.ok) return null;
-        /**
-         * Returns an object with many keys. Example:
-         *
-         * ```js
-         * {
-         *     track: {
-         *         name: 'Dog Days Are Over',
-         *         mbid: '52587f93-2a1d-45fb-a8ba-97aafa2c1f28',
-         *         url: 'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over',
-         *         duration: '0',
-         *         streamable: { '#text': '0', fulltrack: '0' },
-         *         // `listeners` and `playcount` could be potential parameters
-         *         // but Spotify's `popularity` key seems better
-         *         listeners: '2537',
-         *         playcount: '8492',
-         *         artist: {
-         *             name: 'Florence   The Machine',
-         *             // Some artists do not have `mbid` key
-         *             mbid: '5fee3020-513b-48c2-b1f7-4681b01db0c6',
-         *             url: 'https://www.last.fm/music/Florence+++The+Machine'
-         *         },
-         *         // ----- Normal ----- //
-         *         toptags: { tag: [Array] },
-         *         wiki: {
-         *             published: '31 Aug 2009, 11:29',
-         *             summary: `"Dog... Read more on Last.fm</a>.`,
-         *             content: `"Dog... \n` + '\n' + '...' + '... terms may apply.'
-         *         }
-         *         // ----- Abnormal ----- //
-         *         toptags: { tag: [] }
-         *         // `wiki:` does not exist at all
-         *     }
-         * }
-         * ```
-         */
-        const data: {
-            track: {
-                url: string;
-            };
-        } = await response.json();
-        /**
-         * Returns a string. Example:
-         *
-         * ```js
-         * 'https://www.last.fm/music/Florence+++The+Machine/_/Dog+Days+Are+Over'
-         * ```
-         */
-        const aboutLink = data?.track?.url;
-        // // TEST
-        // console.log(data);
-        // console.log(aboutLink);
-        // console.log(fullUrl);
-        // console.log("[!] ^ from ./src/libs/lastfm.ts::getLastFmAboutLink()");
-        // console.log();
-        return aboutLink ?? null;
-    } catch (err) {
-        console.error(`[!] ./src/libs/lastfm.ts::getLastFmAboutLink():\n${err}`);
         return null;
     }
 }

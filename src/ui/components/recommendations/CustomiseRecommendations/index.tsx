@@ -86,6 +86,7 @@ export default function CustomiseRecommendations({
         });
     }
 
+    // FIXME I want another button that clears the URL's "?" onwards (i.e. no params at all) so no need to manually backspace
     return (
         <section>
             <h3
