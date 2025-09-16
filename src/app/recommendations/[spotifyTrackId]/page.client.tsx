@@ -54,24 +54,26 @@ export default function TrackRecommendationsClient({
         // // TODO Implement later
         // const genreSimilarity = processValue(searchParams.get("genreSimilarity"));
         // const moods = parseCommaList(searchParams.get("moods"));
-        // TEST Printed in browser's console
-        console.log(
-            [
-                // Format
-                "Filtering recommended tracks by retrieving params from URL!",
-                "",
-                "./src/app/recommendations/[spotifyTrackId]/page.client.tsx",
-                "::TrackRecommendationsClient()",
-                "::filteredRecommendedTracks",
-                "::useMemo():",
-                "",
-                `popularity     : {${typeof popularity}} ${popularity}`,
-                `releaseDateFrom: {${typeof releaseDateFrom}} ${releaseDateFrom}`,
-                `releaseDateTo  : {${typeof releaseDateTo}} ${releaseDateTo}`,
-            ].join("\n")
-        );
+        // // TEST Printed in browser's console
+        // console.log(
+        //     [
+        //         // Format
+        //         "Filtering recommended tracks by retrieving params from URL!",
+        //         "",
+        //         "./src/app/recommendations/[spotifyTrackId]/page.client.tsx",
+        //         "::TrackRecommendationsClient()",
+        //         "::filteredRecommendedTracks",
+        //         "::useMemo():",
+        //         "",
+        //         `popularity     : {${typeof popularity}} ${popularity}`,
+        //         `releaseDateFrom: {${typeof releaseDateFrom}} ${releaseDateFrom}`,
+        //         `releaseDateTo  : {${typeof releaseDateTo}} ${releaseDateTo}`,
+        //     ].join("\n")
+        // );
         return recommendedTracks.filter((recommendedTrack) => {
             /**
+             * FIXME Popularity value of `0` acts like value of `100`! `0` should return recommendations with popularity of `0` only!
+             *
              * Popularity: If recommended track's popularity <= URL param's popularity, then return it. \
              * (must include `typeof` so that value `0` is valid)
              *

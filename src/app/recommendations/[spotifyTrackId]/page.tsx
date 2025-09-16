@@ -5,7 +5,7 @@ import type { recommendedTrackType } from "@/ui/components/recommendations/Recom
 import TrackRecommendationsClient from "./page.client";
 
 import { getGenres } from "@/libs/genres";
-import { inferMoodsFromGenres } from "@/libs/mood";
+import { inferMoodsFromGenres } from "@/libs/moods";
 import { getSpotifyTrackId, getSpotifyTrackDetails, setSpotifyReleaseDate } from "@/libs/spotify";
 import { getLastFmSimilarTracks, webScrapeLastFmYoutubeId, webScrapeLastFmListenAtLinks } from "@/libs/lastfm";
 import { getGeniusSearch, getGeniusAboutLink } from "@/libs/genius";

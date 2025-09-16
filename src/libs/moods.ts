@@ -36,94 +36,63 @@ export const genreToMoodMapping: {
         weight: number;
     }[];
 } = {
+    // Pop family
     pop: [
         { mood: moods[0], weight: 2 },
         { mood: moods[3], weight: 3 },
     ],
-    "bedroom pop": [{ mood: moods[2], weight: 3 }],
-    "dream pop": [{ mood: moods[2], weight: 3 }],
-    "sunshine pop": [
-        { mood: moods[0], weight: 3 },
-        { mood: moods[2], weight: 3 },
-        { mood: moods[3], weight: 1 },
-    ],
-    "indie pop": [
-        { mood: moods[2], weight: 3 },
-        { mood: moods[3], weight: 1 },
-    ],
+    bedroom: [{ mood: moods[2], weight: 3 }],
+    dream: [{ mood: moods[2], weight: 3 }],
     indie: [{ mood: moods[2], weight: 2 }],
-
-    hiphop: [
-        { mood: moods[2], weight: 1 },
-        { mood: moods[3], weight: 2 },
-    ],
-    "hip hop": [
-        { mood: moods[2], weight: 1 },
-        { mood: moods[3], weight: 2 },
-    ],
-    "hip-hop": [
-        { mood: moods[2], weight: 1 },
-        { mood: moods[3], weight: 2 },
+    sunshine: [
+        { mood: moods[0], weight: 3 },
+        { mood: moods[3], weight: 1 },
     ],
 
+    // Hip hop / Rap / R&B family
+    hip: [
+        { mood: moods[2], weight: 1 },
+        { mood: moods[3], weight: 2 },
+    ],
     rap: [{ mood: moods[3], weight: 2 }],
-    "jazz rap": [{ mood: moods[2], weight: 2 }],
-
     rnb: [
-        { mood: moods[2], weight: 2 },
+        { mood: moods[2], weight: 3 },
         { mood: moods[3], weight: 2 },
     ],
     "r&b": [
-        { mood: moods[2], weight: 2 },
+        { mood: moods[2], weight: 3 },
         { mood: moods[3], weight: 2 },
     ],
 
-    soul: [
-        { mood: moods[1], weight: 1 },
-        { mood: moods[2], weight: 2 },
-    ],
-    soulful: [
-        { mood: moods[1], weight: 1 },
-        { mood: moods[2], weight: 2 },
-    ],
-    "neo-soul": [
-        { mood: moods[1], weight: 1 },
-        { mood: moods[2], weight: 2 },
-    ],
+    // Soul / Jazz / Blue family
+    soul: [{ mood: moods[2], weight: 3 }],
     jazz: [
         { mood: moods[0], weight: 1 },
         { mood: moods[2], weight: 3 },
     ],
-    blues: [
-        { mood: moods[1], weight: 3 },
-        { mood: moods[2], weight: 1 },
+    blue: [
+        { mood: moods[1], weight: 2 },
+        { mood: moods[2], weight: 3 },
     ],
 
-    rock: [
-        { mood: moods[0], weight: 1 },
-        { mood: moods[3], weight: 2 },
-    ],
-    "hard rock": [{ mood: moods[3], weight: 3 }],
-    "classic rock": [
-        { mood: moods[0], weight: 1 },
-        { mood: moods[3], weight: 3 },
-    ],
-    "alternative rock": [
+    // Rock / Metal family
+    rock: [{ mood: moods[3], weight: 3 }],
+    hard: [{ mood: moods[3], weight: 3 }],
+    classic: [{ mood: moods[0], weight: 1 }],
+    // (for both "alternate" and "alternative" words)
+    alternat: [
         { mood: moods[0], weight: 2 },
         { mood: moods[2], weight: 2 },
     ],
-    "alternate rock": [
-        { mood: moods[0], weight: 2 },
-        { mood: moods[2], weight: 2 },
-    ],
-    "psychedelic rock": [
+    psych: [
         { mood: moods[2], weight: 3 },
         { mood: moods[3], weight: 1 },
     ],
-
+    punk: [{ mood: moods[3], weight: 3 }],
     metal: [{ mood: moods[3], weight: 3 }],
-    "heavy metal": [{ mood: moods[3], weight: 3 }],
+    heavy: [{ mood: moods[3], weight: 3 }],
 
+    // EDM family
     edm: [{ mood: moods[3], weight: 3 }],
     electronic: [{ mood: moods[3], weight: 3 }],
     dance: [{ mood: moods[3], weight: 3 }],
@@ -132,13 +101,13 @@ export const genreToMoodMapping: {
     techno: [{ mood: moods[3], weight: 3 }],
     trap: [{ mood: moods[3], weight: 3 }],
     dnb: [{ mood: moods[3], weight: 3 }],
-    "drum and bass": [{ mood: moods[3], weight: 3 }],
-    "future bass": [{ mood: moods[3], weight: 3 }],
+    drum: [{ mood: moods[3], weight: 3 }],
+    bass: [{ mood: moods[3], weight: 3 }],
+    future: [{ mood: moods[3], weight: 3 }],
 
+    // Others
     lofi: [{ mood: moods[2], weight: 3 }],
     "lo-fi": [{ mood: moods[2], weight: 3 }],
-
-    alternative: [{ mood: moods[2], weight: 2 }],
     uplifting: [{ mood: moods[0], weight: 3 }],
     rage: [{ mood: moods[3], weight: 3 }],
     surf: [
@@ -159,7 +128,7 @@ export const genreToMoodMapping: {
  *
  * Max `numberOfMoodsToGet` is based on `moods.length`.
  *
- * Ensure moods are the same as `./src/ui/components/CustomiseRecommendations.ts::allMoods`.
+ * Ensure moods are the same as `./src/ui/components/CustomiseRecommendations/index.ts::allMoods`.
  */
 export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: number) {
     if (numberOfMoodsToGet > moods.length) {
@@ -181,24 +150,15 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
     const summedMappingObject: { [mood: string]: number } = {};
     // Iterate through track's genres
     for (const genre of genres) {
-        /**
-         * Returns either `undefined` or an array of mapping. Example:
-         *
-         * ```js
-         * [
-         *     { mood: 'happy', weight: 3 },
-         *     { mood: 'chill', weight: 3 },
-         *     { mood: 'party', weight: 1 }
-         * ]
-         * ```
-         */
-        const mapping = genreToMoodMapping[genre];
-        // Continue even if one of track's genre did not match anything in `genreToMoodMapping`
-        if (!mapping) continue;
-        // Iterate through genre's mappings to sum its mood's weight
-        for (const { mood, weight } of mapping) {
-            if (!summedMappingObject[mood]) summedMappingObject[mood] = 0;
-            summedMappingObject[mood] += weight;
+        for (const [genreKey, moodAndWeightValue] of Object.entries(genreToMoodMapping)) {
+            // Better to use `.includes()` instead of `==`
+            if (genre.toLowerCase().includes(genreKey.toLowerCase())) {
+                // Iterate through genre's mappings to sum its mood's weight
+                for (const { mood, weight } of moodAndWeightValue) {
+                    if (!summedMappingObject[mood]) summedMappingObject[mood] = 0;
+                    summedMappingObject[mood] += weight;
+                }
+            }
         }
     }
     /**
@@ -222,13 +182,13 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
      * // From (as per above):
      * [ [ 'chill', 9 ], [ 'party', 2 ], [ 'happy', 3 ] ]
      *
-     * // To:
+     * // To (re-ordered from highest to lowest):
      * [ [ 'chill', 9 ], [ 'happy', 3 ], [ 'party', 2 ] ]
      *
-     * // To:
+     * // To (get names only):
      * [ 'chill', 'happy', 'party' ]
      *
-     * // To:
+     * // To (limit to `numberOfMoodsToGet`):
      * [ 'chill', 'happy' ]
      * ```
      */
