@@ -35,6 +35,8 @@ export default function TrackRecommendationsClient({
      *   those checks will be skipped (no errors).
      */
     const filteredRecommendedTracks = useMemo(() => {
+        // ----- Process URL params ----- //
+
         // Helpers
         function processValue(urlValue: string | null) {
             if (urlValue == "" || urlValue == "null" || urlValue == null) return null;
@@ -47,7 +49,7 @@ export default function TrackRecommendationsClient({
             if (urlDate == "" || urlDate == "null" || urlDate == null) return null;
             return urlDate;
         }
-        // Process URL params
+        // Actual
         const popularity = processValue(searchParams.get("popularity"));
         const releaseDateFrom = processReleaseDate(searchParams.get("releaseDateFrom"));
         const releaseDateTo = processReleaseDate(searchParams.get("releaseDateTo"));
@@ -70,12 +72,12 @@ export default function TrackRecommendationsClient({
         //         `releaseDateTo  : {${typeof releaseDateTo}} ${releaseDateTo}`,
         //     ].join("\n")
         // );
+
+        // ----- Filter recommended tracks ----- //
+
         return recommendedTracks.filter((recommendedTrack) => {
             /**
-             * FIXME Popularity value of `0` acts like value of `100`! `0` should return recommendations with popularity of `0` only!
-             *
-             * Popularity: If recommended track's popularity <= URL param's popularity, then return it. \
-             * (must include `typeof` so that value `0` is valid)
+             * Popularity: If recommended track's popularity <= URL param's popularity, then return it
              *
              * Rationale:
              *
@@ -83,7 +85,8 @@ export default function TrackRecommendationsClient({
              * I would want to see recommended tracks with max popularities that are <= whatever value I adjust it to.
              */
             if (typeof recommendedTrack.popularity == "number") {
-                if (popularity && recommendedTrack.popularity > popularity) return false;
+                // Must include `!= null` so that value of `0` works as intended
+                if (popularity != null && recommendedTrack.popularity > popularity) return false;
             }
             // Release date: If recommended track's release date is within URL param's date range, then return it
             if (typeof recommendedTrack.releaseDate == "string") {
@@ -150,9 +153,6 @@ export default function TrackRecommendationsClient({
      * L side ("Customise Recommendations"):
      *
      * - Double-click to reset slider's value.
-     * - Upon form submission, put slider's value in URL via something like `?=` maybe?
-     *      - So URL will have additional "?=genre-similarity=50&?=popularity=72&..." something like that.
-     *      - So page refreshing stores those values.
      *
      * R side ("Recommended Tracks"):
      *
