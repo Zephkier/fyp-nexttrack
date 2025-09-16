@@ -148,7 +148,7 @@ export const genreToMoodMapping: {
 };
 
 /**
- * Helper function returns `[]` or an array of strings. Example:
+ * Helper function returns `["no moods found"]` or an array of strings. Example:
  *
  * - If `numberOfMoodsToGet = 2`, then returns `[ "mood1", "mood2" ]`.
  * - If `numberOfMoodsToGet = 4`, then returns `[ "mood1", ..., "mood4" ]`.
@@ -164,7 +164,7 @@ export const genreToMoodMapping: {
 export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: number) {
     if (numberOfMoodsToGet > moods.length) {
         console.error(`[!] ./src/libs/mood.ts::inferMoodsFromGenres():\nMax value allowed for "numberOfMoodsToGet" is ${moods.length} (current: ${numberOfMoodsToGet}).`);
-        return [];
+        return ["no moods found"];
     }
     /**
      * This will eventually become something like:
@@ -214,7 +214,7 @@ export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: numbe
      */
     const summedMappingArray = Object.entries(summedMappingObject);
     // When all of track's genres did not match anything in `genreToMoodMapping`
-    if (summedMappingArray.length == 0) return [];
+    if (summedMappingArray.length == 0) return ["no moods found"];
     /**
      * Sorts by weight, then return the top `numberOfMoodsToGet` (e.g. 2) moods. Example:
      *

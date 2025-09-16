@@ -19,8 +19,8 @@ export type recommendedTrackType = {
         genius: string;
         lastFm: string;
     };
-    // These are `submittedCustomisations` params,
-    // and need `?` because they are not submitted (i.e. undefined) on the first EVER page load
+    // Need `?` because they are not submitted (i.e. undefined) on the first EVER page load
+    genres?: string[] | null;
     genreSimilarity?: number | null;
     popularity?: number | null;
     releaseDate?: string | null;
@@ -45,6 +45,19 @@ export default function RecommendedTrack({ recommendedTrack }: { recommendedTrac
                 <div>
                     <h4 className="text-xl font-bold">{recommendedTrack.name}</h4>
                     <p>by {recommendedTrack.artist}</p>
+                    <br />
+                    <p>
+                        <b>Genres:</b> {recommendedTrack.genres?.join(", ")}
+                    </p>
+                    <p>
+                        <b>Max Popularity:</b> {recommendedTrack.popularity}%
+                    </p>
+                    <p>
+                        <b>Release Date (yyyy-mm-dd):</b> {recommendedTrack.releaseDate}
+                    </p>
+                    <p>
+                        <b>Moods:</b> {recommendedTrack.moods?.join(", ")}
+                    </p>
                 </div>
                 <span style={{ color: "var(--primary)" }}>{isExpanded ? "▲" : "▼"}</span>
             </summary>

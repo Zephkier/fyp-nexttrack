@@ -4,27 +4,11 @@ import type { recommendedTrackType } from "@/ui/components/recommendations/Recom
 
 import TrackRecommendationsClient from "./page.client";
 
+import { getGenres } from "@/libs/genres";
 import { inferMoodsFromGenres } from "@/libs/mood";
-import {
-    // Format
-    getSpotifyTrackId,
-    getSpotifyTrackDetails,
-    setSpotifyReleaseDate,
-} from "@/libs/spotify";
-import {
-    // Format
-    getLastFmGenres,
-    webScrapeLastFmGenres,
-    getLastFmSimilarTracks,
-    webScrapeLastFmYoutubeId,
-    webScrapeLastFmListenAtLinks,
-} from "@/libs/lastfm";
-import {
-    // Format
-    getGeniusSearch,
-    webScrapeGeniusGenres,
-    getGeniusAboutLink,
-} from "@/libs/genius";
+import { getSpotifyTrackId, getSpotifyTrackDetails, setSpotifyReleaseDate } from "@/libs/spotify";
+import { getLastFmSimilarTracks, webScrapeLastFmYoutubeId, webScrapeLastFmListenAtLinks } from "@/libs/lastfm";
+import { getGeniusSearch, getGeniusAboutLink } from "@/libs/genius";
 
 export const metadata: Metadata = {
     title: "Recommendations",
@@ -43,13 +27,9 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
      */
     const { spotifyTrackId } = await params;
 
-    // ------------------------------------------------------- //
-    // ----- 1. Get values for "Submitted Track Details" ----- //
-    // ------------------------------------------------------- //
-
-    // ----- Get user-submitted (Spotify) track details ----- //
-
     /**
+     * NOTE
+     *
      * Unfortunately, Spotify API's `/albums/`, `/audio-features/`, `/audio-analysis/`, \
      * and `/recommendations` endpoints are deprecated.
      *
@@ -77,6 +57,12 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
      *   to get its recommendations based on the user-submitted artist and track names.
      */
 
+    // --------------------------------------------------------------------------------------------------- //
+    // ----- 1. Get values for "Submitted Track Details" and 2. "Customise Recommendations" sections ----- //
+    // --------------------------------------------------------------------------------------------------- //
+
+    // ----- Get user-submitted (Spotify) track details (i.e. name, artist, release date) ----- //
+
     /**
      * Spotify API returns `null` or an object with many keys.
      * @see {@linkcode getSpotifyTrackDetails()}
@@ -102,37 +88,11 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     const artistName = spotifyTrackDetails.artists[0].name;
     const trackName = spotifyTrackDetails.name;
 
-    // --------------------------------------------------------- //
-    // ----- 2. Get values for "Customise Recommendations" ----- //
-    // --------------------------------------------------------- //
+    // ----- Get genres ----- //
 
-    // ----- Get genres (Last.fm and Genius call it "tags", but we shall call it "genres" for simplicity) ----- //
+    const retrievedGenres = await getGenres(artistName, trackName);
 
-    /**
-     * Sources to get genres:
-     *
-     * Priority 1. Spotify API               - has no genre-related data \
-     * Priority 2. Last.fm API               - inconsistent; may return 0 genres \
-     * Priority 3. Last.fm web scrape        - insufficient; may return 1 genre \
-     * Priority 4. Genius API                - has no genre-related data \
-     * Priority 5. Genius web scrape         - last resort \
-     * Priority 6. Set `["no genres found"]` - fail-safe
-     */
-
-    // // TEST Handle cases where there are insufficient genres (move this line anywhere)
-    // retrievedGenres = [];
-
-    let retrievedGenres: string[] = await getLastFmGenres(artistName, trackName);
-    const minNumberOfGenres = 2;
-    if (retrievedGenres.length < minNumberOfGenres) retrievedGenres = await webScrapeLastFmGenres(artistName, trackName);
-    if (retrievedGenres.length < minNumberOfGenres) {
-        const searchResults = await getGeniusSearch(artistName, trackName);
-        const firstSearchResultGeniusUrl: string | null = searchResults?.[0]?.result?.url ?? null;
-        if (firstSearchResultGeniusUrl) retrievedGenres = await webScrapeGeniusGenres(firstSearchResultGeniusUrl);
-    }
-    if (retrievedGenres.length < minNumberOfGenres) retrievedGenres = ["no genres found"];
-
-    // ----- Get moods that are custom-created and inferred from genres ----- //
+    // ----- Get moods (that are custom-created and inferred from genres) ----- //
 
     /**
      * Must "custom-create" and "infer" because:
@@ -151,7 +111,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
         name: spotifyTrackDetails.name,
         artists: spotifyTrackDetails.artists.map((artist) => artist.name),
         releaseDate: spotifyTrackDetails.album.release_date,
-        genres: retrievedGenres.map((genre) => genre.toLowerCase()),
+        genres: retrievedGenres,
         popularity: spotifyTrackDetails.popularity,
         moods: inferredMoods,
     };
@@ -161,22 +121,6 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     // -------------------------------------------------- //
 
     // ----- Get recommended tracks ----- //
-
-    /**
-     * TODO
-     *
-     * Current recommendations are placeholders.
-     *
-     * In fact, it simply uses similar tracks as recommendations \
-     * via Last.fm API's `track.getSimilar` endpoint.
-     *
-     * Actual recommendations must be dynamic and based on:
-     *
-     * - `submittedTrack.genres` similarity value
-     * - `submittedTrack.popularity` value
-     * - `submittedTrack.releaseDate` range of values
-     * - `submittedTrack.moods` value
-     */
 
     /**
      * Last.fm API returns `[]` or an array of objects.
@@ -263,29 +207,35 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
      * - Unsure to set `??` here or within their own functions over at `./src/libs`.
      *
      * - Handle `null` cases such that it displays greyed italic text like for `video`.
-     *   - This means handling things like `"Unknown track name"` etc.
+     *   - This means handling things like `"Unknown track/artist name"` etc.
      *
      * - Display the actual (about and lyrics) text instead of having a button with its link.
      */
     const initialRecommendedTracks: recommendedTrackType[] = await Promise.all(
         lastFmSimilarTracks2.map(async (lastFmSimilarTrack) => {
-            const linkToItsGeniusPage = lastFmSimilarTrack?.aboutLinks?.genius ?? "https://genius.com/";
-            const linkToItsLastFmPage = lastFmSimilarTrack?.aboutLinks?.lastFm ?? "https://www.last.fm/";
-
-            // Use the same methods (that were used above) to get customisation params
-            const spotifyLink = lastFmSimilarTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com/";
-            const spotifyId = getSpotifyTrackId(spotifyLink);
-            const spotifyDetails = await getSpotifyTrackDetails(spotifyId);
+            const name = lastFmSimilarTrack?.name ?? "Unknown track name";
+            const artist = lastFmSimilarTrack?.artist.name ?? "Unknown artist name";
+            const video = lastFmSimilarTrack?.youtubeId ?? null;
+            const spotifyLink = lastFmSimilarTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com";
+            const appleMusicLink = lastFmSimilarTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com";
+            const youtubeMusicLink = lastFmSimilarTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com";
+            const linkToItsGeniusPage = lastFmSimilarTrack?.aboutLinks?.genius ?? "https://genius.com";
+            const linkToItsLastFmPage = lastFmSimilarTrack?.aboutLinks?.lastFm ?? "https://www.last.fm";
+            // Use the same methods (that were used above) to get params
+            const genres = await getGenres(name, artist);
+            const spotifyDetails = await getSpotifyTrackDetails(getSpotifyTrackId(spotifyLink));
             if (spotifyDetails && spotifyDetails.album.release_date) spotifyDetails.album.release_date = setSpotifyReleaseDate(spotifyDetails.album.release_date);
-
+            const numberOfMoodsToGet = 2;
+            const inferredMoods = inferMoodsFromGenres(genres, numberOfMoodsToGet);
             return {
-                name: lastFmSimilarTrack?.name ?? "Unknown track name",
-                artist: lastFmSimilarTrack?.artist.name ?? "Unknown artist name",
-                video: lastFmSimilarTrack?.youtubeId ?? null,
+                // (basic) Details
+                name: name,
+                artist: artist,
+                video: video,
                 links: {
                     spotify: spotifyLink,
-                    appleMusic: lastFmSimilarTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
-                    youtubeMusic: lastFmSimilarTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
+                    appleMusic: appleMusicLink,
+                    youtubeMusic: youtubeMusicLink,
                 },
                 about: {
                     genius: linkToItsGeniusPage,
@@ -296,21 +246,22 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
                     lastFm: `${linkToItsLastFmPage}#shoutbox`,
                 },
                 lyrics: linkToItsGeniusPage,
-                // TODO Implement later, see "./src/app/recommendations/[spotifyTrackId]/page.client.tsx"
-                // genreSimilarity: null,
+                // (extra) Params
+                genres: genres,
                 popularity: spotifyDetails?.popularity ?? null,
                 releaseDate: spotifyDetails?.album.release_date ?? null,
+                moods: inferredMoods,
                 // TODO Implement later, see "./src/app/recommendations/[spotifyTrackId]/page.client.tsx"
-                // moods: [],
+                // genreSimilarity: null,
             };
         })
     );
 
-    // TEST
-    for (const initialRecommendedTrack of initialRecommendedTracks) {
-        console.log(`${initialRecommendedTrack.name}\n${initialRecommendedTrack.popularity}\n${initialRecommendedTrack.releaseDate}\n`);
-    }
-    console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
+    // // TEST
+    // for (const initialRecommendedTrack of initialRecommendedTracks) {
+    //     console.log(`${initialRecommendedTrack.name}\n${initialRecommendedTrack.popularity}\n${initialRecommendedTrack.releaseDate}\n`);
+    // }
+    // console.log("[!] ^ from ./src/app/recommendations/[spotifyTrackID]/page.tsx");
 
     return (
         <TrackRecommendationsClient

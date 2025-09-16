@@ -27,6 +27,7 @@ export default function SubmittedTrackDetails({ submittedTrack }: { submittedTra
                 <li>
                     <b>Release Date (yyyy-mm-dd):</b> {submittedTrack.releaseDate}
                 </li>
+                {/* TODO Insert "moods" value */}
             </ul>
         </div>
     );
