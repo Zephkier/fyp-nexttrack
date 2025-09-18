@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
@@ -10,6 +10,7 @@ import SubmittedTrackDetails from "@/ui/components/recommendations/SubmittedTrac
 // This directory's `index.tsx` acts as the entry point, so no need to specify its `page.tsx` file
 import CustomiseRecommendations from "@/ui/components/recommendations/CustomiseRecommendations";
 import RecommendedTracks from "@/ui/components/recommendations/RecommendedTracks";
+import LoadingAnimation from "@/ui/components/common/LoadingAnimation";
 
 export default function TrackRecommendationsClient({
     // Format
@@ -22,6 +23,7 @@ export default function TrackRecommendationsClient({
     const router = useRouter();
     const searchParams = useSearchParams();
     const [recommendedTracks] = useState(initialRecommendedTracks);
+    const [isPending, startTransition] = useTransition();
 
     // ----- Process URL params ----- //
 
@@ -201,8 +203,12 @@ export default function TrackRecommendationsClient({
             params.append("moods", submittedCustomisations.moods.join(","));
         }
         url.search = params.toString();
-        // Refresh URL with new query string
-        router.replace(url.toString());
+        // // Refresh URL with new query string
+        // router.replace(url.toString());
+        // Refresh URL with new query string with smooth transition
+        startTransition(() => {
+            router.replace(url.toString(), { scroll: false });
+        });
     }
 
     /**
@@ -224,6 +230,7 @@ export default function TrackRecommendationsClient({
                 <CustomiseRecommendations submittedTrack={submittedTrack} onSubmit={handleSubmit} />
                 <RecommendedTracks recommendedTracks={filteredRecommendedTracks} />
             </div>
+            {isPending && <LoadingAnimation customText="Setting customisations..." />}
         </main>
     );
 }
