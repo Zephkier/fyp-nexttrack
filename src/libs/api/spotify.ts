@@ -1,5 +1,8 @@
 import SpotifyWebApi from "spotify-web-api-node";
 
+let spotifyWebApi: SpotifyWebApi | null = null;
+let tokenExpiresAt = 0;
+
 /**
  * Helper function returns a string. Example:
  *
@@ -28,24 +31,35 @@ export function getSpotifyTrackId(spotifyTrackLink: string) {
  *
  * Source: https://www.npmjs.com/package/spotify-web-api-node
  */
-export async function getSpotifyApiToken() {
+export async function getSpotifyWebApiToken() {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
     if (!clientId || !clientSecret) {
-        console.error('[!] ./src/libs/api/spotify.ts::getSpotifyApiToken():\nNo "SPOTIFY_CLIENT_ID" or "SPOTIFY_CLIENT_SECRET"');
+        console.error('[!] ./src/libs/api/spotify.ts::getSpotifyWebApiToken():\nNo "SPOTIFY_CLIENT_ID" or "SPOTIFY_CLIENT_SECRET"');
         return null;
     }
+    // Re-use existing API and token if they are still valid
+    const now = Date.now();
+    if (spotifyWebApi && now < tokenExpiresAt - 5000) return spotifyWebApi;
     try {
-        /**
-         * `clientId` **must** be called `clientId` and not anything else (like `clientID`).
-         */
-        const spotifyApi = new SpotifyWebApi({ clientId, clientSecret });
-        const data = await spotifyApi.clientCredentialsGrant();
+        // Ensure a single instance of `SpotifyWebApi()`
+        if (!spotifyWebApi) spotifyWebApi = new SpotifyWebApi({ clientId, clientSecret });
+        const data = await spotifyWebApi.clientCredentialsGrant();
         const accessToken = data.body.access_token;
-        spotifyApi.setAccessToken(accessToken);
-        return spotifyApi;
+        // const expiresInSec = Number(data.body.expires_in);
+        const expiresInSec = data.body.expires_in;
+        tokenExpiresAt = now + expiresInSec * 1000;
+        // // TEST
+        // console.log("[! Spotify Web API Token !]");
+        // console.log(data.body.expires_in);
+        // console.log(tokenExpiresAt);
+        // console.log("[! Spotify Web API Token !]");
+        spotifyWebApi.setAccessToken(accessToken);
+        return spotifyWebApi;
     } catch (err) {
-        console.error("[!] ./src/libs/api/spotify.ts::getSpotifyApiToken():\nerr:", err);
+        console.error("[!] ./src/libs/api/spotify.ts::getSpotifyWebApiToken():\nerr:", err);
+        spotifyWebApi = null;
+        tokenExpiresAt = 0;
         return null;
     }
 }
@@ -126,7 +140,7 @@ export async function getSpotifyApiToken() {
  */
 export async function getSpotifyTrackDetails(trackId: string) {
     try {
-        const api = await getSpotifyApiToken();
+        const api = await getSpotifyWebApiToken();
         if (!api) return null;
         const response = await api.getTrack(trackId);
         // // TEST Check for useful keys
