@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getSpotifyTrackId } from "@/libs/spotify";
+import { getSpotifyTrackId } from "@/libs/api/spotify";
 
 export async function POST(request: Request) {
     try {

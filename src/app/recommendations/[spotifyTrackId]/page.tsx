@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import type { lastFmSimilarTrackType } from "@/libs/lastfm";
+import type { lastFmSimilarTrackType } from "@/libs/api/lastfm";
 import type { recommendedTrackType } from "@/ui/components/recommendations/RecommendedTrack";
 
-import TrackRecommendationsClient from "./page.client";
+import { getSpotifyTrackId, getSpotifyTrackDetails, setSpotifyReleaseDate } from "@/libs/api/spotify";
+import { getLastFmSimilarTracks, webScrapeLastFmYoutubeId, webScrapeLastFmListenAtLinks } from "@/libs/api/lastfm";
+import { getGeniusSearch, getGeniusAboutLink } from "@/libs/api/genius";
 
-import { getGenres } from "@/libs/genres";
-import { inferMoodsFromGenres } from "@/libs/moods";
-import { getSpotifyTrackId, getSpotifyTrackDetails, setSpotifyReleaseDate } from "@/libs/spotify";
-import { getLastFmSimilarTracks, webScrapeLastFmYoutubeId, webScrapeLastFmListenAtLinks } from "@/libs/lastfm";
-import { getGeniusSearch, getGeniusAboutLink } from "@/libs/genius";
+import { getGenres } from "@/libs/helper/genres";
+import { inferMoodsFromGenres } from "@/libs/helper/moods";
+
+import TrackRecommendationsClient from "./page.client";
 
 export const metadata: Metadata = {
     title: "Recommendations",

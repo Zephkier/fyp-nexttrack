@@ -3,11 +3,13 @@ import { useState } from "react";
 
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
 
+import { moods } from "@/libs/helper/moods";
+import { currentDate } from "./ReleaseDateRangeSection";
+
 import GenresSection from "./GenresSection";
 import PopularitySection from "./PopularitySection";
-import ReleaseDateRangeSection, { currentDate } from "./ReleaseDateRangeSection";
+import ReleaseDateRangeSection from "./ReleaseDateRangeSection";
 import MoodsSection from "./MoodsSection";
-import { moods } from "@/libs/moods";
 
 /**
  * `type` is more flexible and has more use cases than `interface`.\

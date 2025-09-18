@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 
 import { Geist, Geist_Mono } from "next/font/google";
-
 import "./globals.css";
+
 import Header from "@/ui/components/common/Header";
 import Footer from "@/ui/components/common/Footer";
 

@@ -1,5 +1,5 @@
-import { getLastFmGenres, webScrapeLastFmGenres } from "@/libs/lastfm";
-import { getGeniusSearch, webScrapeGeniusGenres } from "@/libs/genius";
+import { getLastFmGenres, webScrapeLastFmGenres } from "@/libs/api/lastfm";
+import { getGeniusSearch, webScrapeGeniusGenres } from "@/libs/api/genius";
 
 /**
  * Multiple APIs and web scraping returns `["no genres found"]` or an array of strings. Example:
