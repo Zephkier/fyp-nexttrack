@@ -1,3 +1,4 @@
+import { cache } from "react";
 import * as cheerio from "cheerio";
 
 /**
@@ -126,7 +127,7 @@ export function authHeaders(): HeadersInit {
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function getGeniusSearch(artistName: string, trackName: string) {
+export const getGeniusSearch = cache(async (artistName: string, trackName: string) => {
     // The API (and even via manual browser navigation) works best when track name is minimal
     const minimalTrackName = convertToGeniusHtmlFormat(trackName);
     const artistAndTrackName = `${artistName} - ${minimalTrackName}`;
@@ -169,7 +170,7 @@ export async function getGeniusSearch(artistName: string, trackName: string) {
     // console.log("[!] ^ from ./src/libs/api/genius.ts::getGeniusSearch()");
     // console.log();
     return searchResults;
-}
+});
 
 /**
  * # Deprecated because this Genius API endpoint has no genre-related data.
@@ -359,7 +360,7 @@ export async function getGeniusSong_deprecated(id: number) {
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function webScrapeGeniusGenres(geniusUrl: string) {
+export const webScrapeGeniusGenres = cache(async (geniusUrl: string) => {
     try {
         const response = await fetch(geniusUrl, {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
@@ -390,7 +391,7 @@ export async function webScrapeGeniusGenres(geniusUrl: string) {
         console.error(`[!] ./src/libs/api/genius.ts::webScrapeGeniusGenres():\n${err}`);
         return [];
     }
-}
+});
 
 /**
  * Genius API and web scraping Genius page returns `null` or a string. Example:
@@ -465,7 +466,7 @@ export async function webScrapeGeniusGenres(geniusUrl: string) {
  * ...
  * ```
  */
-export async function getGeniusAboutLink(geniusUrl: string | null, trackName: string) {
+export const getGeniusAboutLink = cache(async (geniusUrl: string | null, trackName: string) => {
     if (!geniusUrl) return null;
 
     // ----- Genius URLs that are correct: the URLs are already the "about" link, so just return them ----- //
@@ -531,4 +532,4 @@ export async function getGeniusAboutLink(geniusUrl: string | null, trackName: st
         console.error(`[!] ./src/libs/api/genius.ts::getGeniusAboutLink():\n${err}`);
         return null;
     }
-}
+});

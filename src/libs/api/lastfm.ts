@@ -1,3 +1,4 @@
+import { cache } from "react";
 import * as cheerio from "cheerio";
 
 // `type` is more flexible and has more use cases than `interface`
@@ -72,7 +73,7 @@ function convertToLastFmFormat(incomingString: string) {
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function getLastFmGenres(artistName: string, trackName: string) {
+export const getLastFmGenres = cache(async (artistName: string, trackName: string) => {
     const baseUrl = "http://ws.audioscrobbler.com";
     // Using ".getInfo" method to get more info than the ".getTopTags" method
     const method = "track.getInfo";
@@ -146,7 +147,7 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
     // console.log(genres);
     // console.log("[!] ^ from ./src/libs/api/lastfm.ts::getLastFmGenres()");
     return genres;
-}
+});
 
 /**
  * Web scraping Last.fm page returns `[]` or an array of strings. Example:
@@ -193,7 +194,7 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function webScrapeLastFmGenres(artistName: string, trackName: string) {
+export const webScrapeLastFmGenres = cache(async (artistName: string, trackName: string) => {
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
     const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
     const fullUrl = `https://www.last.fm/music/${artistNameInLastFmFormat}/_/${trackNameInLastFmFormat}`;
@@ -230,7 +231,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
         console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmGenres():\nartistName: ${artistName}\ntrackName: ${trackName}\n`, err);
         return [];
     }
-}
+});
 
 /**
  * Last.fm API returns `[]` or an array of objects. Example:
@@ -272,7 +273,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function getLastFmSimilarTracks(artistName: string, trackName: string): Promise<lastFmSimilarTrackType[]> {
+export const getLastFmSimilarTracks = cache(async (artistName: string, trackName: string) => {
     const baseUrl = "http://ws.audioscrobbler.com";
     const method = "track.getSimilar";
     const apiKey = process.env.LASTFM_API_KEY;
@@ -303,7 +304,7 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     // }
     // console.log("[!] ^ from ./src/libs/api/lastfm.ts::getLastFmSimilarTracks()");
     return similarTracks;
-}
+});
 
 /**
  * Web scraping Last.fm page returns `null` or a string. Example:
@@ -355,7 +356,7 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
  *   as NextTrack's user-submitted track.
  * - Check the first recommendation.
  */
-export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
+export const webScrapeLastFmYoutubeId = cache(async (lastFmUrl: string) => {
     try {
         const response = await fetch(lastFmUrl, {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
@@ -385,7 +386,7 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
         console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId():\nlastFmUrl: ${lastFmUrl}\n`, err);
         return null;
     }
-}
+});
 
 /**
  * Web scraping Last.fm page returns a `listenAtLinks` object with 3 keys. Example:
@@ -475,7 +476,7 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
  *   as NextTrack's user-submitted track.
  * - Check the first recommendation.
  */
-export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
+export const webScrapeLastFmListenAtLinks = cache(async (lastFmUrl: string) => {
     const listenAtLinks: {
         spotify: string | null;
         appleMusic: string | null;
@@ -546,4 +547,4 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
         console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks():\nlastFmUrl: ${lastFmUrl}\n`, err);
         return null;
     }
-}
+});

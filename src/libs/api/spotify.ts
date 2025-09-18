@@ -1,3 +1,4 @@
+import { cache } from "react";
 import SpotifyWebApi from "spotify-web-api-node";
 
 let spotifyWebApi: SpotifyWebApi | null = null;
@@ -138,7 +139,7 @@ export async function getSpotifyWebApiToken() {
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function getSpotifyTrackDetails(trackId: string) {
+export const getSpotifyTrackDetails = cache(async (trackId: string) => {
     try {
         const api = await getSpotifyWebApiToken();
         if (!api) return null;
@@ -161,7 +162,7 @@ export async function getSpotifyTrackDetails(trackId: string) {
         console.error(`[!] ./src/libs/api/spotify.ts::getSpotifyTrackDetails():\ntrackId: ${trackId}\nerr:`, err);
         return null;
     }
-}
+});
 
 /**
  * Helper function returns a string in "`YYYY-MM-DD`" format. Example:
