@@ -148,6 +148,16 @@ export async function getSpotifyTrackDetails(trackId: string) {
         // console.log("[!] ^ from ./src/libs/api/spotify.ts::getSpotifyTrackDetails()");
         return response.body;
     } catch (err) {
+        // // TEST
+        // console.error(
+        //     // If enabling this line, then set `catch (err)` to `catch (err: any)`
+        //     `[!] ./src/libs/api/spotify.ts::getSpotifyTrackDetails():\ntrackId: ${trackId}\nerr:`,
+        //     err,
+        //     "\nerr.headers:",
+        //     err?.headers,
+        //     '\nerr.headers["retry-after"]:',
+        //     err?.headers?.["retry-after"]
+        // );
         console.error(`[!] ./src/libs/api/spotify.ts::getSpotifyTrackDetails():\ntrackId: ${trackId}\nerr:`, err);
         return null;
     }

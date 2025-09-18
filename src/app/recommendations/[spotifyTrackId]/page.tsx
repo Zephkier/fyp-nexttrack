@@ -233,11 +233,11 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
         });
 
         // ----- NOTE (Extra) Prevent error 429 "Too Many Requests" ----- //
-        // await new Promise((resolve) => {
-        //     // Reference: 1000 ms = 1 s
-        //     // 100 ms = 0.1 s --> 10 tracks per second --> 100 tracks takes 10 seconds
-        //     setTimeout(resolve, 10);
-        // });
+        await new Promise((resolve) => {
+            // Reference: 1000 ms = 1 s
+            // This calculated value is recommended by ChatGPT
+            setTimeout(resolve, 600 + Math.random() * 200);
+        });
     }
 
     // // TEST
