@@ -32,7 +32,7 @@ export async function getSpotifyApiToken() {
     const clientId = process.env.SPOTIFY_CLIENT_ID;
     const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
     if (!clientId || !clientSecret) {
-        console.error('[!] ./src/libs/spotify.ts::getSpotifyApiToken():\nNo "SPOTIFY_CLIENT_ID" or "SPOTIFY_CLIENT_SECRET"');
+        console.error('[!] ./src/libs/api/spotify.ts::getSpotifyApiToken():\nNo "SPOTIFY_CLIENT_ID" or "SPOTIFY_CLIENT_SECRET"');
         return null;
     }
     try {
@@ -45,7 +45,7 @@ export async function getSpotifyApiToken() {
         spotifyApi.setAccessToken(accessToken);
         return spotifyApi;
     } catch (err) {
-        console.error(`[!] ./src/libs/spotify.ts::getSpotifyApiToken():\n${err}`);
+        console.error(`[!] ./src/libs/api/spotify.ts::getSpotifyApiToken():\n${err}`);
         return null;
     }
 }
@@ -131,10 +131,10 @@ export async function getSpotifyTrackDetails(trackId: string) {
         const response = await api.getTrack(trackId);
         // // TEST Check for useful keys
         // console.log(response.body);
-        // console.log("[!] ^ from ./src/libs/spotify.ts::getSpotifyTrackDetails()");
+        // console.log("[!] ^ from ./src/libs/api/spotify.ts::getSpotifyTrackDetails()");
         return response.body;
     } catch (err) {
-        console.error(`[!] ./src/libs/spotify.ts::getSpotifyTrackDetails():\n${err}`);
+        console.error(`[!] ./src/libs/api/spotify.ts::getSpotifyTrackDetails():\n${err}`);
         return null;
     }
 }

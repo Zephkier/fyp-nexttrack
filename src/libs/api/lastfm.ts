@@ -81,7 +81,10 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
     const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
     const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&format=json`;
     const response = await fetch(fullUrl);
-    if (!response.ok) return [];
+    if (!response.ok) {
+        console.error(`[!] ./src/libs/api/lastfm.ts::getLastFmGenres():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+        return [];
+    }
     /**
      * Returns an object with many keys. Example:
      *
@@ -137,7 +140,7 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
     // // console.log(data);
     // console.log(fullUrl);
     // console.log(genres);
-    // console.log("[!] ^ from ./src/libs/lastfm.ts::getLastFmGenres()");
+    // console.log("[!] ^ from ./src/libs/api/lastfm.ts::getLastFmGenres()");
     return genres;
 }
 
@@ -195,7 +198,10 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
             cache: "no-store",
         });
-        if (!response.ok) return [];
+        if (!response.ok) {
+            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmGenres():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+            return [];
+        }
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
@@ -212,10 +218,10 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
         // // TEST Ensure that genres retrieved are displayed on NextTrack
         // console.log(fullUrl);
         // console.log(genres);
-        // console.log("[!] ^ from ./src/libs/lastfm.ts::webScrapeLastFmGenres()");
+        // console.log("[!] ^ from ./src/libs/api/lastfm.ts::webScrapeLastFmGenres()");
         return genres ?? [];
     } catch (err) {
-        console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmGenres():\n${err}`);
+        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmGenres():\n${err}`);
         return [];
     }
 }
@@ -272,7 +278,10 @@ Promise<lastFmSimilarTrackType[]> {
     const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
     const fullUrl = `${baseUrl}/2.0/?method=${method}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&api_key=${apiKey}&format=json`;
     const response = await fetch(fullUrl);
-    if (!response.ok) return [];
+    if (!response.ok) {
+        console.error(`[!] ./src/libs/api/lastfm.ts::getLastFmSimilarTracks():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+        return [];
+    }
     const data: {
         similartracks: {
             "@attr": { artist: string; track: string };
@@ -286,7 +295,7 @@ Promise<lastFmSimilarTrackType[]> {
     // for (const similarTrack of similarTracks) {
     //     console.log(`${similarTrack.artist.name} - ${similarTrack.name}`);
     // }
-    // console.log("[!] ^ from ./src/libs/lastfm.ts::getLastFmSimilarTracks()");
+    // console.log("[!] ^ from ./src/libs/api/lastfm.ts::getLastFmSimilarTracks()");
     return similarTracks;
 }
 
@@ -346,7 +355,10 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
             cache: "no-store",
         });
-        if (!response.ok) return null;
+        if (!response.ok) {
+            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+            return null;
+        }
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
@@ -358,11 +370,11 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
         // // TEST Ensure that the Last.fm page's YouTube video matches what was retrieved
         // console.log(lastFmUrl);
         // console.log(youtubeId);
-        // console.log("[!] ^ from ./src/libs/lastfm.ts::webScrapeLastFmYoutubeId()");
+        // console.log("[!] ^ from ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId()");
         // console.log();
         return youtubeId;
     } catch (err) {
-        console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmYoutubeId():\n${err}`);
+        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId():\n${err}`);
         return null;
     }
 }
@@ -470,7 +482,10 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
             cache: "no-store",
         });
-        if (!response.ok) return null;
+        if (!response.ok) {
+            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+            return null;
+        }
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
@@ -512,13 +527,13 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
         // // TEST Ensure that the Last.fm page's links matches what was retrieved
         // console.log(lastFmUrl);
         // console.log(listenAtLinks);
-        // console.log("[!] ^ from ./src/libs/lastfm.ts::webScrapeLastFmListenAtLinks()");
+        // console.log("[!] ^ from ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks()");
         // console.log();
 
         // - Done
         return listenAtLinks;
     } catch (err) {
-        console.error(`[!] ./src/libs/lastfm.ts::webScrapeLastFmListenAtLinks():\n${err}`);
+        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks():\n${err}`);
         return null;
     }
 }

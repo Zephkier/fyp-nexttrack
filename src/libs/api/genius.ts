@@ -56,7 +56,7 @@ function convertToGeniusHtmlFormat(incomingString: string) {
 export function authHeaders(): HeadersInit {
     const clientAccessToken = process.env.GENIUS_CLIENT_ACCESS_TOKEN;
     if (!clientAccessToken) {
-        console.error('[!] ./src/libs/genius.ts::authHeaders():\nNo "GENIUS_CLIENT_ACCESS_TOKEN"');
+        console.error('[!] ./src/libs/api/genius.ts::authHeaders():\nNo "GENIUS_CLIENT_ACCESS_TOKEN"');
         return {};
     }
     return { Authorization: `Bearer ${clientAccessToken}` };
@@ -137,7 +137,7 @@ export async function getGeniusSearch(artistName: string, trackName: string) {
         cache: "no-store",
     });
     if (!response.ok) {
-        console.error("[!] ./src/libs/genius.ts::getGeniusSearch()");
+        console.error(`[!] ./src/libs/api/genius.ts::getGeniusSearch():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
         return null;
     }
     const data: {
@@ -164,7 +164,7 @@ export async function getGeniusSearch(artistName: string, trackName: string) {
     //     console.log(`id: ${searchResult.result.id}, url: ${searchResult.result.url}`);
     //     console.log();
     // }
-    // console.log("[!] ^ from ./src/libs/genius.ts::getGeniusSearch()");
+    // console.log("[!] ^ from ./src/libs/api/genius.ts::getGeniusSearch()");
     // console.log();
     return searchResults;
 }
@@ -300,7 +300,7 @@ export async function getGeniusSong_deprecated(id: number) {
         cache: "no-store",
     });
     if (!response.ok) {
-        console.error("[!] ./src/libs/genius.ts::getGeniusSong_deprecated()");
+        console.error(`[!] ./src/libs/api/genius.ts::getGeniusSong_deprecated():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
         return null;
     }
     /**
@@ -316,7 +316,7 @@ export async function getGeniusSong_deprecated(id: number) {
     // const data = await response.json();
     // // TEST
     // console.log(data.response);
-    // console.log("[!] ^ from ./src/libs/genius.ts::getGeniusSong_deprecated()");
+    // console.log("[!] ^ from ./src/libs/api/genius.ts::getGeniusSong_deprecated()");
 }
 
 /**
@@ -361,7 +361,10 @@ export async function webScrapeGeniusGenres(geniusUrl: string) {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
             cache: "no-store",
         });
-        if (!response.ok) return [];
+        if (!response.ok) {
+            console.error(`[!] ./src/libs/api/genius.ts::webScrapeGeniusGenres():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+            return [];
+        }
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
@@ -375,10 +378,10 @@ export async function webScrapeGeniusGenres(geniusUrl: string) {
             .get();
         // // TEST Ensure that genres retrieved are displayed on NextTrack
         // console.log(genres);
-        // console.log("[!] ^ from ./src/libs/genius.ts::webScrapeGeniusGenres()");
+        // console.log("[!] ^ from ./src/libs/api/genius.ts::webScrapeGeniusGenres()");
         return genres;
     } catch (err) {
-        console.error(`[!] ./src/libs/genius.ts::webScrapeGeniusGenres():\n${err}`);
+        console.error(`[!] ./src/libs/api/genius.ts::webScrapeGeniusGenres():\n${err}`);
         return [];
     }
 }
@@ -468,7 +471,7 @@ export async function getGeniusAboutLink(geniusUrl: string | null, trackName: st
     // console.log(`Track name after :       ${similarTrackNameInUrlFormat}`);
     // console.log(`Its Genius URL from API: ${geniusUrl}`);
     // console.log(`Is track name in URL?    ${isTrackNameInUrl}`);
-    // console.log("[!] ^ from ./src/libs/genius.ts::getGeniusAboutLink()");
+    // console.log("[!] ^ from ./src/libs/api/genius.ts::getGeniusAboutLink()");
     // console.log();
     if (isTrackNameInUrl) return geniusUrl;
 
@@ -483,7 +486,10 @@ export async function getGeniusAboutLink(geniusUrl: string | null, trackName: st
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
             cache: "no-store",
         });
-        if (!response.ok) return null;
+        if (!response.ok) {
+            console.error(`[!] ./src/libs/api/genius.ts::getGeniusAboutLink():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+            return null;
+        }
         // Parse HTML using Cheerio
         const html = await response.text();
         const $ = cheerio.load(html);
@@ -510,11 +516,11 @@ export async function getGeniusAboutLink(geniusUrl: string | null, trackName: st
         // console.log(`In URL, search for this track name: ${similarTrackNameInHtmlFormat}`);
         // console.log(`The matching HTML element's text:   ${matchingHtmlElement.text() ?? null}`);
         // console.log(`Its Genius URL this time:           ${correctGeniusUrl}`);
-        // console.log("[!] ^ from ./src/libs/genius.ts::getGeniusAboutLink()");
+        // console.log("[!] ^ from ./src/libs/api/genius.ts::getGeniusAboutLink()");
         // console.log();
         return correctGeniusUrl ?? null;
     } catch (err) {
-        console.error(`[!] ./src/libs/genius.ts::getGeniusAboutLink():\n${err}`);
+        console.error(`[!] ./src/libs/api/genius.ts::getGeniusAboutLink():\n${err}`);
         return null;
     }
 }

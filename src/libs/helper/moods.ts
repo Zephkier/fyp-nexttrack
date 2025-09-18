@@ -132,7 +132,7 @@ export const genreToMoodMapping: {
  */
 export function inferMoodsFromGenres(genres: string[], numberOfMoodsToGet: number) {
     if (numberOfMoodsToGet > moods.length) {
-        console.error(`[!] ./src/libs/mood.ts::inferMoodsFromGenres():\nMax value allowed for "numberOfMoodsToGet" is ${moods.length} (current: ${numberOfMoodsToGet}).`);
+        console.error(`[!] ./src/libs/helper/mood.ts::inferMoodsFromGenres():\nMax value allowed for "numberOfMoodsToGet" is ${moods.length} (current: ${numberOfMoodsToGet}).`);
         return ["no moods found"];
     }
     /**
