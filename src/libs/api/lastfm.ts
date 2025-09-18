@@ -82,7 +82,7 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
     const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&format=json`;
     const response = await fetch(fullUrl);
     if (!response.ok) {
-        console.error(`[!] ./src/libs/api/lastfm.ts::getLastFmGenres():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+        console.error(`[!] ./src/libs/api/lastfm.ts::getLastFmGenres():\nartistName: ${artistName}\ntrackName: ${trackName}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
         return [];
     }
     /**
@@ -199,7 +199,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
             cache: "no-store",
         });
         if (!response.ok) {
-            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmGenres():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmGenres():\nartistName: ${artistName}\ntrackName: ${trackName}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
             return [];
         }
         // Parse HTML using Cheerio
@@ -221,7 +221,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
         // console.log("[!] ^ from ./src/libs/api/lastfm.ts::webScrapeLastFmGenres()");
         return genres ?? [];
     } catch (err) {
-        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmGenres():\n${err}`);
+        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmGenres():\nartistName: ${artistName}\ntrackName: ${trackName}\n`, err);
         return [];
     }
 }
@@ -266,11 +266,7 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
  *   via https://open.spotify.com/track/456WNXWhDwYOSf5SpTuqxd?si=e9a5cc69ef9b4ffe \
  *   as NextTrack's user-submitted track.
  */
-export async function getLastFmSimilarTracks(
-    artistName: string,
-    trackName: string
-): //
-Promise<lastFmSimilarTrackType[]> {
+export async function getLastFmSimilarTracks(artistName: string, trackName: string): Promise<lastFmSimilarTrackType[]> {
     const baseUrl = "http://ws.audioscrobbler.com";
     const method = "track.getSimilar";
     const apiKey = process.env.LASTFM_API_KEY;
@@ -279,7 +275,8 @@ Promise<lastFmSimilarTrackType[]> {
     const fullUrl = `${baseUrl}/2.0/?method=${method}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&api_key=${apiKey}&format=json`;
     const response = await fetch(fullUrl);
     if (!response.ok) {
-        console.error(`[!] ./src/libs/api/lastfm.ts::getLastFmSimilarTracks():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+        console.error(`[!] ./src/libs/api/lastfm.ts::getLastFmSimilarTracks():\nartistName: ${artistName}\ntrackName: ${trackName}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+
         return [];
     }
     const data: {
@@ -356,7 +353,7 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
             cache: "no-store",
         });
         if (!response.ok) {
-            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId():\nlastFmUrl: ${lastFmUrl}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
             return null;
         }
         // Parse HTML using Cheerio
@@ -374,7 +371,7 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
         // console.log();
         return youtubeId;
     } catch (err) {
-        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId():\n${err}`);
+        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId():\nlastFmUrl: ${lastFmUrl}\n`, err);
         return null;
     }
 }
@@ -483,7 +480,7 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
             cache: "no-store",
         });
         if (!response.ok) {
-            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
+            console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks():\nlastFmUrl: ${lastFmUrl}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
             return null;
         }
         // Parse HTML using Cheerio
@@ -533,7 +530,7 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
         // - Done
         return listenAtLinks;
     } catch (err) {
-        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks():\n${err}`);
+        console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks():\nlastFmUrl: ${lastFmUrl}\n`, err);
         return null;
     }
 }

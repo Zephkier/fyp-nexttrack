@@ -106,7 +106,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     const numberOfMoodsToGet = 2;
     const inferredMoods = inferMoodsFromGenres(retrievedGenres, numberOfMoodsToGet);
 
-    // ----- (Last step) Convert and standardise retrieved data into suitable types for frontend components to render ----- //
+    // ----- (Last) Convert and standardise retrieved data into suitable types for frontend components to render ----- //
 
     const submittedTrack = {
         name: spotifyTrackDetails.name,
@@ -124,13 +124,9 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
     // ----- Get recommended tracks ----- //
 
     /**
-     * Last.fm API returns `[]` or an array of objects.
-     * @see {@linkcode getLastFmSimilarTracks()}
-     */
-    let lastFmSimilarTracks1 = await getLastFmSimilarTracks(artistName, trackName);
-
-    /**
-     * Limit number of recommended tracks returned. Max: 100.
+     * Last.fm API returns `[]` or an array of 100 objects. \
+     * \+ \
+     * Limit the number of recommended tracks shown (i.e. to work with) (max: 100).
      *
      * - Tried working with 100 recommended tracks but it tends to run into "ECONNRESET" error.
      * - Best to work with 50 to 75 recommended tracks.
@@ -139,82 +135,26 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
      *
      * TODO
      *
-     * - Idea 1: Return max number of recommendations (100) and allow users to browse through via pagination?
-     * - Idea 2: Allow users to adjust this value via dropdown box?
-     */
-    const numberOfRecommendations = 50;
-    lastFmSimilarTracks1 = lastFmSimilarTracks1.slice(0, numberOfRecommendations);
-
-    // // TEST Handle cases where there are no recommended tracks.
-    // lastFmSimilarTracks1 = [];
-
-    // ----- Get recommended tracks' additional details ----- //
-
-    /**
-     * Last.fm API returns `[]` or an array of objects, where each object has additional keys like:
+     * - Idea 1: Browse via pagination?
+     * - Idea 2: Adjust recommended tracks shown (i.e. to work with) via dropdown box?
      *
-     * ```js
-     * {
-     *     ...lastFmSimilarTracks1[0],
-     *     youtubeId: 'WbN0nX61rIs',
-     *     listenAtLinks: {
-     *         spotify: 'https://open.spotify.com/track/71iSmEeF0qRVyULABxP75P',
-     *         appleMusic: 'https://geo.music.apple.com/album/id1440862789?i=1440862797&at=10l3Sh',
-     *         youtubeMusic: 'https://music.youtube.com/watch?v=WbN0nX61rIs'
-     *     }
-     * },
-     * // Repeat `{}` for `numberOfRecommendations` more times
-     * ```
+     * -----
      *
      * @see {@linkcode getLastFmSimilarTracks()}
-     * @see `youtubeId` via {@linkcode webScrapeLastFmYoutubeId()}
-     * @see `listenAtLinks` via {@linkcode webScrapeLastFmListenAtLinks()}
      */
-    const lastFmSimilarTracks2 = await Promise.all(
-        lastFmSimilarTracks1.map(async (lastFmSimilarTrack: lastFmSimilarTrackType) => {
-            /**
-             * **Additional detail 1: YouTube ID for video embed** \
-             * Web scraping Last.fm page returns `null` or a string.
-             * @see {@linkcode webScrapeLastFmYoutubeId()}
-             */
-            const youtubeId = await webScrapeLastFmYoutubeId(lastFmSimilarTrack.url);
-            /**
-             * **Additional detail 2: "Listen at" buttons' link** \
-             * Web scraping Last.fm page returns a `listenAtLinks` object with 3 keys.
-             * @see {@linkcode webScrapeLastFmListenAtLinks()}
-             */
-            const listenAtLinks = await webScrapeLastFmListenAtLinks(lastFmSimilarTrack.url);
-            /**
-             * **Additional detail 3: "About" buttons' link** \
-             * Genius API returns `null` or an array of objects.
-             * @see {@linkcode getGeniusSearch()}
-             */
-            const searchResults = await getGeniusSearch(lastFmSimilarTrack.artist.name, lastFmSimilarTrack.name);
-            const firstSearchResultGeniusUrl: string | null = searchResults?.[0]?.result?.url ?? null;
-            const geniusAboutLink = await getGeniusAboutLink(firstSearchResultGeniusUrl, lastFmSimilarTrack.name);
-            const lastFmAboutLink = lastFmSimilarTrack.url;
-            /**
-             * Done
-             */
-            return {
-                ...lastFmSimilarTrack,
-                // Format
-                youtubeId,
-                listenAtLinks,
-                aboutLinks: {
-                    genius: geniusAboutLink,
-                    lastFm: lastFmAboutLink,
-                },
-            };
-        })
-    );
+    let lastFmSimilarTracks: lastFmSimilarTrackType[] = await getLastFmSimilarTracks(artistName, trackName);
+    const numberOfRecommendedTracks = 100;
+    lastFmSimilarTracks = lastFmSimilarTracks.slice(0, numberOfRecommendedTracks);
 
-    // ----- (Last step) Convert retrieved data into suitable types for frontend components to render ----- //
+    // // TEST Handle cases where there are no recommended tracks.
+    // lastFmSimilarTracks = [];
 
     /**
-     * Convert from Last.fm similar tracks to NextTrack recommended tracks.
+     * Converting from `lastFmSimilarTrackType` to `recommendedTrackType`.
      *
-     * Bunch of TODOs:
+     * -----
+     *
+     * TODO
      *
      * - Unsure to set `??` here or within their own functions over at `./src/libs`.
      *
@@ -223,52 +163,82 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
      *
      * - Display the actual (about and lyrics) text instead of having a button with its link.
      */
-    const initialRecommendedTracks: recommendedTrackType[] = await Promise.all(
-        lastFmSimilarTracks2.map(async (lastFmSimilarTrack) => {
-            const name = lastFmSimilarTrack?.name ?? "Unknown track name";
-            const artist = lastFmSimilarTrack?.artist.name ?? "Unknown artist name";
-            const video = lastFmSimilarTrack?.youtubeId ?? null;
-            const spotifyLink = lastFmSimilarTrack?.listenAtLinks?.spotify ?? "https://open.spotify.com";
-            const appleMusicLink = lastFmSimilarTrack?.listenAtLinks?.appleMusic ?? "https://geo.music.apple.com";
-            const youtubeMusicLink = lastFmSimilarTrack?.listenAtLinks?.youtubeMusic ?? "https://music.youtube.com";
-            const linkToItsGeniusPage = lastFmSimilarTrack?.aboutLinks?.genius ?? "https://genius.com";
-            const linkToItsLastFmPage = lastFmSimilarTrack?.aboutLinks?.lastFm ?? "https://www.last.fm";
-            // Use the same methods (that were used above) to get params
-            const genres = await getGenres(name, artist);
-            const spotifyTrackId = getSpotifyTrackId(spotifyLink);
-            const spotifyDetails = spotifyTrackId ? await getSpotifyTrackDetails(spotifyTrackId) : null;
-            if (spotifyDetails && spotifyDetails.album.release_date) spotifyDetails.album.release_date = setSpotifyReleaseDate(spotifyDetails.album.release_date);
-            const numberOfMoodsToGet = 2;
-            const inferredMoods = inferMoodsFromGenres(genres, numberOfMoodsToGet);
-            return {
-                // (basic) Details
-                name: name,
-                artist: artist,
-                video: video,
-                links: {
-                    spotify: spotifyLink,
-                    appleMusic: appleMusicLink,
-                    youtubeMusic: youtubeMusicLink,
-                },
-                about: {
-                    genius: linkToItsGeniusPage,
-                    lastFm: linkToItsLastFmPage,
-                },
-                comments: {
-                    genius: `${linkToItsGeniusPage}#comments`,
-                    lastFm: `${linkToItsLastFmPage}#shoutbox`,
-                },
-                lyrics: linkToItsGeniusPage,
-                // (extra) Params
-                // // TODO Implement `genreSimilarity`
-                // genreSimilarity: null,
-                genres: genres,
-                popularity: spotifyDetails?.popularity ?? null,
-                releaseDate: spotifyDetails?.album.release_date ?? null,
-                moods: inferredMoods,
-            };
-        })
-    );
+    const initialRecommendedTracksNew: recommendedTrackType[] = [];
+
+    for (const lastFmSimilarTrack of lastFmSimilarTracks) {
+        // ----- Get recommended tracks' additional details ----- //
+
+        /**
+         * **Additional detail 1: YouTube ID for video embed** \
+         * Web scraping Last.fm page returns `null` or a string.
+         * @see {@linkcode webScrapeLastFmYoutubeId()}
+         */
+        const youtubeId = await webScrapeLastFmYoutubeId(lastFmSimilarTrack.url);
+        /**
+         * **Additional detail 2: "Listen at" buttons' link** \
+         * Web scraping Last.fm page returns a `listenAtLinks` object with 3 keys.
+         * @see {@linkcode webScrapeLastFmListenAtLinks()}
+         */
+        const listenAtLinks = await webScrapeLastFmListenAtLinks(lastFmSimilarTrack.url);
+        const spotifyLink = listenAtLinks?.spotify ?? "https://open.spotify.com";
+        /**
+         * **Additional detail 3: "About" buttons' link** \
+         * Genius API (`getGeniusSearch()`) returns `null` or an array of objects. \
+         * Then Genius API or web scraping (`getGeniusAboutLink()`) returns `null` or a string.
+         * @see {@linkcode getGeniusSearch()}
+         * @see {@linkcode getGeniusAboutLink()}
+         */
+        const searchResults = await getGeniusSearch(lastFmSimilarTrack.artist.name, lastFmSimilarTrack.name);
+        const firstSearchResultGeniusUrl: string | null = searchResults?.[0]?.result?.url ?? null;
+        const geniusAboutLink = await getGeniusAboutLink(firstSearchResultGeniusUrl, lastFmSimilarTrack.name);
+        const lastFmAboutLink = lastFmSimilarTrack.url;
+        /**
+         * For (extra) params: Uses same methods for getting user-submitted (Spotify) track details.
+         */
+        const genres = await getGenres(lastFmSimilarTrack.artist.name, lastFmSimilarTrack.name);
+        const spotifyTrackId = getSpotifyTrackId(spotifyLink);
+        const spotifyDetails = spotifyTrackId ? await getSpotifyTrackDetails(spotifyTrackId) : null;
+        if (spotifyDetails && spotifyDetails.album.release_date) spotifyDetails.album.release_date = setSpotifyReleaseDate(spotifyDetails.album.release_date);
+        const numberOfMoodsToGet = 2;
+        const inferredMoods = inferMoodsFromGenres(genres, numberOfMoodsToGet);
+
+        // ----- (Last) Convert retrieved data into suitable types for frontend components to render ----- //
+
+        initialRecommendedTracksNew.push({
+            // (Basic) Details
+            name: lastFmSimilarTrack.name ?? "Unknown track name",
+            artist: lastFmSimilarTrack.artist.name ?? "Unknown artist name",
+            video: youtubeId ?? null,
+            listenAtLinks: {
+                spotify: spotifyLink, // Set above
+                appleMusic: listenAtLinks?.appleMusic ?? "https://geo.music.apple.com",
+                youtubeMusic: listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
+            },
+            aboutLinks: {
+                genius: geniusAboutLink ?? "https://genius.com",
+                lastFm: lastFmAboutLink ?? "https://www.last.fm",
+            },
+            comments: {
+                genius: `${geniusAboutLink}#comments`,
+                lastFm: `${lastFmAboutLink}#shoutbox`,
+            },
+            lyrics: geniusAboutLink ?? "https://genius.com",
+            // (Extra) Params
+            // // TODO Implement `genreSimilarity`
+            // genreSimilarity: null,
+            genres: genres ?? null,
+            popularity: spotifyDetails?.popularity ?? null,
+            releaseDate: spotifyDetails?.album.release_date ?? null,
+            moods: inferredMoods ?? null,
+        });
+
+        // ----- NOTE (Extra) Prevent error 429 "Too Many Requests" ----- //
+        // await new Promise((resolve) => {
+        //     // Reference: 1000 ms = 1 s
+        //     // 100 ms = 0.1 s --> 10 tracks per second --> 100 tracks takes 10 seconds
+        //     setTimeout(resolve, 10);
+        // });
+    }
 
     // // TEST
     // for (const initialRecommendedTrack of initialRecommendedTracks) {
@@ -280,7 +250,7 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
         <TrackRecommendationsClient
             // Format
             submittedTrack={submittedTrack}
-            initialRecommendedTracks={initialRecommendedTracks}
+            initialRecommendedTracks={initialRecommendedTracksNew}
         />
     );
 }

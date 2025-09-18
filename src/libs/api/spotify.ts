@@ -45,7 +45,7 @@ export async function getSpotifyApiToken() {
         spotifyApi.setAccessToken(accessToken);
         return spotifyApi;
     } catch (err) {
-        console.error(`[!] ./src/libs/api/spotify.ts::getSpotifyApiToken():\n${err}`);
+        console.error("[!] ./src/libs/api/spotify.ts::getSpotifyApiToken():\nerr:", err);
         return null;
     }
 }
@@ -134,7 +134,7 @@ export async function getSpotifyTrackDetails(trackId: string) {
         // console.log("[!] ^ from ./src/libs/api/spotify.ts::getSpotifyTrackDetails()");
         return response.body;
     } catch (err) {
-        console.error(`[!] ./src/libs/api/spotify.ts::getSpotifyTrackDetails():\n${err}`);
+        console.error(`[!] ./src/libs/api/spotify.ts::getSpotifyTrackDetails():\ntrackId: ${trackId}\nerr:`, err);
         return null;
     }
 }

@@ -6,12 +6,12 @@ export type recommendedTrackType = {
     name: string;
     artist: string;
     video: string | null;
-    links: {
+    listenAtLinks: {
         spotify: string;
         appleMusic: string;
         youtubeMusic: string;
     };
-    about: {
+    aboutLinks: {
         genius: string;
         lastFm: string;
     };
@@ -19,6 +19,7 @@ export type recommendedTrackType = {
         genius: string;
         lastFm: string;
     };
+    lyrics: string;
     // Need `?` because they are not submitted (i.e. undefined) on the first EVER page load
     genres?: string[] | null;
     genreSimilarity?: number | null;
@@ -89,13 +90,13 @@ export default function RecommendedTrack({ recommendedTrack }: { recommendedTrac
                 {/* Links */}
                 <div className="mb-4 flex items-center space-x-2">
                     <span>Listen at:</span>
-                    <a className="px-2 py-1 bg-green-700 text-white hover:bg-green-500" href={recommendedTrack.links.spotify} target="_blank">
+                    <a className="px-2 py-1 bg-green-700 text-white hover:bg-green-500" href={recommendedTrack.listenAtLinks.spotify} target="_blank">
                         Spotify
                     </a>
-                    <a className="px-2 py-1 bg-pink-700 text-white hover:bg-pink-500" href={recommendedTrack.links.appleMusic} target="_blank">
+                    <a className="px-2 py-1 bg-pink-700 text-white hover:bg-pink-500" href={recommendedTrack.listenAtLinks.appleMusic} target="_blank">
                         Apple Music
                     </a>
-                    <a className="px-2 py-1 bg-red-700 text-white hover:bg-red-500" href={recommendedTrack.links.youtubeMusic} target="_blank">
+                    <a className="px-2 py-1 bg-red-700 text-white hover:bg-red-500" href={recommendedTrack.listenAtLinks.youtubeMusic} target="_blank">
                         YouTube Music
                     </a>
                 </div>
@@ -103,10 +104,10 @@ export default function RecommendedTrack({ recommendedTrack }: { recommendedTrac
                 {/* About */}
                 <div className="mb-4 flex items-center space-x-2">
                     <span>About:</span>
-                    <a className="px-2 py-1 bg-yellow-300 text-black hover:bg-yellow-100" href={recommendedTrack.about.genius} target="_blank">
+                    <a className="px-2 py-1 bg-yellow-300 text-black hover:bg-yellow-100" href={recommendedTrack.aboutLinks.genius} target="_blank">
                         Genius
                     </a>
-                    <a className="px-2 py-1 bg-red-700 text-white hover:bg-red-500" href={recommendedTrack.about.lastFm} target="_blank">
+                    <a className="px-2 py-1 bg-red-700 text-white hover:bg-red-500" href={recommendedTrack.aboutLinks.lastFm} target="_blank">
                         Last.fm
                     </a>
                 </div>
@@ -119,6 +120,15 @@ export default function RecommendedTrack({ recommendedTrack }: { recommendedTrac
                     </a>
                     <a className="px-2 py-1 bg-red-700 text-white hover:bg-red-500" href={recommendedTrack.comments.lastFm} target="_blank">
                         Last.fm
+                    </a>
+                </div>
+
+                {/* TODO Display the actual lyrics text (that is collapsible maybe?) instead of a button */}
+                {/* Lyrics */}
+                <div className="flex items-center space-x-2">
+                    <p>Lyrics:</p>
+                    <a className="px-2 py-1 bg-teal-300 text-black hover:bg-teal-100" href={recommendedTrack.lyrics} target="_blank">
+                        Lyrics
                     </a>
                 </div>
             </div>
