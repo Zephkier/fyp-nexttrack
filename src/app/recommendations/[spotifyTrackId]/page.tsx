@@ -128,9 +128,20 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
      */
     let lastFmSimilarTracks1 = await getLastFmSimilarTracks(artistName, trackName);
 
-    // TODO Allow users to adjust this value (via page navigation? select value via dropdown box?)
-    // Limit number of results
-    const numberOfRecommendations = 100;
+    /**
+     * Limit number of recommended tracks returned. Max: 100.
+     *
+     * - Tried working with 100 recommended tracks but it tends to run into "ECONNRESET" error.
+     * - Best to work with 50 to 75 recommended tracks.
+     *
+     * -----
+     *
+     * TODO
+     *
+     * - Idea 1: Return max number of recommendations (100) and allow users to browse through via pagination?
+     * - Idea 2: Allow users to adjust this value via dropdown box?
+     */
+    const numberOfRecommendations = 50;
     lastFmSimilarTracks1 = lastFmSimilarTracks1.slice(0, numberOfRecommendations);
 
     // // TEST Handle cases where there are no recommended tracks.
@@ -248,12 +259,12 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
                 },
                 lyrics: linkToItsGeniusPage,
                 // (extra) Params
+                // // TODO Implement `genreSimilarity`
+                // genreSimilarity: null,
                 genres: genres,
                 popularity: spotifyDetails?.popularity ?? null,
                 releaseDate: spotifyDetails?.album.release_date ?? null,
                 moods: inferredMoods,
-                // TODO Implement later, see "./src/app/recommendations/[spotifyTrackId]/page.client.tsx"
-                // genreSimilarity: null,
             };
         })
     );

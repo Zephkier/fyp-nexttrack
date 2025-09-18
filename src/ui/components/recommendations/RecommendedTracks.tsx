@@ -9,7 +9,7 @@ export default function RecommendedTracks({ recommendedTracks }: { recommendedTr
                 className="text-2xl font-bold mb-2"
                 style={{ color: "var(--primary)" }}
             >
-                Recommended Tracks
+                Recommended Tracks ({recommendedTracks.length} results)
             </h3>
             {recommendedTracks.length == 0 ? (
                 <p className="items-center text-gray-400 italic">
