@@ -134,7 +134,9 @@ export async function getGeniusSearch(artistName: string, trackName: string) {
     const geniusUrl = `https://api.genius.com/search?q=${encodedArtistAndTrackName}`;
     const response = await fetch(geniusUrl, {
         headers: authHeaders(),
-        cache: "no-store",
+        // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+        // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+        next: { revalidate: 86400 },
     });
     if (!response.ok) {
         console.error(`[!] ./src/libs/api/genius.ts::getGeniusSearch():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
@@ -297,7 +299,9 @@ export async function getGeniusSong_deprecated(id: number) {
     const geniusUrl = `https://api.genius.com/songs/${id}`;
     const response = await fetch(geniusUrl, {
         headers: authHeaders(),
-        cache: "no-store",
+        // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+        // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+        next: { revalidate: 86400 },
     });
     if (!response.ok) {
         console.error(`[!] ./src/libs/api/genius.ts::getGeniusSong_deprecated():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
@@ -359,7 +363,9 @@ export async function webScrapeGeniusGenres(geniusUrl: string) {
     try {
         const response = await fetch(geniusUrl, {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
-            cache: "no-store",
+            // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+            // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+            next: { revalidate: 86400 },
         });
         if (!response.ok) {
             console.error(`[!] ./src/libs/api/genius.ts::webScrapeGeniusGenres():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
@@ -484,7 +490,9 @@ export async function getGeniusAboutLink(geniusUrl: string | null, trackName: st
     try {
         const response = await fetch(geniusUrl, {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
-            cache: "no-store",
+            // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+            // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+            next: { revalidate: 86400 },
         });
         if (!response.ok) {
             console.error(`[!] ./src/libs/api/genius.ts::getGeniusAboutLink():\nstatus: ${response.status}\nstatusText: ${response.statusText}`);

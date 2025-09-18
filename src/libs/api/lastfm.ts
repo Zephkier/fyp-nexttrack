@@ -80,7 +80,11 @@ export async function getLastFmGenres(artistName: string, trackName: string) {
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
     const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
     const fullUrl = `${baseUrl}/2.0/?method=${method}&api_key=${apiKey}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&format=json`;
-    const response = await fetch(fullUrl);
+    const response = await fetch(fullUrl, {
+        // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+        // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+        next: { revalidate: 86400 },
+    });
     if (!response.ok) {
         console.error(`[!] ./src/libs/api/lastfm.ts::getLastFmGenres():\nartistName: ${artistName}\ntrackName: ${trackName}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
         return [];
@@ -196,7 +200,9 @@ export async function webScrapeLastFmGenres(artistName: string, trackName: strin
     try {
         const response = await fetch(fullUrl, {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
-            cache: "no-store",
+            // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+            // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+            next: { revalidate: 86400 },
         });
         if (!response.ok) {
             console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmGenres():\nartistName: ${artistName}\ntrackName: ${trackName}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
@@ -273,10 +279,13 @@ export async function getLastFmSimilarTracks(artistName: string, trackName: stri
     const artistNameInLastFmFormat = convertToLastFmFormat(artistName);
     const trackNameInLastFmFormat = convertToLastFmFormat(trackName);
     const fullUrl = `${baseUrl}/2.0/?method=${method}&artist=${artistNameInLastFmFormat}&track=${trackNameInLastFmFormat}&api_key=${apiKey}&format=json`;
-    const response = await fetch(fullUrl);
+    const response = await fetch(fullUrl, {
+        // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+        // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+        next: { revalidate: 86400 },
+    });
     if (!response.ok) {
         console.error(`[!] ./src/libs/api/lastfm.ts::getLastFmSimilarTracks():\nartistName: ${artistName}\ntrackName: ${trackName}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
-
         return [];
     }
     const data: {
@@ -350,7 +359,9 @@ export async function webScrapeLastFmYoutubeId(lastFmUrl: string) {
     try {
         const response = await fetch(lastFmUrl, {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
-            cache: "no-store",
+            // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+            // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+            next: { revalidate: 86400 },
         });
         if (!response.ok) {
             console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmYoutubeId():\nlastFmUrl: ${lastFmUrl}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
@@ -477,7 +488,9 @@ export async function webScrapeLastFmListenAtLinks(lastFmUrl: string) {
     try {
         const response = await fetch(lastFmUrl, {
             headers: { "User-Agent": "NextTrack/1.0 (+https://example.com)" },
-            cache: "no-store",
+            // Next.js has built-in caching, current implementation re-validates cache after 24 hours
+            // 60 seconds * 60 minutes * 24 hours = 86400 seconds
+            next: { revalidate: 86400 },
         });
         if (!response.ok) {
             console.error(`[!] ./src/libs/api/lastfm.ts::webScrapeLastFmListenAtLinks():\nlastFmUrl: ${lastFmUrl}\nstatus: ${response.status}\nstatusText: ${response.statusText}`);
