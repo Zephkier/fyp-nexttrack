@@ -13,6 +13,9 @@ import { inferMoodsFromGenres } from "@/libs/helper/moods";
 
 import TrackRecommendationsClient from "./page.client";
 
+// TEST
+let counter = 0;
+
 export const metadata: Metadata = {
     title: "Recommendations",
 };
@@ -201,6 +204,10 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
 
             // ----- (Last) Convert retrieved data into suitable types for frontend components to render ----- //
 
+            // TEST
+            console.log(`[!] ./src/app/recommendations/[spotifyTrackId]/page.tsx::buildInitialRecommendedTracks = cache(): Going to '.push()' ${counter}`);
+            counter += 1;
+
             initialRecommendedTracks.push({
                 // (Basic) Details
                 name: lastFmSimilarTrack.name ?? "Unknown track name",
@@ -213,11 +220,10 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
                     youtubeMusic: listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
                 },
                 aboutLinks: {
-                    // CHECK Technically, Genius' "About" section is at the top of its page, so may not need "#questions"
-                    genius: geniusAboutLink ? `${geniusAboutLink}#questions` : "https://genius.com",
+                    genius: geniusAboutLink ?? "https://genius.com",
                     lastFm: lastFmAboutLink ? `${lastFmAboutLink}/+wiki` : "https://www.last.fm",
-                    // // Old reference
-                    // genius: geniusAboutLink ?? "https://genius.com",
+                    // // Alternative links
+                    // genius: geniusAboutLink ? `${geniusAboutLink}#questions` : "https://genius.com",
                     // lastFm: lastFmAboutLink ?? "https://www.last.fm",
                 },
                 comments: {
@@ -254,7 +260,8 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
         return initialRecommendedTracks;
     });
 
-    const numberOfRecommendedTracks = 100;
+    // FIXME Find a value that does not result in error 429 "Too Many Requests"
+    const numberOfRecommendedTracks = 50;
     const initialRecommendedTracks = await buildInitialRecommendedTracks(artistName, trackName, numberOfRecommendedTracks);
 
     // // TEST
