@@ -1,10 +1,11 @@
 "use client";
-import { useState, useMemo, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 
 import type { submittedTrackType } from "@/ui/components/recommendations/SubmittedTrackDetails";
 import type { submittedCustomisationsType } from "@/ui/components/recommendations/CustomiseRecommendations";
 import type { recommendedTrackType } from "@/ui/components/recommendations/RecommendedTrack";
+
+import { useState, useMemo, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import SubmittedTrackDetails from "@/ui/components/recommendations/SubmittedTrackDetails";
 // This directory's `index.tsx` acts as the entry point, so no need to specify its `page.tsx` file
@@ -214,6 +215,12 @@ export default function TrackRecommendationsClient({
     /**
      * TODO
      *
+     * General:
+     *
+     * - Handle `null` cases such that it displays greyed italic text \
+     *   like for `video` in `./src/ui/components/recommendations/RecommendedTrack.tsx`.
+     *   - This also means handling things like `"Unknown track/artist name"` etc.
+     *
      * L side ("Customise Recommendations"):
      *
      * - Double-click to reset slider's value.
@@ -222,6 +229,7 @@ export default function TrackRecommendationsClient({
      *
      * - Make video's size responsive? 360p size? Ultimately, it must scale to video's width.
      * - Make buttons without links in different colour (i.e. greyed out or something).
+     * - Display actual text (e.g. "About" section, lyrics) instead of linking a button to their page.
      */
     return (
         <main className="container mx-auto">

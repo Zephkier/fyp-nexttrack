@@ -5,7 +5,6 @@ import { getSpotifyTrackId } from "@/libs/api/spotify";
 export async function POST(request: Request) {
     try {
         const formDataObject = await request.formData();
-
         /**
          * The var name `spotifyTrackLink` comes from: \
          * `./src/ui/components/TrackForm.tsx::TrackForm()::<input name>`
@@ -22,7 +21,8 @@ export async function POST(request: Request) {
         // Connected to "./src/app/recommendations/[spotifyTrackId]/page.tsx"
         return NextResponse.redirect(new URL(`/recommendations/${id}`, request.url));
     } catch {
-        // Connected to "./src/app/page.tsx" TODO Create a popup window of some sort to notify user
+        // TODO Create a popup window of some sort to notify user
+        // Connected to "./src/app/page.tsx"
         return NextResponse.redirect(new URL(`/?error=invalid-link`, request.url));
     }
 }

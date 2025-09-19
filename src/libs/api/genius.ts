@@ -435,9 +435,7 @@ export const webScrapeGeniusGenres = cache(async (geniusUrl: string) => {
  *
  * Explanation:
  *
- * 1. FIXME
- *
- * 2. Test via the following code (in `./src/app/recommendations/[spotifyTrackId]/page.tsx`):
+ * 1. Test via the following code (in `./src/app/recommendations/[spotifyTrackId]/page.tsx`):
  *
  * ```js
  * const demoWrong1 = "Timmy Trumpet - Like A G6 (with Naeleck)";
@@ -452,7 +450,7 @@ export const webScrapeGeniusGenres = cache(async (geniusUrl: string) => {
  * }
  * ```
  *
- * 3. Note the console output:
+ * 2. Its console output:
  *
  * ```text
  * Searching for: Timmy Trumpet - Like A G6 (with Naeleck)
@@ -465,6 +463,9 @@ export const webScrapeGeniusGenres = cache(async (geniusUrl: string) => {
  * https://genius.com/Genius-august-2024-singles-release-calendar-annotated
  * ...
  * ```
+ *
+ * 3. However, those wrong URL pages still contain the correct URL pages. \
+ *    Thus, access it as per the provided example's HTML.
  */
 export const getGeniusAboutLink = cache(async (geniusUrl: string | null, trackName: string) => {
     if (!geniusUrl) return null;

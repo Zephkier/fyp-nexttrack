@@ -152,10 +152,11 @@ export const getSpotifyTrackDetails = cache(async (trackId: string) => {
         // // TEST
         // console.error(
         //     // If enabling this line, then set `catch (err)` to `catch (err: any)`
-        //     `[!] ./src/libs/api/spotify.ts::getSpotifyTrackDetails():\ntrackId: ${trackId}\nerr:`,
-        //     err,
-        //     "\nerr.headers:",
-        //     err?.headers,
+        //     `[!] ./src/libs/api/spotify.ts::getSpotifyTrackDetails():\ntrackId: ${trackId}`,
+        //     // "\nerr:",
+        //     // err,
+        //     // "\nerr.headers:",
+        //     // err?.headers,
         //     '\nerr.headers["retry-after"]:',
         //     err?.headers?.["retry-after"]
         // );

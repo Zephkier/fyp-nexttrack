@@ -1,4 +1,4 @@
-import { type recommendedTrackType } from "./RecommendedTrack";
+import type { recommendedTrackType } from "./RecommendedTrack";
 
 import RecommendedTrack from "./RecommendedTrack";
 

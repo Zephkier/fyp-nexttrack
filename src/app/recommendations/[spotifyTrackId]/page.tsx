@@ -1,8 +1,8 @@
-import { cache } from "react";
-
 import type { Metadata } from "next";
 import type { lastFmSimilarTrackType } from "@/libs/api/lastfm";
 import type { recommendedTrackType } from "@/ui/components/recommendations/RecommendedTrack";
+
+import { cache } from "react";
 
 import { getSpotifyTrackId, getSpotifyTrackDetails, setSpotifyReleaseDate } from "@/libs/api/spotify";
 import { getLastFmSimilarTracks, webScrapeLastFmYoutubeId, webScrapeLastFmListenAtLinks } from "@/libs/api/lastfm";
@@ -127,21 +127,19 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
         // ----- Get recommended tracks ----- //
 
         /**
+         * TODO
+         *
+         * - Idea 1: Browse via pagination?
+         * - Idea 2: Adjust recommended tracks shown (i.e. to work with) via dropdown box?
+         */
+
+        /**
          * Last.fm API returns `[]` or an array of 100 objects. \
          * \+ \
          * Limit the number of recommended tracks shown (i.e. to work with) (max: 100).
          *
          * - Tried working with 100 recommended tracks but it tends to run into "ECONNRESET" error.
          * - Best to work with 50 to 75 recommended tracks.
-         *
-         * -----
-         *
-         * TODO
-         *
-         * - Idea 1: Browse via pagination?
-         * - Idea 2: Adjust recommended tracks shown (i.e. to work with) via dropdown box?
-         *
-         * -----
          *
          * @see {@linkcode getLastFmSimilarTracks()}
          */
@@ -152,18 +150,15 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
         // lastFmSimilarTracks = [];
 
         /**
-         * Converting from `lastFmSimilarTrackType` to `recommendedTrackType`.
-         *
-         * -----
-         *
          * TODO
          *
          * - Unsure to set `??` here or within their own functions over at `./src/libs`.
-         *
-         * - Handle `null` cases such that it displays greyed italic text like for `video`.
-         *   - This means handling things like `"Unknown track/artist name"` etc.
-         *
-         * - Display the actual (about and lyrics) text instead of having a button with its link.
+         */
+
+        /**
+         * Convert from `lastFmSimilarTrackType` to `recommendedTrackType`.
+         * @see {@linkcode lastFmSimilarTrackType()}
+         * @see {@linkcode recommendedTrackType()}
          */
         const initialRecommendedTracks: recommendedTrackType[] = [];
 
@@ -218,8 +213,12 @@ export default async function TrackRecommendationsPage({ params }: { params: Pro
                     youtubeMusic: listenAtLinks?.youtubeMusic ?? "https://music.youtube.com",
                 },
                 aboutLinks: {
-                    genius: geniusAboutLink ?? "https://genius.com",
-                    lastFm: lastFmAboutLink ?? "https://www.last.fm",
+                    // CHECK Technically, Genius' "About" section is at the top of its page, so may not need "#questions"
+                    genius: geniusAboutLink ? `${geniusAboutLink}#questions` : "https://genius.com",
+                    lastFm: lastFmAboutLink ? `${lastFmAboutLink}/+wiki` : "https://www.last.fm",
+                    // // Old reference
+                    // genius: geniusAboutLink ?? "https://genius.com",
+                    // lastFm: lastFmAboutLink ?? "https://www.last.fm",
                 },
                 comments: {
                     genius: `${geniusAboutLink}#comments`,

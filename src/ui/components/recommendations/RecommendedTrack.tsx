@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 
 // `type` is more flexible and has more use cases than `interface`
@@ -123,7 +124,6 @@ export default function RecommendedTrack({ recommendedTrack }: { recommendedTrac
                     </a>
                 </div>
 
-                {/* TODO Display the actual lyrics text (that is collapsible maybe?) instead of a button */}
                 {/* Lyrics */}
                 <div className="flex items-center space-x-2">
                     <p>Lyrics:</p>
