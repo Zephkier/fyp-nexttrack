@@ -15,7 +15,7 @@ export default function RecommendationsPage() {
          */
         <main className="container mx-auto">
             {/* Height is meticulously calculated to ensure `<footer>` is out of vh so that the scrollbar appears */}
-            <p className="h-[calc(100vh-32rem)] flex items-center justify-center text-gray-400 italic">
+            <p className="h-[calc(100vh-26rem)] flex items-center justify-center text-gray-400 italic">
                 {/* Format */}
                 Submit a Spotify track link on the home page to see recommendations.
             </p>
