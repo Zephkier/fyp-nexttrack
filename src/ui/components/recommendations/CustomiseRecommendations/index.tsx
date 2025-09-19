@@ -6,6 +6,8 @@ import type { submittedTrackType } from "@/ui/components/recommendations/Submitt
 import { moods } from "@/libs/helper/moods";
 import { currentDate } from "./ReleaseDateRangeSection";
 
+import ButtonToSubmitCustomisations from "@/ui/primitives/ButtonToSubmitCustomisations";
+
 import GenresSection from "./GenresSection";
 import PopularitySection from "./PopularitySection";
 import ReleaseDateRangeSection from "./ReleaseDateRangeSection";
@@ -104,16 +106,7 @@ export default function CustomiseRecommendations({
                 className="mb-15"
                 onSubmit={handleSubmit}
             >
-                {/* There is a duplicate button at the bottom of this form */}
-                <div className="flex justify-end">
-                    <button
-                        // Format
-                        className="mb-4 px-4 py-2 text-white bg-[var(--secondary)] hover:bg-green-600 cursor-pointer"
-                        type="submit"
-                    >
-                        Submit Customisations
-                    </button>
-                </div>
+                <ButtonToSubmitCustomisations margin="mb-4" />
 
                 <GenresSection
                     // Format
@@ -146,16 +139,7 @@ export default function CustomiseRecommendations({
                     onChange={toggleMood}
                 />
 
-                {/* There is a duplicate button at the top of this form */}
-                <div className="flex justify-end">
-                    <button
-                        // Format
-                        className="px-4 py-2 text-white bg-[var(--secondary)] hover:bg-green-600 cursor-pointer"
-                        type="submit"
-                    >
-                        Submit Customisations
-                    </button>
-                </div>
+                <ButtonToSubmitCustomisations margin="" />
             </form>
         </section>
     );

@@ -113,7 +113,7 @@ export default function RecommendedTrack({ recommendedTrack }: { recommendedTrac
                 </div>
 
                 {/* Comments */}
-                <div className="flex items-center space-x-2">
+                <div className="mb-4 flex items-center space-x-2">
                     <span>Comments:</span>
                     <a className="px-2 py-1 bg-yellow-300 text-black hover:bg-yellow-100" href={recommendedTrack.comments.genius} target="_blank">
                         Genius
@@ -128,7 +128,7 @@ export default function RecommendedTrack({ recommendedTrack }: { recommendedTrac
                 <div className="flex items-center space-x-2">
                     <p>Lyrics:</p>
                     <a className="px-2 py-1 bg-teal-300 text-black hover:bg-teal-100" href={recommendedTrack.lyrics} target="_blank">
-                        Lyrics
+                        Read here
                     </a>
                 </div>
             </div>

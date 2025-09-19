@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 
+import ButtonToSubmitSpotifyTrackLink from "@/ui/primitives/ButtonToSubmitSpotifyTrackLink";
+
 export default function TrackForm() {
     const [inputValue, setInputValue] = useState("");
     const handleClear = () => {
@@ -36,21 +38,22 @@ export default function TrackForm() {
                     setInputValue(event.target.value);
                 }}
             />
-            <button
+            <ButtonToSubmitSpotifyTrackLink
                 // Format
-                className="px-4 py-2 mr-4 text-white bg-green-800 hover:bg-green-600 cursor-pointer"
+                margin="mr-4"
+                colour="green"
                 type="submit"
-            >
-                Submit
-            </button>
-            <button
+                onClick={() => {}}
+                buttonText="Submit"
+            />
+            <ButtonToSubmitSpotifyTrackLink
                 // Format
-                className="px-4 py-2 text-white bg-red-800 hover:bg-red-600 cursor-pointer"
+                margin=""
+                colour="red"
                 type="button"
                 onClick={handleClear}
-            >
-                Clear
-            </button>
+                buttonText="Clear"
+            />
         </form>
     );
 }

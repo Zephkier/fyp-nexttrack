@@ -5,9 +5,9 @@
 export type submittedTrackType = {
     name: string;
     artists: string[];
-    releaseDate: string;
-    popularity: number;
     genres: string[];
+    popularity: number;
+    releaseDate: string;
     moods: string[];
 };
 
