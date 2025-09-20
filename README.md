@@ -1,3 +1,11 @@
+-   [Introduction](#introduction)
+-   [Getting Started](#getting-started)
+-   [Preview](#preview)
+-   [Notes For Myself](#notes-for-myself)
+    -   [About Files](#about-files)
+    -   [App's Flow](#apps-flow)
+    -   [WIP - All TODOs](#wip---all-todos)
+
 # Introduction
 
 > [!note]
@@ -24,15 +32,7 @@ How it works:
 > [!tip]
 > No signing up or logging in is required. Simply copy-paste a Spotify track's link.
 
-# Preview
-
-\*insert caption here\*: \
-\*insert screenshot here\*
-
-\*insert caption here\*: \
-\*insert screenshot here\*
-
-# Accessing The App
+# Getting Started
 
 Visit [https://fyp-nexttrack.vercel.app/](https://fyp-nexttrack.vercel.app/), or...
 
@@ -79,6 +79,35 @@ Visit [https://fyp-nexttrack.vercel.app/](https://fyp-nexttrack.vercel.app/), or
 5. Access [http://localhost:3000](http://localhost:3000) on browser to visit app.
 
     - As files (e.g. `./src/app/page.tsx`) get edited and saved, its corresponding pages are auto-updated.
+
+# Preview
+
+Home page: \
+![image](public/README-images/home-page.png)
+
+Recommendations page (without submitting a track): \
+![image](public/README-images/recommendations-page-fail.png)
+
+Recommendations page (proper): \
+![image](public/README-images/recommendations-page-proper.png)
+
+Recommendations page's "Customise Recommendations" section: \
+![image](public/README-images/recommendations-page-customise-recommendations-section.png)
+
+Recommendations page's "Recommended Tracks" section: \
+![image](public/README-images/recommendations-page-recommended-tracks-section.png)
+
+Recommendations page's recommended track: \
+![image](public/README-images/recommendations-page-recommended-track.png)
+
+Demonstration of dynamically-generated recommended tracks:
+
+-   Genre similarity: `100%`
+-   Max popularity: `100%`
+-   Release date range: `past 5 years`
+-   Mood: `party`
+
+![image](public/README-images/demo-customisation.png)
 
 # Notes For Myself
 
